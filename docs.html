@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Docs · OddsEngine AI</title>
+<meta name="description" content="How to use OddsEngine AI: chat, models, API keys, prices, top up with $ODDS.">
+<link rel="icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#030605;--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.16);--tx:#ecf5ef;--dim:#9fb2a7;--dim2:#62756a;--g:#22f08a;--g2:#7dffbd;
+--disp:'Unbounded',system-ui,sans-serif;--body:'Instrument Sans',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:var(--g2)}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(3,6,5,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top a.b{display:flex;align-items:center;gap:8px;color:var(--tx);text-decoration:none;font-family:var(--disp);font-weight:700;font-size:12.5px;letter-spacing:.05em}
+.top .sp{flex:1}
+.top .btn{min-height:38px;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;background:var(--g);color:#02130a;font-family:var(--disp);font-weight:700;font-size:11px;text-decoration:none}
+.lay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px;max-width:1080px;margin:0 auto;padding:30px 16px 80px}
+nav.toc{position:sticky;top:80px;align-self:start;display:flex;flex-direction:column;gap:2px;font-size:14px}
+nav.toc a{color:var(--dim);text-decoration:none;padding:6px 10px;border-radius:10px}
+nav.toc a:hover{color:var(--tx);background:rgba(255,255,255,.04)}
+@media (max-width:860px){.lay{grid-template-columns:1fr;gap:10px}nav.toc{position:static;flex-direction:row;flex-wrap:wrap;gap:6px}nav.toc a{border:1px solid var(--line);border-radius:999px;font-size:13px;padding:5px 11px}}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(30px,5vw,46px);line-height:1.05;margin:6px 0 12px}
+h2{font-family:var(--disp);font-weight:700;font-size:21px;margin:46px 0 10px;padding-top:6px}
+h3{font-size:16.5px;margin:22px 0 6px}
+p,li{color:#cfdcd4}
+.lead{color:var(--dim);font-size:18px}
+code{font-family:var(--mono);font-size:13.5px;background:rgba(255,255,255,.07);padding:1px 6px;border-radius:6px;overflow-wrap:anywhere}
+pre{background:rgba(0,0,0,.5);border:1px solid var(--line2);border-radius:14px;padding:14px;overflow-x:auto;font-size:13px;line-height:1.55}
+pre code{background:none;padding:0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin:8px 0}
+.tw{overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim2);font-weight:500}
+.box{padding:14px 16px;border-radius:16px;border:1px solid rgba(34,240,138,.35);background:rgba(34,240,138,.05);margin:14px 0}
+ol li,ul li{margin:4px 0}
+.eb{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="top"><a class="b" href="./"><svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><path d="M44.5 15.2A20 20 0 1 0 49 19.6" fill="none" stroke="#22f08a" stroke-width="9"/></svg>ODDSENGINE</a><span class="sp"></span><a class="btn" href="./#chat">Open chat</a></div>
+<div class="lay">
+<nav class="toc" aria-label="Contents">
+  <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
+  <a href="#api">API quickstart</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
+</nav>
+<main>
+<span class="eb">Docs</span>
+<h1>OddsEngine AI</h1>
+<p class="lead">Every major AI model in one chat and behind one API key. You pay per message with $ODDS. No subscription, no card, no email.</p>
+
+<h2 id="start">Start in three steps</h2>
+<ol>
+<li><b>Connect a wallet.</b> MetaMask, Rabby or any wallet that works on Robinhood Chain. You sign one message. That is not a transaction and costs nothing.</li>
+<li><b>Top up.</b> Pick an amount in dollars, send the $ODDS your wallet shows you. Your balance is in dollars from then on.</li>
+<li><b>Chat.</b> Pick a model at the top of the chat and start typing. Switch the model whenever you like, even inside the same conversation.</li>
+</ol>
+
+<h2 id="chat">The chat</h2>
+<ul>
+<li>Your chats are saved to your wallet. Open them on any device after you connect the same wallet.</li>
+<li>Attach up to 4 images per message to any model marked <i>sees images</i>. You can also paste them.</li>
+<li>Pick a model under <i>Create images</i> and describe what you want. Each image has a download button.</li>
+<li>Under every answer you see what it cost.</li>
+<li><i>OddsEngine auto</i> picks a strong model for each question. You pay what the picked model costs.</li>
+</ul>
+
+<h2 id="money">Prices and fees</h2>
+<p>You pay what the model maker charges plus our fee. The fee is already inside every price on the site, nothing is added later.</p>
+<div class="tw"><table>
+<tr><th>You hold</th><th>Fee</th></tr>
+<tr><td>Everyone</td><td>9.5%</td></tr>
+<tr><td>250,000 $ODDS or more</td><td>9%</td></tr>
+<tr><td>1,000,000 $ODDS or more</td><td>8.5%</td></tr>
+<tr><td>3,000,000 $ODDS or more</td><td>8%</td></tr>
+<tr><td>10,000,000 $ODDS or more</td><td>7.5%</td></tr>
+</table></div>
+<p>Holdings are checked when you send a message and remembered for a few minutes. Tokens in linked Torch wallets count. Your current fee is shown on the Account page.</p>
+<p>Before a message runs we hold back the most it could cost, then charge what it really cost. You can never go below zero, and two messages at once can never spend the same dollar twice.</p>
+
+<h2 id="topup">Top up</h2>
+<h3>With a fixed amount (recommended)</h3>
+<p>Choose $5, $10, $25, $50 or your own amount. We hold the $ODDS price for 10 minutes. Send the exact amount shown and you get exactly that many dollars, even if the price moves while your transfer is on its way.</p>
+<h3>Any amount</h3>
+<p>Send any amount of $ODDS on Robinhood Chain to the deposit address on the Account page. It is credited at the live price within about a minute.</p>
+<div class="box">Send from the wallet you connected or a wallet you linked. That is how we know the transfer is yours. A transfer from an unknown wallet is not lost, it waits and is credited as soon as you connect or link that wallet.</div>
+<p>Your balance is kept in dollars. If $ODDS goes up or down afterwards, your balance stays the same.</p>
+
+<h2 id="torch">Holding on Torch</h2>
+<p>A Torch wallet can not sign in on other websites, so you connect a normal wallet first. Then link your Torch wallet once:</p>
+<ol>
+<li>On the Account page, enter your Torch wallet address.</li>
+<li>Send 1 $ODDS from your Torch wallet to your own connected wallet. The token stays yours, it only proves both wallets belong to you.</li>
+<li>Done. Your Torch holdings count for the fee, and you can top up straight from Torch.</li>
+</ol>
+<p>Your $ODDS stay in your Torch wallet, so you keep earning Torch holder rewards.</p>
+
+<h2 id="api">API quickstart</h2>
+<p>The API works like the OpenAI API. Create a key on the Account page, then use any OpenAI client.</p>
+<pre><code>curl https://web-production-6b61c.up.railway.app/v1/chat/completions \
+  -H "Authorization: Bearer oe_live_..." \
+  -H "Content-Type: application/json" \
+  -d '{"model":"anthropic/claude-sonnet-5.5","messages":[{"role":"user","content":"Hello"}]}'</code></pre>
+<pre><code>from openai import OpenAI
+client = OpenAI(base_url="https://web-production-6b61c.up.railway.app/v1", api_key="oe_live_...")
+r = client.chat.completions.create(model="openai/gpt-6.1-sol",
+    messages=[{"role": "user", "content": "Hello"}])
+print(r.choices[0].message.content)</code></pre>
+<ul>
+<li><code>GET /v1/models</code> lists every model with our prices.</li>
+<li><code>POST /v1/chat/completions</code> supports <code>stream: true</code>, tools and JSON output where the model supports them.</li>
+<li>Each response has <code>usage.oddsengine_charged_usd</code>, the exact amount taken from your balance.</li>
+<li>Use <code>oddsengine/auto</code> as the model to let us pick.</li>
+<li>Keys are stored as a hash. A new key is shown once. Revoke a key any time on the Account page.</li>
+</ul>
+
+<h2 id="images">Images</h2>
+<h3>Send an image</h3>
+<pre><code>{"model":"google/gemini-3.8-flash","messages":[{"role":"user","content":[
+  {"type":"text","text":"What is in this picture?"},
+  {"type":"image_url","image_url":{"url":"data:image/jpeg;base64,..."}}]}]}</code></pre>
+<h3>Create an image</h3>
+<pre><code>{"model":"google/gemini-nano-banana-2.1","modalities":["image","text"],
+ "messages":[{"role":"user","content":"A green neon ring in the dark"}]}</code></pre>
+<p>The picture comes back in <code>choices[0].message.images[0].image_url.url</code> as a data URL.</p>
+
+<h2 id="models">Models</h2>
+<p>All current paid models are available. <i>Picked for you</i> on the Models page shows the ones we use ourselves. New models appear on their own and get a NEW badge for three weeks. Model IDs are the usual <code>maker/model</code> format.</p>
+
+<h2 id="errors">Errors and limits</h2>
+<div class="tw"><table>
+<tr><th>Code</th><th>Meaning</th></tr>
+<tr><td>400</td><td>Something in the request is wrong, the message says what.</td></tr>
+<tr><td>401</td><td>Missing or wrong API key.</td></tr>
+<tr><td>402</td><td>Not enough balance for this request. Top up or pick a cheaper model.</td></tr>
+<tr><td>404</td><td>Unknown model ID. See <code>/v1/models</code>.</td></tr>
+<tr><td>429</td><td>Too many requests. The limit is 60 per minute per key.</td></tr>
+<tr><td>502 / 503</td><td>The model maker had a problem. Try again or use another model. Failed requests are not charged.</td></tr>
+</table></div>
+
+<h2 id="data">Your data</h2>
+<ul>
+<li><b>Chats on the site</b> are saved so you can come back to them. Messages, titles and images are encrypted in our database.</li>
+<li><b>Images</b> in chats are deleted after 30 days. Download the ones you want to keep.</li>
+<li><b>Delete</b> one chat or all chats at any time. Deleted means gone.</li>
+<li><b>API requests</b>: we keep the model, token counts and cost for your usage list. We do not store the text of API requests.</li>
+<li>What you send goes to the maker of the model you picked so it can answer.</li>
+</ul>
+
+<h2 id="openrouter">Coming from OpenRouter</h2>
+<p>Change the base URL and the key. Model IDs stay the same. The difference: you pay with $ODDS from your wallet instead of a card, and you get a full chat on top of the API with the same balance.</p>
+</main>
+</div>
+</body>
+</html>
