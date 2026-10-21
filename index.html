@@ -510,6 +510,11 @@ body.chatmode{height:100%;overflow:hidden;padding-bottom:0}
 .cxo input{width:18px;height:18px;accent-color:#22f08a;flex:none;margin-right:4px}
 .cxo .pn{flex:1}
 @media (max-width:860px){.cxg.n2,.cxg.n3{grid-template-columns:1fr}.cxb span{display:none}.cxb{padding:0 11px}}
+.mono-badge.mb-logo{background:#f4f7f5;padding:7px}
+.mono-badge.mb-logo img{width:100%;height:100%;object-fit:contain;display:block;border-radius:4px}
+.mono-badge.mb-oe{background:#06120c;border:1px solid rgba(34,240,138,.4)}
+.pbadge{flex:none}.pbadge .mono-badge{width:30px;height:30px;border-radius:9px;font-size:10.5px}.pbadge .mono-badge.mb-logo{padding:5px}
+.popt .pn{flex:1}
 
 </style>
 </head>
@@ -1283,7 +1288,7 @@ function countUp(){document.querySelectorAll('[data-cu]').forEach(el=>{const t=+
 function pickSheet(){
   const cur=chatModel().id;
   const groups=[['auto','Let it choose',m=>m.id==='oddsengine/auto'],['cheap','Cheap',m=>m.picked&&m.tier==='cheap'&&m.kind!=='image'],['standard','Standard',m=>m.picked&&m.tier==='standard'&&m.kind!=='image'],['premium','Premium',m=>m.picked&&m.tier==='premium'&&m.kind!=='image'],['image','Create images',m=>m.picked&&m.kind==='image'],['free','Free to try',m=>m.free&&m.kind!=='image']];
-  const row=m=>`<button class="popt ${m.id===cur?'on':''}" data-pm="${E(m.id)}"><span class="pn"><b>${E(m.name)}${m.new?' <em class="newb">NEW</em>':''}</b><small>${E(m.provider)}${(m.tags||[]).includes('vision')&&m.kind!=='image'?' · sees images':''}</small></span><span class="pp">${E(msgPrice(m).replace('≈ ',''))}</span></button>`;
+  const row=m=>`<button class="popt ${m.id===cur?'on':''}" data-pm="${E(m.id)}"><span class="pbadge">${badge(m)}</span><span class="pn"><b>${E(m.name)}${m.new?' <em class="newb">NEW</em>':''}</b><small>${E(m.provider)}${(m.tags||[]).includes('vision')&&m.kind!=='image'?' · sees images':''}</small></span><span class="pp">${E(msgPrice(m).replace('≈ ',''))}</span></button>`;
   const srt=(a,b)=>((a.kind==='image'?a.per_image:a.per_msg)||0)-((b.kind==='image'?b.per_image:b.per_msg)||0);
   const n=MODELS.length-1;
   $('#sheetIn').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0;font-family:var(--disp)">Pick a model</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>
@@ -1496,6 +1501,26 @@ const _chatBind0=chatBind;
 chatBind=function(){_chatBind0();cmpChrome();
   const f=$('#cForm');if(f){const ta=$('#cIn');f.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!t&&!CH.att.length)return;ta.value='';chatSend(t);};
     document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>chatSend(b.dataset.sug));}
+};
+
+/* ---------- maker logos (their own site icon, letter badge as fallback) ---------- */
+const MAKER={anthropic:'anthropic.com',openai:'openai.com',google:'gemini.google.com','x-ai':'x.ai',deepseek:'deepseek.com','meta-llama':'llama.com',mistralai:'mistral.ai',qwen:'qwen.ai',moonshotai:'kimi.com','z-ai':'z.ai',minimax:'minimax.io',perplexity:'perplexity.ai',nvidia:'nvidia.com',cohere:'cohere.com',amazon:'aws.amazon.com',microsoft:'microsoft.com','ibm-granite':'ibm.com',inception:'inceptionlabs.ai',recraft:'recraft.ai','black-forest-labs':'bfl.ai',baidu:'baidu.com',tencent:'tencent.com',bytedance:'bytedance.com','bytedance-seed':'seed.bytedance.com',inclusionai:'inclusionai.github.io',ai21:'ai21.com',liquid:'liquid.ai',nousresearch:'nousresearch.com',arcee:'arcee.ai','arcee-ai':'arcee.ai',allenai:'allenai.org',upstage:'upstage.ai',reka:'reka.ai',rekaai:'reka.ai',writer:'writer.com',stepfun:'stepfun.com','stepfun-ai':'stepfun.com',poolside:'poolside.ai',xiaomi:'mi.com',kwaipilot:'kuaishou.com',thudm:'zhipuai.cn',openrouter:'openrouter.ai','inference-net':'inference.net',scaledown:'scaledown.ai',alibaba:'alibaba.com',ibm:'ibm.com',morph:'morphllm.com',relace:'relace.ai',switchpoint:'switchpoint.ai',tngtech:'tngtech.com',essentialai:'essential.ai','prime-intellect':'primeintellect.ai',cognition:'cognition.ai',meituan:'meituan.com',unbiased:'openrouter.ai',meta:'llama.com','aion-labs':'aionlabs.ai',sakana:'sakana.ai',thinkingmachines:'thinkingmachines.ai',moondream:'moondream.ai',perceptron:'perceptron.inc',mancer:'mancer.tech',reflection:'reflection.ai',fireworks:'fireworks.ai'};
+function badge(m){const id=m.provider_id||'';const t=(m.provider||id||'?').replace(/[^A-Za-z]/g,'').slice(0,2);
+  const letters=E(id==='oddsengine'?'OE':t.charAt(0).toUpperCase()+t.charAt(1).toLowerCase());
+  if(id==='oddsengine')return `<div class="mono-badge mb-oe"><svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true"><path d="M44.5 15.2A20 20 0 1 0 49 19.6" fill="none" stroke="#22f08a" stroke-width="9"/></svg></div>`;
+  const dom=MAKER[id.replace(/^~/,'')];
+  const bg=PCOL[id]||'#9fb2a7';
+  if(!dom)return `<div class="mono-badge" style="background:${bg}">${letters}</div>`;
+  return `<div class="mono-badge mb-logo" data-l="${letters}" style="--bb:${bg}"><img src="https://www.google.com/s2/favicons?domain=${dom}&sz=64" alt="${E(m.provider||id)}" loading="lazy" onerror="var p=this.parentNode;p.classList.remove('mb-logo');p.style.background=p.style.getPropertyValue('--bb');p.textContent=p.dataset.l"></div>`;}
+
+/* ---------- operator: who uses it ---------- */
+const _adminCard0=adminCard;
+adminCard=function(){
+  const a=ADM||{};const u=a.top_users||[];
+  const extra=`<div class="kv"><div><span>Users 7d</span><b>${E(a.users_7d==null?'n/a':a.users_7d)}</b></div><div><span>Free msgs 24h</span><b>${E(a.free_24h==null?'n/a':a.free_24h)}</b></div><div><span>Accounts</span><b>${E(a.accounts)}</b></div></div>
+   <h3 style="margin-top:18px">Top users</h3><p class="sub">Sorted by what they spent. Tap a wallet to open it in the explorer.</p>
+   ${u.length?`<div class="ulist">${u.map(x=>`<div class="ur"><div><b><a href="https://robinhoodchain.blockscout.com/address/${E(x.address)}" target="_blank" rel="noopener">${E(short(x.address))}</a></b><span>${x.requests} requests · last ${x.last?ago(x.last):'never'}</span><span>topped up ${usd(x.deposited)} · ${usd(x.credit)} left</span></div><em title="spent">${usd(x.spent,x.spent<1?4:2)}</em></div>`).join('')}</div>`:'<div class="note">Nobody yet.</div>'}`;
+  return _adminCard0().replace(/<\/div><\/section>\s*$/,extra+'</div></section>');
 };
 
 /* ---------- load ---------- */
