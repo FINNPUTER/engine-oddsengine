@@ -522,6 +522,13 @@ body.chatmode{height:100%;overflow:hidden;padding-bottom:0}
 .wbtn{display:flex;align-items:center;justify-content:center;gap:10px}
 .wlogo{width:24px;height:24px;border-radius:6px;background:#fff;padding:2px;flex:none}
 
+/* teaser fits the screen, no scroll */
+body.teaser footer{display:none}
+body.teaser .soon{min-height:calc(100dvh - 84px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 0 18px}
+body.teaser .soon .face{width:min(400px,40vh);max-width:none}
+body.teaser .soon h1{font-size:clamp(34px,6vw,76px);margin:6px 0 10px}
+@media (max-width:640px){body.teaser .soon .face{width:min(300px,34vh)}}
+
 </style>
 </head>
 <body>
@@ -575,7 +582,7 @@ const DEMO_ME={address:'0x9c87b4cfa21266d1638f437c96dbe1012cb81111',short:'0x9c8
   memory:{paused:false,cats:{wallets:true,notes:true,markets:true},items:[{id:1,cat:'markets',text:'Follows Seoul and Madrid weather calls'},{id:2,cat:'notes',text:'Prefers short answers in the morning'}]},
   wallets:[{chain:'EVM',address:'0x9c87b4cfa21266d1638f437c96dbe1012cb81111',main:true}],
   keys:[{id:'k1',prefix:'oe_live_7f3a',name:'my bot',created:'Oct 20',used:'$3.12',requests:212}],ai:{live:true,markup:.08}};
-let ME=null, MODELS=[], MARKUP=.08, TAB=(location.hash==='#ai')?'ai':(location.hash==='#chat')?'chat':'engine', FEAT={engine:false,ai:false}, PREVIEW=false, ADM=null;
+let ME=null, MODELS=[], MARKUP=.08, TAB=(location.hash==='#ai')?'ai':(location.hash==='#chat')?'chat':(location.hash==='#models')?'models':'engine', FEAT={engine:false,ai:false}, PREVIEW=false, ADM=null;
 const PAGE=()=>innerWidth<700?8:24;
 let MF={q:'',chip:'all',sort:'popular',n:PAGE()}, CMP=[], CHAT=[], QT='curl', LINK=null;
 
@@ -1183,16 +1190,17 @@ function introMaybe(){
 function tabOpen(t){if(t==='engine')return !!FEAT.engine||DEMO;if(DEMO||PREVIEW)return true;return FEAT.ai;}
 function soon(){
   return `<section class="soon">${face('idle')}
-  <span class="eyebrow rv d1"><b>●</b> OddsEngine</span>
-  <h1 class="rv d1"><span class="shiny">The Engine reads the markets.</span></h1>
-  <p class="lead rv d2" style="margin:0 auto 20px">Live calls on weather and crypto markets, every pick on the record.</p>
+  <span class="eyebrow rv d1"><b>●</b> OddsEngine AI</span>
+  <h1 class="rv d1"><span class="shiny">Every top model. One engine.</span></h1>
+  <p class="lead rv d2" style="margin:0 auto 20px">Claude, GPT, Gemini, Grok and hundreds more in one chat. No subscription, paid in $ODDS.</p>
   <div class="rv d3" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn btn-g" href="https://public.oddsengine.live">Open the app</a><a class="btn" href="https://x.com/OddsEngine">Follow on X</a></div></section>`;}
 
 function go(t){TAB=t;history.replaceState(null,'',t==='engine'?location.pathname:'#'+t);render();window.scrollTo({top:0});if(t==='chat')setTimeout(()=>{scrollChat();const ta=$('#cIn');if(ta&&innerWidth>700)ta.focus();},60);}
 function render(){
   const tabs=[...document.querySelectorAll('.tabs button')];
   tabs.forEach(b=>{const show=tabOpen(b.dataset.tab);b.hidden=!show;});
-  if(!tabOpen(TAB)){const first=tabs.find(b=>!b.hidden);if(first)TAB=first.dataset.tab;}
+  if(!tabOpen(TAB)){const first=(TAB==='engine'&&tabOpen('models'))?tabs.find(b=>b.dataset.tab==='models'):tabs.find(b=>!b.hidden);if(first)TAB=first.dataset.tab;}
+  document.body.classList.toggle('teaser',!tabOpen(TAB));
   tabs.forEach(b=>{b.classList.toggle('on',b.dataset.tab===TAB);b.setAttribute('aria-selected',b.dataset.tab===TAB);});
   const open=tabOpen(TAB);
   const nav=$('.tabs');if(nav)nav.hidden=tabs.filter(b=>!b.hidden).length<2;
