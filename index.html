@@ -516,6 +516,12 @@ body.chatmode{height:100%;overflow:hidden;padding-bottom:0}
 .pbadge{flex:none}.pbadge .mono-badge{width:30px;height:30px;border-radius:9px;font-size:10.5px}.pbadge .mono-badge.mb-logo{padding:5px}
 .popt .pn{flex:1}
 
+/* 2.31: nav without tabs, wallet logos */
+#walletBtn{margin-left:auto}
+.nav:has(.tabs[hidden]) .brand span{display:inline}
+.wbtn{display:flex;align-items:center;justify-content:center;gap:10px}
+.wlogo{width:24px;height:24px;border-radius:6px;background:#fff;padding:2px;flex:none}
+
 </style>
 </head>
 <body>
@@ -940,7 +946,7 @@ async function connect(){
   if(!eth){const u=location.host+location.pathname+location.hash;toast('No wallet found in this browser');
     $('#sheetIn').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0;font-family:var(--disp)">Open in your wallet</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>
     <p class="sub" style="margin-top:10px">Connecting needs a wallet browser. Open this page in one of these apps, then tap Connect again.</p>
-    <div style="display:flex;flex-direction:column;gap:8px"><a class="btn" href="https://metamask.app.link/dapp/${E(u)}">Open in MetaMask</a><a class="btn" href="https://go.cb-w.com/dapp?cb_url=${encodeURIComponent('https://'+u)}">Open in Coinbase Wallet</a><a class="btn" href="https://rabby.io" target="_blank" rel="noopener">Get Rabby for desktop</a></div>`;
+    <div style="display:flex;flex-direction:column;gap:8px"><a class="btn wbtn" href="https://metamask.app.link/dapp/${E(u)}"><img class="wlogo" src="https://www.google.com/s2/favicons?domain=metamask.io&sz=64" alt="" width="24" height="24" onerror="this.remove()">Open in MetaMask</a><a class="btn wbtn" href="https://go.cb-w.com/dapp?cb_url=${encodeURIComponent('https://'+u)}"><img class="wlogo" src="https://www.google.com/s2/favicons?domain=coinbase.com&sz=64" alt="" width="24" height="24" onerror="this.remove()">Open in Coinbase Wallet</a><a class="btn wbtn" href="https://rabby.io" target="_blank" rel="noopener"><img class="wlogo" src="https://www.google.com/s2/favicons?domain=rabby.io&sz=64" alt="" width="24" height="24" onerror="this.remove()">Get Rabby for desktop</a></div>`;
     $('#sheet').classList.add('show');bind();return;}
   try{
     setRing('listening');
@@ -1180,7 +1186,7 @@ function soon(){
   <span class="eyebrow rv d1"><b>●</b> OddsEngine</span>
   <h1 class="rv d1"><span class="shiny">The Engine reads the markets.</span></h1>
   <p class="lead rv d2" style="margin:0 auto 20px">Live calls on weather and crypto markets, every pick on the record.</p>
-  <div class="rv d3" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn btn-g" href="https://oddsengine.live">Open OddsEngine</a><a class="btn" href="https://x.com/OddsEngine">Follow on X</a></div></section>`;}
+  <div class="rv d3" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn btn-g" href="https://public.oddsengine.live">Open the app</a><a class="btn" href="https://x.com/OddsEngine">Follow on X</a></div></section>`;}
 
 function go(t){TAB=t;history.replaceState(null,'',t==='engine'?location.pathname:'#'+t);render();window.scrollTo({top:0});if(t==='chat')setTimeout(()=>{scrollChat();const ta=$('#cIn');if(ta&&innerWidth>700)ta.focus();},60);}
 function render(){
@@ -1520,7 +1526,9 @@ adminCard=function(){
   const extra=`<div class="kv"><div><span>Users 7d</span><b>${E(a.users_7d==null?'n/a':a.users_7d)}</b></div><div><span>Free msgs 24h</span><b>${E(a.free_24h==null?'n/a':a.free_24h)}</b></div><div><span>Accounts</span><b>${E(a.accounts)}</b></div></div>
    <h3 style="margin-top:18px">Top users</h3><p class="sub">Sorted by what they spent. Tap a wallet to open it in the explorer.</p>
    ${u.length?`<div class="ulist">${u.map(x=>`<div class="ur"><div><b><a href="https://robinhoodchain.blockscout.com/address/${E(x.address)}" target="_blank" rel="noopener">${E(short(x.address))}</a></b><span>${x.requests} requests · last ${x.last?ago(x.last):'never'}</span><span>topped up ${usd(x.deposited)} · ${usd(x.credit)} left</span></div><em title="spent">${usd(x.spent,x.spent<1?4:2)}</em></div>`).join('')}</div>`:'<div class="note">Nobody yet.</div>'}`;
-  return _adminCard0().replace(/<\/div><\/section>\s*$/,extra+'</div></section>');
+  const al=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px"><button class="btn btn-sm" id="alTest">Send test alert to my Telegram</button><span class="note">You get a message when 70 % and 90 % of the OpenRouter budget is used.</span></div>`;
+  setTimeout(()=>{const b=$('#alTest');if(b)b.onclick=async()=>{b.disabled=true;try{const r=await api('/v1/admin/ai/alert-test',{method:'POST',body:'{}'});toast(r.ok?'Sent, check Telegram':'Could not send, check TELEGRAM_BOT_TOKEN and TELEGRAM_PRIVATE_CHAT_ID');}catch(e){toast(e.message);}b.disabled=false;};},0);
+  return _adminCard0().replace(/(<div class="kv">)/,al+'$1').replace(/<\/div><\/section>\s*$/,extra+'</div></section>');
 };
 
 /* ---------- load ---------- */

@@ -39,6 +39,7 @@ th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:up
 .box{padding:14px 16px;border-radius:16px;border:1px solid rgba(34,240,138,.35);background:rgba(34,240,138,.05);margin:14px 0}
 ol li,ul li{margin:4px 0}
 .eb{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -46,7 +47,7 @@ ol li,ul li{margin:4px 0}
 <div class="lay">
 <nav class="toc" aria-label="Contents">
   <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
-  <a href="#api">API quickstart</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
+  <a href="#api">API quickstart</a><a href="#agents" class="feat-agents" hidden>Agents, MCP, x402</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
 </nav>
 <main>
 <span class="eb">Docs</span>
@@ -120,6 +121,34 @@ print(r.choices[0].message.content)</code></pre>
 <li>Keys are stored as a hash. A new key is shown once. Revoke a key any time on the Account page.</li>
 </ul>
 
+<section class="feat-agents" hidden>
+<h2 id="agents">Agents, MCP and x402</h2>
+<h3>A key for your agent, without a browser</h3>
+<p>Your agent signs in with its own wallet and gets a key with limits you choose.</p>
+<pre><code>GET  /v1/engine/nonce?address=0xYOUR_WALLET     -> { "message": "..." }
+sign the message with personal_sign
+POST /v1/agents/key
+{"address":"0x...","signature":"0x...","name":"my bot","day_cap":5,"models":["anthropic/claude-sonnet-5.5"]}</code></pre>
+<ul>
+<li><code>day_cap</code> is the most this key may spend per day, in dollars. Leave it out for no limit.</li>
+<li><code>models</code> limits the key to these model ids. Leave it out for all models.</li>
+<li>Change limits later with <code>POST /v1/ai/keys/limits</code> <code>{"id","day_cap","models"}</code>.</li>
+</ul>
+<h3>MCP server</h3>
+<p>Point Claude, Cursor or any MCP client at <code>https://web-production-6b61c.up.railway.app/mcp</code> with the header <code>Authorization: Bearer oe_live_...</code>. Tools: <code>list_models</code>, <code>estimate_cost</code>, <code>chat</code>, <code>compare</code>, <code>balance</code>.</p>
+<pre><code>{"mcpServers":{"oddsengine":{"type":"http","url":"https://web-production-6b61c.up.railway.app/mcp",
+  "headers":{"Authorization":"Bearer oe_live_..."}}}}</code></pre>
+<h3>Pay per request with x402</h3>
+<p>No account, no key. Call <code>/v1/chat/completions</code> without a key and you get <code>402</code> with the price in $ODDS. Sign an EIP-2612 permit for that amount and send the same request again with the <code>X-PAYMENT</code> header. We settle it on Robinhood Chain and answer. You pay no gas.</p>
+<pre><code>X-PAYMENT: base64({"x402Version":1,"scheme":"permit","network":"robinhood",
+  "payload":{"owner":"0x...","value":"&lt;maxAmountRequired&gt;","deadline":1790000000,"signature":"0x..."}})</code></pre>
+<ul>
+<li>Spender, token, chain id and the EIP-712 domain are in <code>accepts[0].extra</code> of the 402 answer.</li>
+<li>One payment covers at least $0.05 plus $0.01 for gas. What the request does not use stays as credit on your wallet.</li>
+<li>Next time, send a fresh permit. If your credit covers the request we use the credit and move no tokens.</li>
+<li>The answer carries <code>X-PAYMENT-RESPONSE</code> with the transaction.</li>
+</ul>
+</section>
 <h2 id="images">Images</h2>
 <h3>Send an image</h3>
 <pre><code>{"model":"google/gemini-3.8-flash","messages":[{"role":"user","content":[
@@ -157,5 +186,10 @@ print(r.choices[0].message.content)</code></pre>
 <p>Change the base URL and the key. Model IDs stay the same. The difference: you pay with $ODDS from your wallet instead of a card, and you get a full chat on top of the API with the same balance.</p>
 </main>
 </div>
+<script>
+(function(){var h={};try{var a=localStorage.getItem('oe_admin');if(a)h['X-OddsEngine-Admin']=a;}catch(e){}
+fetch('https://web-production-6b61c.up.railway.app/v1/features',{headers:h}).then(function(r){return r.json()}).then(function(d){
+var f=d.features||{};if((f.agents&&f.ai)||d.admin){document.querySelectorAll('.feat-agents').forEach(function(e){e.hidden=false});if(location.hash==='#agents'){var t=document.getElementById('agents');if(t)t.scrollIntoView();}}}).catch(function(){});})();
+</script>
 </body>
 </html>
