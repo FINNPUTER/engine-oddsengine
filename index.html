@@ -479,6 +479,37 @@ body.chatmode .cside{background:rgba(6,11,8,.8);backdrop-filter:blur(12px);-webk
 .cdl:hover{background:rgba(34,240,138,.16)}
 @media (max-width:440px){.nav{gap:4px;padding-left:10px}.tabs{margin:0 auto 0 2px}.tabs button{padding:8px 9px;font-size:12px}#walletBtn{padding:8px 10px;font-size:9.5px}}
 @media (max-width:700px){.ulist .ur:nth-child(n+7){display:none}}
+.mc .mname{flex:1;min-width:0}
+.mhead{min-width:0}
+.mact{display:flex;gap:6px;align-items:center;margin-top:auto}
+.mact .btn{flex:1;min-width:0}
+.ib{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line2);background:none;color:var(--dim);cursor:pointer;font-size:17px;padding:0}
+.ib:hover{color:var(--g);border-color:rgba(34,240,138,.45)}
+.mc.sel .ib.cmp{background:var(--g);color:#02130a;border-color:transparent}
+.mact .cmp{width:40px;min-height:40px}
+.mper2{font-family:var(--mono);font-size:11px;color:var(--dim2);line-height:1.4}
+body.chatmode{height:100dvh}
+.t-free{color:#7dffbd!important;border-color:rgba(125,255,189,.4)!important}
+.mc .mname{flex:1;min-width:0}
+.mhead{min-width:0}
+html:has(body.chatmode){overflow:hidden;height:100%}
+body.chatmode{height:100%;overflow:hidden;padding-bottom:0}
+.cxb{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 12px;border-radius:12px;border:1px solid var(--line2);background:none;color:var(--dim);cursor:pointer;font-size:13px;font-weight:600}
+.cxb:hover,.cxb.on{color:var(--g);border-color:rgba(34,240,138,.45);background:rgba(34,240,138,.06)}
+.chead .ctier{margin-left:auto}
+.cmpx{max-width:1180px!important;flex-direction:column}
+.cxg{display:grid;gap:10px;width:100%}
+.cxg.n2{grid-template-columns:1fr 1fr}.cxg.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cxc{display:flex;flex-direction:column;gap:8px;min-width:0;padding:12px;border-radius:16px;border:1px solid var(--line2);background:rgba(0,0,0,.25)}
+.cxh{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:6px}
+.cxh b{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cxh span{font-family:var(--mono);font-size:11px;color:var(--g2);white-space:nowrap}
+.cxc .md{font-size:14px;flex:1}
+.cxk{align-self:flex-start}
+.cxo{cursor:pointer}
+.cxo input{width:18px;height:18px;accent-color:#22f08a;flex:none;margin-right:4px}
+.cxo .pn{flex:1}
+@media (max-width:860px){.cxg.n2,.cxg.n3{grid-template-columns:1fr}.cxb span{display:none}.cxb{padding:0 11px}}
 
 </style>
 </head>
@@ -932,7 +963,7 @@ let CH={stick:true,list:[],cur:null,msgs:[],model:null,busy:false,ctrl:null,att:
 const RING_SVG='<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M44.5 15.2A20 20 0 1 0 49 19.6" fill="none" stroke="#22f08a" stroke-width="9"/></svg>';
 function chatModel(){const id=CH.model||localStorage.getItem('oe_chat_model')||'oddsengine/auto';return MODELS.find(m=>m.id===id)||MODELS[0]||{id:'oddsengine/auto',name:'OddsEngine auto',tags:[]};}
 function tierLbl(t){return {cheap:'Cheap',standard:'Standard',premium:'Premium',auto:'Auto'}[t]||'';}
-function msgPrice(m){if(!m)return'';if(m.kind==='image')return m.per_image?'≈ '+usd(m.per_image,m.per_image<0.1?3:2)+' per image':'per image';if(m.per_msg==null)return'price of the model it picks';return'≈ '+(m.per_msg<0.01?usd(m.per_msg,4):usd(m.per_msg,3))+' per message';}
+function msgPrice(m){if(!m)return'';if(m.free)return'free, 20 messages a day';if(m.kind==='image')return m.per_image?'≈ '+usd(m.per_image,m.per_image<0.1?3:2)+' per image':'per image';if(m.per_msg==null)return'price of the model it picks';return'≈ '+(m.per_msg<0.01?usd(m.per_msg,4):usd(m.per_msg,3))+' per message';}
 
 /* --- tiny safe markdown --- */
 function md(src){
@@ -975,7 +1006,7 @@ function msgHtml(m){
 }
 
 function chatView(){
-  const m=chatModel();const b=(ME&&ME.balance)||{};const low=connected()&&(b.usd||0)<0.01;
+  const m=chatModel();const b=(ME&&ME.balance)||{};const low=connected()&&(b.usd||0)<0.01&&!m.free;
   return `<div class="chat ${CH.drawer?'dopen':''}">
    <aside class="cside" id="cSide">
      <button class="btn btn-g cnew" data-cact="new">+ New chat</button>
@@ -1138,7 +1169,7 @@ function introMaybe(){
 }
 
 /* ---------- tabs that exist for the public ---------- */
-function tabOpen(t){if(DEMO||PREVIEW)return true;return t==='engine'?FEAT.engine:FEAT.ai;}
+function tabOpen(t){if(t==='engine')return !!FEAT.engine||DEMO;if(DEMO||PREVIEW)return true;return FEAT.ai;}
 function soon(){
   return `<section class="soon">${face('idle')}
   <span class="eyebrow rv d1"><b>●</b> OddsEngine</span>
@@ -1156,6 +1187,7 @@ function render(){
   const nav=$('.tabs');if(nav)nav.hidden=tabs.filter(b=>!b.hidden).length<2;
   const chat=open&&TAB==='chat';
   document.body.classList.toggle('chatmode',chat);
+  document.documentElement.style.overflow=chat?'hidden':'';if(chat)window.scrollTo(0,0);
   document.body.classList.toggle('aimode',open&&AI_TABS.includes(TAB));
   if(!chat){CH.drawer=false;document.body.classList.remove('cdr');}
   const keep=chat&&$('#cIn')?$('#cIn').value:null;
@@ -1163,15 +1195,21 @@ function render(){
   if(open&&AI_TABS.includes(TAB)){bgInit();bgShow(true);introMaybe();}else bgShow(false);
   if(open&&TAB==='models'){renderModels();cmpBar();countUp();}
   if(open&&TAB==='ai'&&QUOTE)quoteTick();
-  if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();}
+  if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();fitChat();}
   bind(); reveal(); spot();
   $('#walletBtn').textContent=connected()?(innerWidth<440?ME.address.slice(0,4)+'…'+ME.address.slice(-3):(ME.short||short(ME.address))):'Connect';
 }
+
+function fitChat(){const c=$('.chat');if(!c)return;const ab=$('.admin-bar');const pad=(ab?ab.offsetHeight:0)+10;
+  const h=Math.max(360,Math.floor((window.visualViewport?visualViewport.height:innerHeight)-c.getBoundingClientRect().top-pad));c.style.height=h+'px';}
+addEventListener('resize',()=>{if(TAB==='chat')fitChat();});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>{if(TAB==='chat')fitChat();});
 
 /* ---------- fees ---------- */
 function myFee(){const a=ME&&ME.ai;if(a&&a.markup!=null)return a.markup;return MARKUP;}
 const pct=v=>(Math.round(v*1000)/10).toString().replace(/\.0$/,'')+'%';
 function tiersList(){const h=ME&&ME.ai&&ME.ai.holder;return (h&&h.tiers)||TIERS_FALLBACK;}
+const FREE_DAY=20;
 const TIERS_FALLBACK=[{hold:0,markup:.095},{hold:250000,markup:.09},{hold:1e6,markup:.085},{hold:3e6,markup:.08},{hold:1e7,markup:.075}];
 const big=n=>n>=1e6?(n/1e6).toString().replace(/\.0+$/,'')+'M':n>=1e3?Math.round(n/1e3)+'K':String(n);
 
@@ -1179,6 +1217,7 @@ const big=n=>n>=1e6?(n/1e6).toString().replace(/\.0+$/,'')+'M':n>=1e3?Math.round
 const CATS=[
   ['picked','Picked for you',m=>m.picked],
   ['new','New',m=>m.new],
+  ['free','Free to try',m=>m.free],
   ['code','Best for code',m=>(m.tags||[]).includes('code')],
   ['writing','Writing',m=>(m.tags||[]).includes('writing')],
   ['reasoning','Deep thinking',m=>(m.tags||[]).includes('reasoning')],
@@ -1226,11 +1265,11 @@ function renderModels(){
   const cap=$('#mCap');if(cap)cap.textContent=MF.q?`${l.length} found`:({picked:'The ones we would pick ourselves. Tap any card to use it in the chat.',new:'Added in the last three weeks.',all:`All ${l.length} models.`}[MF.chip]||`${l.length} models`);
   g.innerHTML=l.slice(0,MF.n).map(m=>`<div class="mc ${CMP.includes(m.id)?'sel':''}">
     <div class="mhead">${badge(m)}<div class="mname"><b title="${E(m.name)}">${E(m.name)}</b><span>${E(m.provider)}${m.context?' · '+ctx(m.context)+' context':''}</span></div>${m.new?'<span class="newb">NEW</span>':''}</div>
-    <div class="mbig"><b>${m.kind==='image'?(m.per_image?cents(m.per_image):'n/a'):(m.per_msg!=null?cents(m.per_msg):'varies')}</b><span>${m.kind==='image'?'per image':m.per_msg!=null?'per message':'price of the model it picks'}</span></div>
+    <div class="mbig">${m.free?`<b>Free</b><span>${FREE_DAY} messages a day</span>`:`<b>${m.kind==='image'?(m.per_image?cents(m.per_image):'n/a'):(m.per_msg!=null?cents(m.per_msg):'varies')}</b><span>${m.kind==='image'?'per image':m.per_msg!=null?'per message':'price of the model it picks'}</span>`}</div>
     <div class="mtags">${(m.tags||[]).filter(t=>t!=='tools').slice(0,4).map(t=>`<i>${E(t==='vision'?'sees images':t==='image'?'creates images':t)}</i>`).join('')}</div>
     ${m.intelligence?`<div><div class="mmeta"><span>Intelligence</span><span>${Number(m.intelligence).toFixed(0)}</span></div><div class="iq"><i style="width:${Math.round(100*m.intelligence/maxIq)}%"></i></div></div>`:''}
-    <div class="mmeta"><span>Per 1M tokens</span><span>${m.in==null?'auto':px(m.in)} in · ${m.out==null?'auto':px(m.out)} out</span></div>
-    <div class="mact"><button class="btn btn-g btn-sm" data-try="${E(m.id)}">Chat with it</button><button class="btn btn-sm" data-cid="${E(m.id)}">Copy ID</button><button class="cmp" data-cmp="${E(m.id)}" aria-label="Compare">${CMP.includes(m.id)?'✓':'+'}</button></div>
+    ${m.in!=null&&!m.free?`<div class="mper2">${px(m.in)} in · ${px(m.out)} out per 1M tokens</div>`:''}
+    <div class="mact"><button class="btn btn-g btn-sm" data-try="${E(m.id)}">Chat with it</button><button class="ib" data-cid="${E(m.id)}" title="Copy model ID" aria-label="Copy model ID"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button><button class="ib cmp" data-cmp="${E(m.id)}" title="Compare" aria-label="Compare">${CMP.includes(m.id)?'✓':'+'}</button></div>
   </div>`).join('')||'<div class="empty">No model matches. Try another word or category.</div>';
   $('#mMore').innerHTML=l.length>MF.n?`<button class="btn btn-sm" data-act="more">Show ${Math.min(l.length-MF.n,innerWidth<700?12:48)>=l.length-MF.n?'all '+l.length:(innerWidth<700?12:48)+' more'}</button>`:'';
   g.querySelectorAll('[data-try]').forEach(b=>b.onclick=()=>{CH.model=b.dataset.try;try{localStorage.setItem('oe_chat_model',CH.model);}catch(e){}if(!CH.busy){CH.cur=null;CH.msgs=[];}go('chat');});
@@ -1243,7 +1282,7 @@ function countUp(){document.querySelectorAll('[data-cu]').forEach(el=>{const t=+
 /* ---------- chat model picker: the picked ones, search for the rest ---------- */
 function pickSheet(){
   const cur=chatModel().id;
-  const groups=[['auto','Let it choose',m=>m.id==='oddsengine/auto'],['cheap','Cheap',m=>m.picked&&m.tier==='cheap'&&m.kind!=='image'],['standard','Standard',m=>m.picked&&m.tier==='standard'&&m.kind!=='image'],['premium','Premium',m=>m.picked&&m.tier==='premium'&&m.kind!=='image'],['image','Create images',m=>m.picked&&m.kind==='image']];
+  const groups=[['auto','Let it choose',m=>m.id==='oddsengine/auto'],['cheap','Cheap',m=>m.picked&&m.tier==='cheap'&&m.kind!=='image'],['standard','Standard',m=>m.picked&&m.tier==='standard'&&m.kind!=='image'],['premium','Premium',m=>m.picked&&m.tier==='premium'&&m.kind!=='image'],['image','Create images',m=>m.picked&&m.kind==='image'],['free','Free to try',m=>m.free&&m.kind!=='image']];
   const row=m=>`<button class="popt ${m.id===cur?'on':''}" data-pm="${E(m.id)}"><span class="pn"><b>${E(m.name)}${m.new?' <em class="newb">NEW</em>':''}</b><small>${E(m.provider)}${(m.tags||[]).includes('vision')&&m.kind!=='image'?' · sees images':''}</small></span><span class="pp">${E(msgPrice(m).replace('≈ ',''))}</span></button>`;
   const srt=(a,b)=>((a.kind==='image'?a.per_image:a.per_msg)||0)-((b.kind==='image'?b.per_image:b.per_msg)||0);
   const n=MODELS.length-1;
@@ -1390,8 +1429,77 @@ bind=function(){
   document.querySelectorAll('[data-chip]').forEach(b=>b.onclick=()=>{MF.chip=b.dataset.chip;MF.q='';const s=$('#mSearch');if(s)s.value='';MF.n=PAGE();document.querySelectorAll('[data-chip]').forEach(x=>x.classList.toggle('on',x===b));renderModels();});
 };
 
+/* ---------- Compare: ask up to 3 models at once, side by side ---------- */
+CH.cmp=[];
+function cmpHtml(m){
+  return `<div class="cm a cmpx"><div class="cxg n${m.cols.length}">${m.cols.map((c,i)=>{const mm=MODELS.find(x=>x.id===c.model)||{name:c.model};
+    return `<div class="cxc" id="cx${m.k}_${i}"><div class="cxh"><b>${E(mm.name)}</b>${c.cost!=null?`<span>${usd(c.cost,c.cost<0.01?4:3)}</span>`:''}</div>
+     <div class="md">${c.err?`<div class="cerr">${E(c.content)}</div>`:c.pending&&!c.content?'<span class="typing"><i></i><i></i><i></i></span>':md(c.content)}</div>
+     ${c.pending||c.err?'':`<button class="btn btn-sm cxk" data-keep="${E(c.model)}">Continue with this one</button>`}</div>`;}).join('')}</div>
+   <div class="cnote" style="text-align:left;margin:6px 0 0">Side by side answers are not saved to this chat. Pick one to continue.</div></div>`;
+}
+const _msgHtml0=msgHtml;
+msgHtml=function(m){return m.role==='compare'?cmpHtml(m):_msgHtml0(m);};
+function cmpSheet(){
+  const sel=new Set(CH.cmp.length?CH.cmp:[chatModel().id].filter(x=>x!=='oddsengine/auto'));
+  const list=MODELS.filter(m=>m.picked&&m.kind!=='image'&&m.id!=='oddsengine/auto').sort((a,b)=>(a.per_msg||0)-(b.per_msg||0));
+  const row=m=>`<label class="popt cxo ${sel.has(m.id)?'on':''}"><input type="checkbox" data-cx="${E(m.id)}" ${sel.has(m.id)?'checked':''}><span class="pn"><b>${E(m.name)}</b><small>${E(m.provider)}</small></span><span class="pp">${E(msgPrice(m).replace('≈ ',''))}</span></label>`;
+  $('#sheetIn').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0;font-family:var(--disp)">Compare models</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>
+   <p class="sub" style="margin:8px 0 4px">Pick 2 or 3. Your next message goes to all of them at once and the answers show up side by side. Each one is paid at its own price.</p>
+   <input id="cxSearch" class="psearch" placeholder="Search all models" autocomplete="off">
+   <div id="cxList">${list.map(row).join('')}</div>
+   <div style="display:flex;gap:8px;margin-top:14px;position:sticky;bottom:0;background:#08100c;padding-top:10px"><button class="btn btn-g" style="flex:1" id="cxGo">Compare <span id="cxN">${sel.size}</span></button>${CH.cmp.length?'<button class="btn" id="cxOff">Turn off</button>':''}</div>`;
+  $('#sheet').classList.add('show');
+  const wire=()=>document.querySelectorAll('[data-cx]').forEach(c=>c.onchange=()=>{const id=c.dataset.cx;if(c.checked){if(sel.size>=3){c.checked=false;toast('Up to 3 models');return;}sel.add(id);}else sel.delete(id);c.closest('.cxo').classList.toggle('on',c.checked);$('#cxN').textContent=sel.size;});
+  wire();
+  $('#cxSearch').oninput=e=>{const q=e.target.value.toLowerCase().trim();const l=q?MODELS.filter(m=>m.kind!=='image'&&m.id!=='oddsengine/auto'&&(m.name.toLowerCase().includes(q)||m.id.toLowerCase().includes(q))).slice(0,40):list;$('#cxList').innerHTML=l.map(row).join('');wire();};
+  $('#cxGo').onclick=()=>{if(sel.size<2){toast('Pick at least 2');return;}CH.cmp=[...sel];$('#sheet').classList.remove('show');render();};
+  const off=$('#cxOff');if(off)off.onclick=()=>{CH.cmp=[];$('#sheet').classList.remove('show');render();};
+  bind();
+}
+function cmpChrome(){
+  const h=$('.chead');if(!h||h.querySelector('.cxb'))return;
+  const b=document.createElement('button');b.className='cxb'+(CH.cmp.length?' on':'');b.title='Compare models';
+  b.innerHTML=`<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="3" y="4" width="7.5" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="4" width="7.5" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg><span>${CH.cmp.length?CH.cmp.length+' models':'Compare'}</span>`;
+  b.onclick=cmpSheet;
+  const t=h.querySelector('.ctier');h.insertBefore(b,t);
+  if(CH.cmp.length){if(t)t.style.display='none';const nt=$('.cnote');if(nt)nt.textContent=CH.cmp.length+' models answer at once · each one paid at its own price';const p=h.querySelector('.cpick');if(p)p.innerHTML=`<b>${E(CH.cmp.map(modelName).join(' · '))}</b><i>▾</i>`;if(p)p.onclick=cmpSheet;}
+  document.querySelectorAll('[data-keep]').forEach(k=>k.onclick=()=>{CH.model=k.dataset.keep;CH.cmp=[];try{localStorage.setItem('oe_chat_model',CH.model);}catch(e){}render();scrollChat();toast('Continuing with '+modelName(CH.model));});
+}
+async function cmpSend(text){
+  if(!connected()){connect();return;}
+  if(CH.att.length){toast('Compare works with text. Remove the images or turn compare off.');return;}
+  const hist=CH.msgs.filter(m=>m.role==='user'||m.role==='assistant').filter(m=>!m.err&&m.content).slice(-12).map(m=>({role:m.role,content:m.content}));
+  hist.push({role:'user',content:text});
+  const blk={role:'compare',k:Date.now(),cols:CH.cmp.map(id=>({model:id,content:'',pending:true}))};
+  CH.msgs.push({role:'user',content:text,local:[]},blk);CH.busy=true;render();scrollChat();setRing('thinking');
+  await Promise.all(blk.cols.map(async(c,i)=>{
+    try{
+      const r=await fetch(API+'/v1/ai/chat',{method:'POST',headers:hdr(),body:JSON.stringify({model:c.model,messages:hist,stream:true})});
+      if(!r.ok){let j=null;try{j=await r.json();}catch(e){}throw new Error((j&&((j.error&&j.error.message)||j.detail))||('error '+r.status));}
+      const rd=r.body.getReader();const dec=new TextDecoder();let buf='';
+      for(;;){const {value,done}=await rd.read();if(done)break;buf+=dec.decode(value,{stream:true});let k;
+        while((k=buf.indexOf('\n\n'))>=0){const ev=buf.slice(0,k);buf=buf.slice(k+2);
+          for(const line of ev.split('\n')){if(!line.startsWith('data: '))continue;const d=line.slice(6).trim();if(d==='[DONE]')continue;let j;try{j=JSON.parse(d);}catch(e){continue;}
+            if(j.error){if(!c.content)throw new Error(j.error.message);continue;}
+            const dl=j.choices&&j.choices[0]&&j.choices[0].delta;if(dl&&dl.content){c.content+=dl.content;const el=document.querySelector(`#cx${blk.k}_${i} .md`);if(el)el.innerHTML=md(c.content);if(CH.stick)scrollChat();}
+            if(j.usage&&j.usage.oddsengine_charged_usd!=null)c.cost=j.usage.oddsengine_charged_usd;}}}
+    }catch(e){c.err=true;c.content=e.message||'Something went wrong';}
+    c.pending=false;
+    if(c.cost&&ME&&ME.balance)ME.balance.usd=Math.max(0,(ME.balance.usd||0)-c.cost);
+  }));
+  CH.busy=false;setRing('idle');render();scrollChat();
+}
+const _chatSend0=chatSend;
+chatSend=function(text){if(CH.cmp.length>1)return cmpSend(text);return _chatSend0(text);};
+const _chatBind0=chatBind;
+chatBind=function(){_chatBind0();cmpChrome();
+  const f=$('#cForm');if(f){const ta=$('#cIn');f.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!t&&!CH.att.length)return;ta.value='';chatSend(t);};
+    document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>chatSend(b.dataset.sug));}
+};
+
 /* ---------- load ---------- */
-function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Holders see each tab only when its switch is on. Your numbers are in the API tab at the bottom.';document.body.appendChild(b);}
+function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Only you see this view. Visitors see Chat, Models and Account only when the ai switch is on.';document.body.appendChild(b);}
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();

@@ -67,6 +67,8 @@ ol li,ul li{margin:4px 0}
 <li>Pick a model under <i>Create images</i> and describe what you want. Each image has a download button.</li>
 <li>Under every answer you see what it cost.</li>
 <li><i>OddsEngine auto</i> picks a strong model for each question. You pay what the picked model costs.</li>
+<li><b>Compare</b>: tap Compare at the top, pick 2 or 3 models, and your next message goes to all of them at once. The answers show up side by side with what each one cost. Pick one to continue the chat with it.</li>
+<li><b>Free to try</b>: models marked Free cost nothing. You can send 20 free messages a day after you connect a wallet, no top up needed.</li>
 </ul>
 
 <h2 id="money">Prices and fees</h2>
@@ -129,7 +131,7 @@ print(r.choices[0].message.content)</code></pre>
 <p>The picture comes back in <code>choices[0].message.images[0].image_url.url</code> as a data URL.</p>
 
 <h2 id="models">Models</h2>
-<p>All current paid models are available. <i>Picked for you</i> on the Models page shows the ones we use ourselves. New models appear on their own and get a NEW badge for three weeks. Model IDs are the usual <code>maker/model</code> format.</p>
+<p>Every model OpenRouter offers is available, including free ones, the cheaper batch versions and the <code>~maker/model-latest</code> names that always point to the newest version. <i>Picked for you</i> on the Models page shows the ones we use ourselves. New models appear on their own and get a NEW badge for three weeks. Model IDs are the usual <code>maker/model</code> format.</p>
 
 <h2 id="errors">Errors and limits</h2>
 <div class="tw"><table>
@@ -138,7 +140,7 @@ print(r.choices[0].message.content)</code></pre>
 <tr><td>401</td><td>Missing or wrong API key.</td></tr>
 <tr><td>402</td><td>Not enough balance for this request. Top up or pick a cheaper model.</td></tr>
 <tr><td>404</td><td>Unknown model ID. See <code>/v1/models</code>.</td></tr>
-<tr><td>429</td><td>Too many requests. The limit is 60 per minute per key.</td></tr>
+<tr><td>429</td><td>Too many requests. The limit is 60 per minute per key. Free models also have a limit of 20 messages a day per wallet.</td></tr>
 <tr><td>502 / 503</td><td>The model maker had a problem. Try again or use another model. Failed requests are not charged.</td></tr>
 </table></div>
 
