@@ -529,6 +529,24 @@ body.teaser .soon .face{width:min(400px,40vh);max-width:none}
 body.teaser .soon h1{font-size:clamp(34px,6vw,76px);margin:6px 0 10px}
 @media (max-width:640px){body.teaser .soon .face{width:min(300px,34vh)}}
 
+/* stats never run over the card edge on phones */
+.hstats b{overflow:hidden;text-overflow:ellipsis;max-width:100%}
+@media (max-width:480px){.hstats b{font-size:clamp(15px,4.7vw,22px)}}
+.tc{min-width:0}
+.tc .tp{overflow-wrap:anywhere;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:480px){.tc .tp{font-size:clamp(15px,4.8vw,22px)}}
+/* sort and model dropdowns in our own style, not the system look */
+.mtools select,.pg select,.pgtop select{-webkit-appearance:none;appearance:none;height:46px;border-radius:12px;border:1px solid var(--line2);background-color:rgba(8,14,11,.85);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2322f08a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding:0 40px 0 14px;color:var(--tx);font-weight:600;cursor:pointer;box-shadow:none;transition:border-color .2s}
+.mtools select:hover,.mtools select:focus{border-color:rgba(34,240,138,.55);outline:none}
+.mtools select option,.pg select option,.pgtop select option{background:#07100c;color:#ecf5ef}
+
+.payline{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:2px 0 18px}
+.payline span{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid rgba(34,240,138,.4);background:rgba(34,240,138,.08);font-weight:600;font-size:15px;color:var(--tx)}
+.payline i{font-style:normal;color:var(--g);font-weight:800}
+.payline span:first-child{background:var(--g);color:#02130a;border-color:transparent}
+.payline span:first-child i{color:#02130a}
+@media (max-width:480px){.payline{gap:6px}.payline span{font-size:13px;min-height:36px;padding:0 12px}}
+
 </style>
 </head>
 <body>
@@ -975,6 +993,7 @@ function reveal(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIn
 function spot(){document.querySelectorAll('.card').forEach(c=>c.onpointermove=e=>{const r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});}
 addEventListener('click',e=>{if(!e.target.closest('button,a'))return;for(let i=0;i<8;i++){const s=document.createElement('i');s.className='spark';document.body.appendChild(s);const a=i/8*Math.PI*2,d=26+Math.random()*12;s.style.left=e.clientX+'px';s.style.top=e.clientY+'px';s.animate([{transform:'translate(-50%,-50%)',opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d}px))`,opacity:0}],{duration:450,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=()=>s.remove();}});
 
+function niceErr(t){t=String(t||'');if(/openrouter|purchased credits|insufficient credits|provider returned|upstream|rate.?limit(ed)? by|no endpoints/i.test(t))return 'This model is not available right now. Nothing was charged. Try again in a minute or pick another model.';return t;}
 
 /* =================== Chat (2.29.1) =================== */
 let CH={stick:true,list:[],cur:null,msgs:[],model:null,busy:false,ctrl:null,att:[],drawer:false,loaded:false};
@@ -1019,7 +1038,7 @@ function msgHtml(m){
   if(m.role==='user')return `<div class="cm u"><div class="cub">${local||imgs}${m.content?`<div class="cut">${E(m.content)}</div>`:''}</div></div>`;
   const mm=MODELS.find(x=>x.id===m.model);
   const dls=(m.images||[]).length?`<div class="cdls">${m.images.map((id,i)=>`<a class="cdl" href="${E(imgUrl(id)+'&dl=1')}" download><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Download${m.images.length>1?' '+(i+1):''}</a>`).join('')}</div>`:'';
-  return `<div class="cm a"><div class="cav">${RING_SVG}</div><div class="cab">${m.err?`<div class="cerr">${E(m.content)}</div>`:`<div class="md">${m.pending?'<span class="typing"><i></i><i></i><i></i></span>':md(m.content)}</div>`}${imgs}${dls}
+  return `<div class="cm a"><div class="cav">${RING_SVG}</div><div class="cab">${m.err?`<div class="cerr">${E(niceErr(m.content))}</div>`:`<div class="md">${m.pending?'<span class="typing"><i></i><i></i><i></i></span>':md(m.content)}</div>`}${imgs}${dls}
     ${m.pending||m.err?'':`<div class="cmeta"><span>${E(mm?mm.name:(m.model||'').split('/').pop())}</span>${m.cost!=null?`<span>${usd(m.cost,m.cost<0.01?4:3)}</span>`:''}<button class="cpy" data-cpy="1" aria-label="Copy answer">Copy</button></div>`}</div></div>`;
 }
 
@@ -1115,7 +1134,7 @@ async function chatSend(text){
   CH.busy=false;CH.ctrl=null;setRing('idle');
   const it=CH.list.find(c=>c.id===CH.cur);if(it)it.updated=new Date().toISOString();
   render();scrollChat();
-  if(a.err&&/balance/i.test(a.content||''))toast('Top up in the API tab');
+  if(a.err&&/balance/i.test(a.content||''))toast('Top up in Account');
 }
 function chatBind(){
   if(TAB!=='chat')return;
@@ -1168,9 +1187,10 @@ function bgInit(){
 }
 function bgShow(on){const d=$('#bgv');if(d)d.classList.toggle('on',on);}
 function introMaybe(){
-  let seen=false;try{seen=!!localStorage.getItem('oe_intro');}catch(e){}
-  if(seen||REDUCED||DEMO||SMALL())return;
-  try{localStorage.setItem('oe_intro','1');}catch(e){}
+  // once per visit (browser session), desktop and phone. Skip is always there.
+  let seen=false;try{seen=!!sessionStorage.getItem('oe_intro_s')||!!localStorage.getItem('oe_intro_off');}catch(e){}
+  if(seen||REDUCED||DEMO)return;
+  try{sessionStorage.setItem('oe_intro_s','1');}catch(e){}
   const o=document.createElement('div');o.id='intro';o.className='intro';
   o.innerHTML=`<img src="robot.webp" alt=""><video muted playsinline autoplay preload="auto"></video>
    <div class="itx"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M44.5 15.2A20 20 0 1 0 49 19.6" fill="none" stroke="#22f08a" stroke-width="9"/></svg><b>OddsEngine AI</b><span>Every model. One chat.</span></div>
@@ -1264,7 +1284,8 @@ function modelsView(){
   return `<section class="mhero">
     <span class="eyebrow rv"><b>●</b> OddsEngine AI</span>
     <h1 class="rv d1"><span class="shiny">Every model.<br>One chat.</span></h1>
-    <p class="lead rv d2">Claude, GPT, Gemini, Grok, DeepSeek and every other model worth using. Pick one with a tap, switch whenever you like. No subscription, you pay per message with $ODDS.</p>
+    <p class="lead rv d2">Claude, GPT, Gemini, Grok, DeepSeek and every other model worth using. Pick one with a tap, switch whenever you like.</p>
+    <div class="payline rv d2"><span><i>✓</i>Pay only for what you use</span><span><i>✓</i>No subscription</span><span><i>✓</i>Top up from $1 in $ODDS</span></div>
     <div class="hstats rv d2"><div><b data-cu="${n}">${n}</b><span>models</span></div><div><b>${c?cents(c):'n/a'}</b><span>cheapest message</span></div><div><b>${pct(myFee())}</b><span>${connected()&&ME.ai&&ME.ai.holder&&ME.ai.holder.markup<ME.ai.base_markup?'your fee as a holder':'fee, less if you hold'}</span></div></div>
     <div class="rv d3 hcta"><button class="btn btn-g" data-go="chat">Start chatting</button><button class="btn" data-go="ai">${connected()?'Top up':'Connect wallet'}</button></div>
   </section>
@@ -1453,7 +1474,7 @@ CH.cmp=[];
 function cmpHtml(m){
   return `<div class="cm a cmpx"><div class="cxg n${m.cols.length}">${m.cols.map((c,i)=>{const mm=MODELS.find(x=>x.id===c.model)||{name:c.model};
     return `<div class="cxc" id="cx${m.k}_${i}"><div class="cxh"><b>${E(mm.name)}</b>${c.cost!=null?`<span>${usd(c.cost,c.cost<0.01?4:3)}</span>`:''}</div>
-     <div class="md">${c.err?`<div class="cerr">${E(c.content)}</div>`:c.pending&&!c.content?'<span class="typing"><i></i><i></i><i></i></span>':md(c.content)}</div>
+     <div class="md">${c.err?`<div class="cerr">${E(niceErr(c.content))}</div>`:c.pending&&!c.content?'<span class="typing"><i></i><i></i><i></i></span>':md(c.content)}</div>
      ${c.pending||c.err?'':`<button class="btn btn-sm cxk" data-keep="${E(c.model)}">Continue with this one</button>`}</div>`;}).join('')}</div>
    <div class="cnote" style="text-align:left;margin:6px 0 0">Side by side answers are not saved to this chat. Pick one to continue.</div></div>`;
 }
@@ -1554,7 +1575,7 @@ async function load(){
   if(PREVIEW&&ADMIN){try{ADM=await api('/v1/admin/ai');}catch(e){ADM=null;}}
   if(ME&&ME.ai&&ME.ai.markup!=null)MARKUP=ME.ai.markup;
   if(pm)await pm;
-  if(!location.hash&&!FEAT.engine&&FEAT.ai&&TAB==='engine')TAB='chat';
+  if(!location.hash&&!FEAT.engine&&FEAT.ai&&TAB==='engine')TAB='models';
   if(ME&&!DEMO){await chatLoadList();}
   if(DEMO||PREVIEW)adminBar();
   render();
