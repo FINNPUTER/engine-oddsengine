@@ -104,12 +104,12 @@ ol li,ul li{margin:4px 0}
 
 <h2 id="api">API quickstart</h2>
 <p>The API works like the OpenAI API. Create a key on the Account page, then use any OpenAI client.</p>
-<pre><code>curl https://web-production-6b61c.up.railway.app/v1/chat/completions \
+<pre><code>curl https://api.oddsengine.live/v1/chat/completions \
   -H "Authorization: Bearer oe_live_..." \
   -H "Content-Type: application/json" \
   -d '{"model":"anthropic/claude-sonnet-5.5","messages":[{"role":"user","content":"Hello"}]}'</code></pre>
 <pre><code>from openai import OpenAI
-client = OpenAI(base_url="https://web-production-6b61c.up.railway.app/v1", api_key="oe_live_...")
+client = OpenAI(base_url="https://api.oddsengine.live/v1", api_key="oe_live_...")
 r = client.chat.completions.create(model="openai/gpt-6.1-sol",
     messages=[{"role": "user", "content": "Hello"}])
 print(r.choices[0].message.content)</code></pre>
@@ -124,10 +124,10 @@ print(r.choices[0].message.content)</code></pre>
 <section class="feat-x402" hidden>
 <h2 id="x402">For agents: pay per request with x402</h2>
 <p>Your agent needs no account and no API key. It needs a wallet with money in it. It calls the API, gets <code>402 Payment Required</code> with a price, signs a payment and sends the request again. We settle it on chain and answer. The agent pays no gas.</p>
-<p>Endpoint: <code>POST https://web-production-6b61c.up.railway.app/v1/chat/completions</code>, same body as OpenAI. 460+ models, pick one with <code>"model"</code>.</p>
+<p>Endpoint: <code>POST https://api.oddsengine.live/v1/chat/completions</code>, same body as OpenAI. 460+ models, pick one with <code>"model"</code>.</p>
 <div class="feat-usdc" hidden>
 <h3>Pay in USDC on Base (any x402 client)</h3>
-<p>We speak standard x402 (v1 and v2, scheme <code>exact</code>, USDC on Base). Any x402 library works without changes. Our margin from every payment buys $ODDS, half of it gets burned. <a href="https://web-production-6b61c.up.railway.app/v1/x402/buybacks" target="_blank" rel="noopener">See every buyback and burn</a>.</p>
+<p>We speak standard x402 (v1 and v2, scheme <code>exact</code>, USDC on Base). Any x402 library works without changes. Our margin from every payment buys $ODDS, half of it gets burned. <a href="https://api.oddsengine.live/v1/x402/buybacks" target="_blank" rel="noopener">See every buyback and burn</a>.</p>
 <p><b>JavaScript</b></p>
 <pre><code>npm i @x402/fetch @x402/evm viem
 
@@ -139,7 +139,7 @@ const account = privateKeyToAccount(process.env.AGENT_KEY);
 const pay = wrapFetchWithPaymentFromConfig(fetch, {
   schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(account) }],
 });
-const r = await pay("https://web-production-6b61c.up.railway.app/v1/chat/completions", {
+const r = await pay("https://api.oddsengine.live/v1/chat/completions", {
   method: "POST", headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ model: "deepseek/deepseek-v4-flash",
     messages: [{ role: "user", content: "Hello" }] }),
@@ -157,7 +157,7 @@ from x402.http.clients import x402_requests
 client = x402ClientSync()
 client.register("eip155:8453", ExactEvmScheme(signer=EthAccountSigner(Account.from_key(AGENT_KEY))))
 s = x402_requests(client)
-r = s.post("https://web-production-6b61c.up.railway.app/v1/chat/completions",
+r = s.post("https://api.oddsengine.live/v1/chat/completions",
            json={"model": "deepseek/deepseek-v4-flash", "messages": [{"role": "user", "content": "Hello"}]})
 print(r.json()["choices"][0]["message"]["content"])</code></pre>
 </div>
@@ -190,8 +190,8 @@ POST /v1/agents/key
 <li>Change limits later with <code>POST /v1/ai/keys/limits</code> <code>{"id","day_cap","models"}</code>.</li>
 </ul>
 <h3>MCP server</h3>
-<p>Point Claude, Cursor or any MCP client at <code>https://web-production-6b61c.up.railway.app/mcp</code> with the header <code>Authorization: Bearer oe_live_...</code>. Tools: <code>list_models</code>, <code>estimate_cost</code>, <code>chat</code>, <code>compare</code>, <code>balance</code>.</p>
-<pre><code>{"mcpServers":{"oddsengine":{"type":"http","url":"https://web-production-6b61c.up.railway.app/mcp",
+<p>Point Claude, Cursor or any MCP client at <code>https://api.oddsengine.live/mcp</code> with the header <code>Authorization: Bearer oe_live_...</code>. Tools: <code>list_models</code>, <code>estimate_cost</code>, <code>chat</code>, <code>compare</code>, <code>balance</code>.</p>
+<pre><code>{"mcpServers":{"oddsengine":{"type":"http","url":"https://api.oddsengine.live/mcp",
   "headers":{"Authorization":"Bearer oe_live_..."}}}}</code></pre>
 </section>
 <h2 id="images">Images</h2>
