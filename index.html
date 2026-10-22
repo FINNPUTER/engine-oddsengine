@@ -414,7 +414,7 @@ body.cdr .nav{visibility:hidden}
 body.aimode .aurora,body.aimode .grid-bg{opacity:0;transition:opacity .6s}
 body.aimode{background:#020403}
 body.aimode .card{background:rgba(8,14,11,.72);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
-body.chatmode .bgv i{background:rgba(2,4,3,.78)}
+body.chatmode .bgv i{background:rgba(2,4,3,.6)}
 body.chatmode .cmain{background:rgba(6,11,8,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 body.chatmode .cside{background:rgba(6,11,8,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 @media (max-width:860px){body.chatmode .cside{background:#07100c}}
@@ -547,6 +547,29 @@ body.teaser .soon h1{font-size:clamp(34px,6vw,76px);margin:6px 0 10px}
 .payline span:first-child i{color:#02130a}
 @media (max-width:480px){.payline{gap:6px}.payline span{font-size:13px;min-height:36px;padding:0 12px}}
 
+.buyrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:16px}
+.buyrow .note{margin:0}
+
+/* motion behind the chat: particle network on top of the room, panels as glass */
+.bgv canvas.net{position:absolute;inset:0;width:100%;height:100%}
+body.chatmode .cside{background:rgba(9,14,12,.62);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+body.chatmode .cmain{background:rgba(6,10,8,.42);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+body.chatmode .chead{background:rgba(8,14,11,.55)}
+
+/* own confirm dialog */
+.oeask{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:16px;opacity:0;transition:opacity .18s}
+.oeask.on{opacity:1}
+.oeask-bg{position:absolute;inset:0;background:rgba(2,6,4,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.oeask-box{position:relative;width:min(420px,100%);padding:26px 22px 20px;border-radius:22px;background:linear-gradient(180deg,rgba(18,30,24,.96),rgba(8,14,11,.96));border:1px solid rgba(34,240,138,.28);box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(34,240,138,.12);text-align:center;transform:translateY(8px) scale(.97);transition:transform .2s}
+.oeask.on .oeask-box{transform:none}
+.oeask-ring{width:34px;height:34px;margin:0 auto 12px;border-radius:50%;border:4px solid var(--g);border-right-color:transparent;transform:rotate(-30deg);box-shadow:0 0 18px rgba(34,240,138,.45)}
+.oeask-box h3{margin:0 0 8px;font-size:20px}
+.oeask-box p{margin:0 0 18px;color:var(--dim);font-size:14.5px;line-height:1.5;word-break:break-word}
+.oeask-btns{display:flex;gap:10px;justify-content:center}
+.oeask-btns .btn{flex:1;max-width:170px}
+.btn-red{background:#ff5d6c;color:#120406;border-color:transparent}
+.btn-red:hover{filter:brightness(1.08)}
+
 </style>
 </head>
 <body>
@@ -578,6 +601,18 @@ body.teaser .soon h1{font-size:clamp(34px,6vw,76px);margin:6px 0 10px}
 const API=window.ODDSENGINE_API||'';
 const $=s=>document.querySelector(s);
 const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* ---------- own dialog instead of the browser's grey confirm() ---------- */
+function ask(text,o){o=o||{};return new Promise(res=>{
+  const d=document.createElement('div');d.className='oeask';
+  d.innerHTML=`<div class="oeask-bg"></div><div class="oeask-box" role="dialog" aria-modal="true" aria-labelledby="oeaskT"><div class="oeask-ring"></div><h3 id="oeaskT">${E(o.title||'Are you sure?')}</h3><p>${E(text)}</p><div class="oeask-btns"><button class="btn" data-k="0">${E(o.cancel||'Cancel')}</button><button class="btn ${o.danger?'btn-red':'btn-g'}" data-k="1">${E(o.ok||'OK')}</button></div></div>`;
+  document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('on'));
+  const done=v=>{d.classList.remove('on');document.removeEventListener('keydown',kd);setTimeout(()=>d.remove(),200);res(v);};
+  const kd=e=>{if(e.key==='Escape')done(false);if(e.key==='Enter')done(true);};
+  document.addEventListener('keydown',kd);
+  d.querySelector('.oeask-bg').onclick=()=>done(false);
+  d.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>done(b.dataset.k==='1'));
+  setTimeout(()=>d.querySelector('[data-k="1"]').focus(),30);
+});}
 let ADMIN='';try{const q=new URLSearchParams(location.search).get('admin');if(q){localStorage.setItem('oe_admin',q);history.replaceState(null,'',location.pathname+location.hash);}ADMIN=localStorage.getItem('oe_admin')||'';}catch(e){}
 const DEMO=/[?&]demo=1/.test(location.search);
 let TOKEN='';try{TOKEN=localStorage.getItem('oe_engine')||'';}catch(e){}
@@ -926,7 +961,7 @@ function bind(){
   });
   document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const id=b.dataset.del;ME.memory.items=ME.memory.items.filter(i=>String(i.id)!==id);b.closest('.it').remove();save('/v1/engine/memory/delete',{id});toast('Deleted');});
   document.querySelectorAll('[data-wdel]').forEach(b=>b.onclick=()=>{const a=b.dataset.wdel;ME.wallets=ME.wallets.filter(w=>w.address!==a);b.closest('.wl').remove();save('/v1/engine/wallets/delete',{address:a});toast('Wallet removed');});
-  document.querySelectorAll('[data-kdel]').forEach(b=>b.onclick=async()=>{if(!confirm('Revoke this key? Apps using it stop working right away.'))return;const id=b.dataset.kdel;ME.keys=ME.keys.filter(k=>k.id!==id);b.closest('.k').remove();await save('/v1/ai/keys/delete',{id});toast('Key revoked');});
+  document.querySelectorAll('[data-kdel]').forEach(b=>b.onclick=async()=>{if(!(await ask('Apps using this key stop working right away.',{title:'Revoke this key?',ok:'Revoke',danger:true})))return;const id=b.dataset.kdel;ME.keys=ME.keys.filter(k=>k.id!==id);b.closest('.k').remove();await save('/v1/ai/keys/delete',{id});toast('Key revoked');});
   document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.act));
   document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=()=>copy(b.dataset.copy,'Address copied'));
   document.querySelectorAll('[data-qt]').forEach(b=>b.onclick=()=>{QT=b.dataset.qt;document.querySelectorAll('[data-qt]').forEach(x=>x.classList.toggle('on',x===b));$('#qCode').textContent=qcode();});
@@ -947,7 +982,7 @@ function bind(){
     ta.oninput=()=>{ta.style.height='48px';ta.style.height=Math.min(140,ta.scrollHeight)+'px';};
     pf.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!t)return;ta.value='';ta.style.height='48px';send(t);};}
 }
-function bindKeys(){document.querySelectorAll('[data-kdel]').forEach(b=>b.onclick=async()=>{if(!confirm('Revoke this key? Apps using it stop working right away.'))return;const id=b.dataset.kdel;ME.keys=ME.keys.filter(k=>k.id!==id);b.closest('.k').remove();await save('/v1/ai/keys/delete',{id});toast('Key revoked');});}
+function bindKeys(){document.querySelectorAll('[data-kdel]').forEach(b=>b.onclick=async()=>{if(!(await ask('Apps using this key stop working right away.',{title:'Revoke this key?',ok:'Revoke',danger:true})))return;const id=b.dataset.kdel;ME.keys=ME.keys.filter(k=>k.id!==id);b.closest('.k').remove();await save('/v1/ai/keys/delete',{id});toast('Key revoked');});}
 async function save(p,body){if(DEMO)return true;try{await api(p,{method:'POST',body:JSON.stringify(body)});return true;}catch(e){toast(e.status===401?'Connect your wallet again':'Could not save: '+e.message);return false;}}
 let LT=null;
 function pollLink(){clearTimeout(LT);LT=setTimeout(async()=>{try{const r=await api('/v1/holder/link');if(r.status==='linked'){LINK=null;toast('Torch wallet linked');await load();return;}if(r.status==='waiting'){LINK=Object.assign(LINK||{},r);pollLink();return;}LINK=null;render();toast('Link request expired, start again');}catch(e){pollLink();}},8000);}
@@ -955,7 +990,7 @@ async function act(a){
   if(a==='connect')return connect();
   if(a==='toai'){CH.drawer=false;go('ai');setTimeout(()=>{const el=$('#account');if(el)el.scrollIntoView({behavior:'smooth'});},100);return;}
   if(a==='tg'){if(!connected()){toast('Connect your wallet first');return;}try{const r=await api('/v1/engine/telegram',{method:'POST',body:'{}'});if(r.url)location.href=r.url;}catch(e){toast(e.message);}}
-  if(a==='wipe'){if(!confirm('Delete everything Your Engine remembers about you?'))return;ME.memory.items=[];save('/v1/engine/memory/delete',{all:true});render();toast('Memory cleared');}
+  if(a==='wipe'){if(!(await ask('Everything Your Engine remembers about you is deleted. This cannot be undone.',{title:'Clear memory?',ok:'Delete',danger:true})))return;ME.memory.items=[];save('/v1/engine/memory/delete',{all:true});render();toast('Memory cleared');}
   if(a==='newchat'){CHAT=[];const log=$('#pgLog');if(log)log.innerHTML='<div class="msg ai">New chat. Ask me anything.<small>OddsEngine AI</small></div>';}
   if(a==='checkdep'){if(DEMO){toast('Preview mode');return;}const b=document.querySelector('[data-act="checkdep"]');if(b){b.disabled=true;b.textContent='Checking…';}
     try{const r=await api('/v1/ai/deposits/check',{method:'POST',body:'{}'});toast(r.credited_now>0?'Credited '+usd(r.credited_now):'Nothing new yet. Blocks can take a minute.');await load();}catch(e){toast(e.message);if(b){b.disabled=false;b.textContent='I sent it, check now';}}}
@@ -984,7 +1019,7 @@ async function connect(){
   }catch(e){toast((e&&e.code===4001)?'You cancelled the signature':'Could not connect: '+(e.message||e));}
   setRing('idle');
 }
-$('#walletBtn').onclick=()=>{if(connected()){if(confirm('Disconnect '+(ME.short||ME.address)+'?'))act('logout');return;}connect();};
+$('#walletBtn').onclick=async()=>{if(connected()){if(await ask((ME.short||ME.address)+'. Your balance stays with this address, connect again any time.',{title:'Disconnect wallet?',ok:'Disconnect'}))act('logout');return;}connect();};
 document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>go(b.dataset.tab));
 $('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')$('#sheet').classList.remove('show');});
 
@@ -1143,10 +1178,10 @@ function chatBind(){
     if(k==='drawer'){CH.drawer=!CH.drawer;document.querySelector('.chat').classList.toggle('dopen',CH.drawer);document.body.classList.toggle('cdr',CH.drawer);}
     if(k==='pick')pickSheet();
     if(k==='stop'&&CH.ctrl)CH.ctrl.abort();
-    if(k==='wipe'){if(!confirm('Delete all your chats and images? This cannot be undone.'))return;try{await api('/v1/chat/delete_all',{method:'POST',body:'{}'});CH.list=[];CH.cur=null;CH.msgs=[];render();toast('All chats deleted');}catch(err){toast(err.message);}}
+    if(k==='wipe'){if(!(await ask('All your chats and images are deleted. This cannot be undone.',{title:'Delete all chats?',ok:'Delete all',danger:true})))return;try{await api('/v1/chat/delete_all',{method:'POST',body:'{}'});CH.list=[];CH.cur=null;CH.msgs=[];render();toast('All chats deleted');}catch(err){toast(err.message);}}
   });
   document.querySelectorAll('[data-open]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-cdel]'))return;chatOpen(el.dataset.open);});
-  document.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!confirm('Delete this chat?'))return;const id=b.dataset.cdel;try{await api('/v1/chat/delete/'+encodeURIComponent(id),{method:'POST',body:'{}'});}catch(err){}CH.list=CH.list.filter(c=>c.id!==id);if(CH.cur===id){CH.cur=null;CH.msgs=[];}render();});
+  document.querySelectorAll('[data-cdel]').forEach(b=>b.onclick=async e=>{e.stopPropagation();if(!(await ask('This chat and its images are deleted.',{title:'Delete this chat?',ok:'Delete',danger:true})))return;const id=b.dataset.cdel;try{await api('/v1/chat/delete/'+encodeURIComponent(id),{method:'POST',body:'{}'});}catch(err){}CH.list=CH.list.filter(c=>c.id!==id);if(CH.cur===id){CH.cur=null;CH.msgs=[];}render();});
   document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>chatSend(b.dataset.sug));
   document.querySelectorAll('[data-unatt]').forEach(b=>b.onclick=()=>{CH.att.splice(+b.dataset.unatt,1);render();});
   document.querySelectorAll('[data-cpy]').forEach(b=>b.onclick=()=>{const t=b.closest('.cab').querySelector('.md');copy(t?t.innerText:'','Answer copied');});
@@ -1160,6 +1195,7 @@ function chatBind(){
     f.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!t&&!CH.att.length)return;ta.value='';chatSend(t);};}
 }
 
+const BUY_ODDS='https://app.torchpad.fun/trade/robinhood/0x9c87B4cfa21266d1638f437c96dBe1012CB81111';
 
 /* =================== 2.30: Models, Account, motion, top up =================== */
 const CDN='https://d2ol7oe51mr4n9.cloudfront.net/user_3JTRZAxrDiNnMw8N7r4orqaTziL/';
@@ -1176,14 +1212,33 @@ let QUOTE=null, QT_TIMER=null;
 function bgInit(){
   if($('#bgv'))return;
   const d=document.createElement('div');d.id='bgv';d.className='bgv';
-  d.innerHTML=`<img src="room.webp" alt="" aria-hidden="true"><video muted loop playsinline preload="none" aria-hidden="true"></video><i></i>`;
+  d.innerHTML=`<img src="room.webp" alt="" aria-hidden="true"><video muted loop playsinline preload="none" aria-hidden="true"></video><i></i><canvas class="net" aria-hidden="true"></canvas>`;
   document.body.prepend(d);
+  netStart(d.querySelector('canvas.net'));
   const v=d.querySelector('video');
   const slow=navigator.connection&&(navigator.connection.saveData||/2g/.test(navigator.connection.effectiveType||''));
   if(REDUCED||slow)return;
   setSrc(v,SMALL()?MEDIA.loopM:MEDIA.loop);
   v.oncanplay=()=>{d.classList.add('vid');};
   v.play().catch(()=>{});
+}
+/* drifting particle network behind every AI tab, chat included. Light on CPU:
+   ~30 fps, fewer points on phones, stops when the tab is hidden or motion is reduced. */
+function netStart(cv){
+  if(!cv||REDUCED)return;
+  const cx=cv.getContext('2d');let W=0,H=0,P=[],last=0;
+  const fit=()=>{const r=Math.min(window.devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*r;cv.height=H*r;cx.setTransform(r,0,0,r,0,0);
+    const n=W<700?28:Math.min(70,Math.round(W*H/26000));P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.6+.6,ph:Math.random()*6.3}));};
+  fit();addEventListener('resize',fit);
+  const L=W<700?110:150;
+  const step=t=>{requestAnimationFrame(step);if(document.hidden||t-last<33)return;last=t;
+    if(!cv.parentNode||!cv.parentNode.classList.contains('on'))return;
+    cx.clearRect(0,0,W,H);
+    for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<-20)p.x=W+20;if(p.x>W+20)p.x=-20;if(p.y<-20)p.y=H+20;if(p.y>H+20)p.y=-20;}
+    for(let i=0;i<P.length;i++){const a=P[i];for(let j=i+1;j<P.length;j++){const b=P[j],dx=a.x-b.x,dy=a.y-b.y,q=dx*dx+dy*dy;if(q<L*L){cx.strokeStyle=`rgba(34,240,138,${(1-Math.sqrt(q)/L)*.16})`;cx.lineWidth=1;cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke();}}}
+    for(const p of P){const g=.45+.35*Math.sin(t/900+p.ph);cx.fillStyle=`rgba(34,240,138,${g})`;cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.283);cx.fill();}
+  };
+  requestAnimationFrame(step);
 }
 function bgShow(on){const d=$('#bgv');if(d)d.classList.toggle('on',on);}
 function introMaybe(){
@@ -1286,8 +1341,8 @@ function modelsView(){
     <h1 class="rv d1"><span class="shiny">Every model.<br>One chat.</span></h1>
     <p class="lead rv d2">Claude, GPT, Gemini, Grok, DeepSeek and every other model worth using. Pick one with a tap, switch whenever you like.</p>
     <div class="payline rv d2"><span><i>✓</i>Pay only for what you use</span><span><i>✓</i>No subscription</span><span><i>✓</i>Top up from $1 in $ODDS</span></div>
-    <div class="hstats rv d2"><div><b data-cu="${n}">${n}</b><span>models</span></div><div><b>${c?cents(c):'n/a'}</b><span>cheapest message</span></div><div><b>${pct(myFee())}</b><span>${connected()&&ME.ai&&ME.ai.holder&&ME.ai.holder.markup<ME.ai.base_markup?'your fee as a holder':'fee, less if you hold'}</span></div></div>
-    <div class="rv d3 hcta"><button class="btn btn-g" data-go="chat">Start chatting</button><button class="btn" data-go="ai">${connected()?'Top up':'Connect wallet'}</button></div>
+    <div class="hstats rv d2"><div><b data-cu="${n}">${n}</b><span>models</span></div><div><b>${c?cents(c):'n/a'}</b><span>cheapest message</span></div><div><b>${pct(myFee())}</b><span>${connected()&&ME.ai&&ME.ai.holder&&ME.ai.holder.markup<ME.ai.base_markup?'your fee as a holder':'fee, less if you hold $ODDS'}</span></div></div>
+    <div class="rv d3 hcta"><button class="btn btn-g" data-go="chat">Start chatting</button><button class="btn" data-go="ai">${connected()?'Top up':'Connect wallet'}</button><a class="btn" href="${BUY_ODDS}" target="_blank" rel="noopener">Get $ODDS</a></div>
   </section>
   <section class="rv" id="models"><div class="card">
     <div class="mtools"><input id="mSearch" placeholder="Search all ${n} models" value="${E(MF.q)}" autocomplete="off" aria-label="Search models"><select id="mSort" aria-label="Sort">${[['popular','Recommended'],['cheap','Cheapest'],['smart','Smartest'],['context','Longest context'],['new','Newest']].map(([v,l])=>`<option value="${v}" ${MF.sort===v?'selected':''}>${l}</option>`).join('')}</select></div>
@@ -1401,8 +1456,9 @@ function topupBox(){
 function tierCard(){
   const h=(ME&&ME.ai&&ME.ai.holder)||null;const tl=tiersList();const cur=h?h.markup:null;
   return `<h3>Hold $ODDS, pay less</h3><p class="sub">Your fee depends on how many $ODDS you hold. Tokens in a linked Torch wallet count too, so you keep your Torch rewards.</p>
-   <div class="tiers2">${tl.map(t=>`<div class="t2 ${cur!=null&&Math.abs(cur-t.markup)<1e-9?'on':''}"><span>${t.hold?'from '+big(t.hold):'everyone'}</span><b>${pct(t.markup)}</b></div>`).join('')}</div>
-   ${h?`<p class="note" style="margin-top:12px">You hold <b>${Number(h.held||0).toLocaleString('en-US')} $ODDS</b>. Your fee is <b>${pct(h.markup)}</b>.${h.next?` Hold ${big(h.next.hold)} to pay ${pct(h.next.markup)}.`:' That is the lowest fee.'}</p>`:''}
+   <div class="tiers2">${tl.map(t=>`<div class="t2 ${cur!=null&&Math.abs(cur-t.markup)<1e-9?'on':''}"><span>${t.hold?'hold '+big(t.hold)+' $ODDS':'everyone'}</span><b>${pct(t.markup)}</b></div>`).join('')}</div>
+   ${h?`<p class="note" style="margin-top:12px">You hold <b>${Number(h.held||0).toLocaleString('en-US')} $ODDS</b>. Your fee is <b>${pct(h.markup)}</b>.${h.next?` Hold ${big(h.next.hold)} $ODDS to pay ${pct(h.next.markup)}.`:' That is the lowest fee.'}</p>`:''}
+   <div class="buyrow"><a class="btn btn-sm btn-g" href="${BUY_ODDS}" target="_blank" rel="noopener">Get $ODDS on Torch</a><span class="note">Buy, hold, and your fee drops on its own. Nothing to claim.</span></div>
    <p class="hint">The fee is added on top of what the model maker charges and is already inside every price you see.</p>`;
 }
 function priceCard(){
@@ -1555,9 +1611,7 @@ adminCard=function(){
   const extra=`<div class="kv"><div><span>Users 7d</span><b>${E(a.users_7d==null?'n/a':a.users_7d)}</b></div><div><span>Free msgs 24h</span><b>${E(a.free_24h==null?'n/a':a.free_24h)}</b></div><div><span>Accounts</span><b>${E(a.accounts)}</b></div></div>
    <h3 style="margin-top:18px">Top users</h3><p class="sub">Sorted by what they spent. Tap a wallet to open it in the explorer.</p>
    ${u.length?`<div class="ulist">${u.map(x=>`<div class="ur"><div><b><a href="https://robinhoodchain.blockscout.com/address/${E(x.address)}" target="_blank" rel="noopener">${E(short(x.address))}</a></b><span>${x.requests} requests · last ${x.last?ago(x.last):'never'}</span><span>topped up ${usd(x.deposited)} · ${usd(x.credit)} left</span></div><em title="spent">${usd(x.spent,x.spent<1?4:2)}</em></div>`).join('')}</div>`:'<div class="note">Nobody yet.</div>'}
-   ${(()=>{const p=a.paper;if(!p)return '';const pl=p.pnl||0;return `<h3 style="margin-top:18px">Paper test, only you see this</h3><p class="sub">Rule fixed on Oct 21: ${E(p.cities.join(', '))}, every engine call from ${E(p.since)}, $${E(p.stake)} per call. No money, nothing public.</p>
-   <div class="kv"><div><span>Calls</span><b>${E(p.calls)}</b></div><div><span>Hits</span><b>${E(p.hits)}${p.hit_rate!=null?' ('+Math.round(p.hit_rate*100)+'%)':''}</b></div><div><span>Result</span><b style="color:${pl>=0?'var(--g)':'#ff5d6c'}">${pl>=0?'+':'-'}$${Math.abs(pl).toFixed(2)}</b></div><div><span>Return</span><b>${p.roi==null?'waiting':(p.roi>=0?'+':'')+(p.roi*100).toFixed(1)+'%'}</b></div></div>
-   ${(p.last||[]).length?`<div class="ulist">${p.last.map(c=>`<div class="ur"><div><b>${E(c.city)} · ${E(c.date)}</b><span>said ${E((c.said||[]).join(', ')||'n/a')} · result ${E(c.result||'n/a')}</span></div><em style="color:${c.pnl>=0?'var(--g)':'#ff5d6c'}">${c.pnl>=0?'+':'-'}$${Math.abs(c.pnl).toFixed(2)}</em></div>`).join('')}</div>`:'<div class="note">No settled calls yet. The first ones settle in a day or two.</div>'}`;})()}`;
+`;
   const al=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px"><button class="btn btn-sm" id="alTest">Send test alert to my Telegram</button><span class="note">You get a message when 70 % and 90 % of the OpenRouter budget is used.</span></div>`;
   setTimeout(()=>{const b=$('#alTest');if(b)b.onclick=async()=>{b.disabled=true;try{const r=await api('/v1/admin/ai/alert-test',{method:'POST',body:'{}'});toast(r.ok?'Sent, check Telegram':'Could not send, check TELEGRAM_BOT_TOKEN and TELEGRAM_PRIVATE_CHAT_ID');}catch(e){toast(e.message);}b.disabled=false;};},0);
   return _adminCard0().replace(/(<div class="kv">)/,al+'$1').replace(/<\/div><\/section>\s*$/,extra+'</div></section>');
