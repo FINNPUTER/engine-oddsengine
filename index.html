@@ -569,6 +569,46 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 .oeask-btns .btn{flex:1;max-width:170px}
 .btn-red{background:#ff5d6c;color:#120406;border-color:transparent}
 .btn-red:hover{filter:brightness(1.08)}
+/* Your Engine agent (2.33) */
+.mo-hero .face .st{display:none}
+.mo-chat{padding:18px}
+.mo-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.mo-head h3{margin:0}
+.mo-head .note{flex:1;min-width:200px}
+.mo-log{height:min(52vh,520px);overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:16px;background:rgba(0,0,0,.28);border:1px solid var(--line);scroll-behavior:smooth}
+.mo-m{max-width:86%;padding:11px 14px;border-radius:16px;line-height:1.5;font-size:15px;overflow-wrap:anywhere;animation:moIn .35s ease both}
+.mo-m.u{align-self:flex-end;background:rgba(46,240,140,.14);border:1px solid rgba(46,240,140,.35);white-space:pre-wrap}
+.mo-m.a{align-self:flex-start;background:rgba(255,255,255,.045);border:1px solid var(--line)}
+.mo-m.a p{margin:0 0 8px}.mo-m.a p:last-child{margin:0}
+.mo-m a{color:var(--g, #2ef08c)}
+.mo-m small{display:block;margin-top:6px;color:var(--dim);font-size:11.5px;font-family:var(--mono)}
+@keyframes moIn{from{opacity:0;transform:translateY(6px)}}
+.mo-hi{color:var(--dim);font-size:14.5px;margin:auto 0}
+.mo-sug{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mo-sug button{border:1px solid var(--line2);background:rgba(255,255,255,.03);color:inherit;border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;text-align:left}
+.mo-sug button:hover{border-color:rgba(46,240,140,.5)}
+.mo-in{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
+.mo-in textarea{flex:1;min-width:0;height:46px;resize:none;border-radius:14px;border:1px solid var(--line2);background:rgba(0,0,0,.35);padding:12px 14px;color:inherit;font:inherit;outline:none}
+.mo-in textarea:focus{border-color:rgba(46,240,140,.6)}
+.mo-in .btn{height:46px}
+.mo-sel{height:38px;border-radius:10px;border:1px solid var(--line2);background:rgba(0,0,0,.35);color:inherit;padding:0 10px}
+@media(max-width:640px){.mo-log{height:58vh}.mo-m{max-width:94%}}
+
+.mo-imgs{display:grid;gap:8px;margin:10px 0 2px}
+.mo-imgs img{display:block;width:100%;max-width:420px;border-radius:12px;border:1px solid var(--line)}
+.mo-imgs .mo-dl{font-size:12px;font-family:var(--mono);color:var(--g,#2ef08c);text-decoration:none}
+.mo-wide{max-width:230px;width:100%}
+@media(max-width:640px){.mo-wide{max-width:160px}}
+@media(max-width:440px){.tabs{flex:1 1 auto;min-width:0}.tabs button{padding:8px 7px}#walletBtn{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 0 auto}}
+@media(max-width:400px){.nav>.brand{display:none}.nav{padding-left:7px}}
+@media(max-width:360px){.tabs button{padding:8px 6px;font-size:11.5px}}
+
+.mo-beta{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;border:1px solid rgba(46,240,140,.45);color:var(--g,#2ef08c);font-size:10px;letter-spacing:.08em;text-transform:uppercase;vertical-align:1px}
+.mo-tb{display:inline-block;margin-left:5px;padding:1px 5px;border-radius:6px;background:rgba(2,19,10,.18);font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;vertical-align:1px}
+.tabs button:not(.on) .mo-tb{background:rgba(46,240,140,.14);color:var(--g,#2ef08c)}
+.mo-betanote{margin:10px 2px 0;font-size:12.5px;color:var(--dim);line-height:1.5}
+.mo-betanote a{color:var(--g,#2ef08c)}
+@media(max-width:440px){.mo-tb{display:none}}
 
 </style>
 </head>
@@ -905,7 +945,7 @@ function render(){
   if(open&&TAB==='ai'){renderModels();cmpBar();}
   if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();}
   bind(); reveal(); spot();
-  $('#walletBtn').textContent=connected()?(ME.short||short(ME.address)):'Connect';
+  $('#walletBtn').textContent=connected()?(innerWidth<=440?String(ME.address||'').slice(0,4)+'…'+String(ME.address||'').slice(-2):(ME.short||short(ME.address))):'Connect';
 }
 
 /* ---------- simple price overview ---------- */
@@ -1616,6 +1656,164 @@ adminCard=function(){
   setTimeout(()=>{const b=$('#alTest');if(b)b.onclick=async()=>{b.disabled=true;try{const r=await api('/v1/admin/ai/alert-test',{method:'POST',body:'{}'});toast(r.ok?'Sent, check Telegram':'Could not send, check TELEGRAM_BOT_TOKEN and TELEGRAM_PRIVATE_CHAT_ID');}catch(e){toast(e.message);}b.disabled=false;};},0);
   return _adminCard0().replace(/(<div class="kv">)/,al+'$1').replace(/<\/div><\/section>\s*$/,extra+'</div></section>');
 };
+
+/* ---------- Your Engine: the agent (2.33) ---------- */
+let MO=null, MO_BUSY=false, MO_LOG=[];
+/* the head stays, the status label goes */
+face=function(state){return `<div class="face rv"><svg id="av" viewBox="0 0 400 400" aria-label="Your Engine">
+<defs><filter id="gl" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+<image href="robot-ring.webp" x="0" y="0" width="400" height="400"/>
+<g id="eye"><circle id="halo" cx="203.9" cy="151.4" r="52.5" fill="none" stroke="#2ef08c" stroke-opacity=".18" stroke-width="22" filter="url(#gl)"/>
+<circle id="ring" cx="203.9" cy="151.4" r="52.5" fill="none" stroke="#5dffa8" stroke-width="6" stroke-linecap="round" stroke-dasharray="300 30" filter="url(#gl)"/>
+<circle id="inner" cx="203.9" cy="151.4" r="40" fill="none" stroke="#2ef08c" stroke-opacity="0" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 211"/></g></svg></div>`;};
+setRing=function(s){RING.state=s;};
+
+const HRS=[...Array(24).keys()];
+function moTime(h){return (h%12||12)+(h<12?' am':' pm');}
+function moMsgs(){
+  const h=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]);
+  if(!h.length)return `<div class="mo-hi">Ask me anything about the markets, a wallet, a token or the news. Try:
+    <div class="mo-sug">${['How much $ODDS and $TORCH is burned?','What was the last launch on Torch?','What just graduated on Torch?','What does this wallet hold: 0x…','Make me an image of a neon robot reading a price chart','Ask GPT what it thinks about this: …','Remind me tomorrow 9:00 to check the calls','Alert me when ETH is above 3000','I drive to the gym every weekday at 5:00, warn me about traffic','Send me Watcher Guru headlines about BTC and the Fed','How many Torch rewards can I claim? My Torch name is …','Watch this page for changes: https://…'].map(s=>`<button type="button" data-sug="${E(s)}">${E(s)}</button>`).join('')}</div></div>`;
+  return h.map(m=>`<div class="mo-m ${m.role==='user'?'u':'a'}">${m.role==='user'?E(m.content):(typeof md==='function'?md(m.content||''):E(m.content||''))}${moImgs(m.images)}${moData(m.data)}${m.cost!=null?`<small>${m.cost>0?usd(m.cost,m.cost<0.01?4:3):'free'}${m.tools&&m.tools.length?' · '+E(m.tools.join(', ')):''}</small>`:''}</div>`).join('')+(MO_BUSY?'<div class="mo-m a"><span class="typing"><i></i><i></i><i></i></span></div>':'');
+}
+function moReady(){const m=ME||{};const L=m.linked||{};const b=m.balance||{};if(!connected())return false;if(MO&&MO.access)return !!(MO.access.ready||(MO.access.telegram&&MO.access.trial_left>0));return !!(L.wallet&&L.telegram&&(b.usd||0)>=0.05);}
+function moWhy(){if(!connected())return 'Connect your wallet to start';const m=ME||{};const L=m.linked||{};const a=(MO&&MO.access)||{missing:[]};if(!L.telegram||(a.missing||[]).includes('telegram'))return 'Link Telegram to start';return 'Top up with $ODDS to start';}
+function moNote(){const u=(MO&&MO.feedback_url)||'https://t.me/OddsEngineCommunity';return `<p class="mo-betanote">Your Engine is in beta. It gets better every day. If an answer looks off, tell us in the <a href="${E(u)}" target="_blank" rel="noopener">Your Engine Beta topic</a>.</p>`;}
+function moBeta(){return !MO||MO.beta_label!==false;}
+function moTabBeta(){const t=document.querySelector('.tabs [data-tab="engine"]');if(!t)return;const on=moBeta();let b=t.querySelector('.mo-tb');if(on&&!b){b=document.createElement('span');b.className='mo-tb';b.textContent='Beta';t.appendChild(b);}if(!on&&b)b.remove();}
+function moImg(id){return API+'/v1/chat/img/'+encodeURIComponent(id)+'?key='+encodeURIComponent(TOKEN);}
+function moImgs(ids){if(!ids||!ids.length)return '';return '<div class="mo-imgs">'+ids.map(id=>`<a href="${moImg(id)}" target="_blank" rel="noopener"><img src="${moImg(id)}" alt="Generated image" loading="lazy"></a><a class="mo-dl" href="${moImg(id)}&dl=1">Download</a>`).join('')+'</div>';}
+function moData(us){if(!us||!us.length)return '';return '<div class="mo-imgs">'+us.filter(u=>/^data:image\//.test(u)).map(u=>`<img src="${u}" alt="Generated image"><a class="mo-dl" href="${u}" download="oddsengine.png">Download</a>`).join('')+'</div>';}
+function moModelCard(){
+  const d=(MO&&MO.defaults)||{};const ms=(typeof MODELS!=='undefined'&&MODELS)||[];
+  const txt=ms.filter(m=>m.kind!=='image'&&m.id!=='oddsengine/auto'&&(m.picked||m.id===d.text_model));
+  const img=ms.filter(m=>m.kind==='image');
+  const opt=(m,sel)=>`<option value="${E(m.id)}" ${m.id===sel?'selected':''}>${E(m.name||m.id)}</option>`;
+  return `<div class="card rv"><h3>Models</h3><p class="sub">Every model of OddsEngine AI works here too. Say "ask GPT…" or "make me an image…", by text or voice.</p>
+    <div class="row"><div class="l"><b>Answers</b><span>Live data always goes through Your Engine</span></div><select id="moTxt" class="mo-sel mo-wide"><option value="">Your Engine picks</option>${txt.map(m=>opt(m,d.text_model)).join('')}</select></div>
+    <div class="row"><div class="l"><b>Images</b><span>Used when you ask for a picture</span></div><select id="moImg" class="mo-sel mo-wide">${img.length?img.map(m=>opt(m,d.image_model)).join(''):`<option>${E(d.image_model||'')}</option>`}</select></div>
+    <p class="note" style="margin-top:10px">You pay what the model costs plus the OddsEngine fee, from the same balance.</p></div>`;
+}
+function moList(){
+  const m=MO||{};const r=m.reminders||[],a=m.alerts||[],w=m.watches||[],c=m.commutes||[],nw=m.news||[];
+  const DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];const dl=d=>(d&&d.length===7)?'Daily':(d&&d.join()==='0,1,2,3,4')?'Weekdays':(d||[]).map(i=>DN[i]).join(' ');
+  const row=(kind,id,t,s)=>`<div class="it"><p>${E(t)}<small>${E(s)}</small></p><button class="x" data-mrm="${kind}:${E(id)}" aria-label="Remove">×</button></div>`;
+  const all=[...r.map(x=>row('reminder',x.id,x.text,'Reminder · '+x.local_time)),
+    ...a.map(x=>row('alert',x.id,x.asset+(x.above!=null?' above $'+x.above:' below $'+x.below),'Price alert')),
+    ...w.map(x=>row('watch',x.id,x.title||x.url,'Watching · '+x.url)),
+    ...c.map(x=>row('commute',x.id,x.name+' at '+x.time,'Trip · '+dl(x.days)+' · to '+x.to)),
+    ...nw.map(x=>row('news',x.id,x.name,(x.mode==='briefing'?'News · in the briefing':'News · sent as it happens')+(x.keywords&&x.keywords.length?' · only '+x.keywords.join(', '):'')))];
+  return all.length?all.join(''):'<div class="note">Nothing yet. Ask in the chat: "remind me…", "alert me when…", "watch this page…", "I drive to the gym every weekday at 5".</div>';
+}
+engineView=function(){
+  const m=ME||{};const L=m.linked||{};const b=m.balance||{};
+  const br=m.briefing||{parts:{}};const mem=m.memory||{cats:{},items:[]};
+  const hr=(MO&&MO.briefing_local_hour!=null)?MO.briefing_local_hour:8;
+  return `
+  <section class="hero mo-hero">
+    <div>
+      <span class="eyebrow rv"><b>●</b> Your Engine${moBeta()?' <span class="mo-beta">Beta</span>':''}</span>
+      <h1 class="rv d1"><span class="shiny">It works for you now.</span></h1>
+      <p class="lead rv d2">Ask it here or in Telegram, by text or voice note. It reads the chain, the markets and the news, makes images, talks to any AI model, remembers what matters to you and pings you on its own: every morning, when a price moves, when a page changes.</p>
+      <div class="chips rv d3">
+        <span class="chip ${L.wallet?'ok':''}"><span class="d"></span>Wallet ${L.wallet?'linked':'not linked'}</span>
+        <span class="chip ${L.telegram?'ok':''}"><span class="d"></span>Telegram ${L.telegram?'linked':'not linked'}</span>
+        <span class="chip ${b.usd?'ok':''}"><span class="d"></span>${b.usd?usd(b.usd)+' balance':'No balance yet'}</span>
+        ${(!b.usd&&MO&&MO.access&&MO.access.telegram)?`<span class="chip ${MO.access.trial_left>0?'ok':''}"><span class="d"></span>${MO.access.trial_left} free message${MO.access.trial_left===1?'':'s'} left</span>`:''}
+      </div>
+    </div>
+    ${face('idle')}
+  </section>
+  ${L.wallet&&L.telegram&&b.usd?'':`<section class="rv"><div class="card"><h3>Three steps and it is yours</h3><p class="sub">Takes about a minute. Your Engine only ever sees public addresses.</p>
+    <div class="steps">
+      <div class="step ${L.wallet?'done':''}"><div class="n">${L.wallet?'✓':'1'}</div><div><b>Connect your wallet</b><span>Sign one message. No transaction, no fee.</span>${L.wallet?'':'<div><button class="btn btn-g btn-sm" data-act="connect">Connect</button></div>'}</div></div>
+      <div class="step ${L.telegram?'done':''}"><div class="n">${L.telegram?'✓':'2'}</div><div><b>Link Telegram</b><span>For the morning briefing, alerts and voice notes.</span>${L.telegram?'':'<div><button class="btn btn-sm" data-act="tg">Link Telegram</button></div>'}</div></div>
+      <div class="step ${b.usd?'done':''}"><div class="n">${b.usd?'✓':'3'}</div><div><b>Top up with $ODDS</b><span>Try it first: ${(MO&&MO.access&&MO.access.trial_total)||10} free messages once Telegram is linked. After that everything comes off your balance. Answers, images and other models at cost plus the fee. Briefing, reminders and alerts run while there is a balance.</span>${b.usd?'':'<div><button class="btn btn-sm" data-act="toai">Top up</button></div>'}</div></div>
+    </div></div></section>`}
+  <section class="rv"><div class="card mo-chat">
+    <div class="mo-head"><h3>Talk to it</h3><span class="note">It picks the right model for each question. You pay what it costs plus the OddsEngine fee.</span>${(MO&&MO.history&&MO.history.length)||MO_LOG.length?'<button class="btn btn-sm" data-act="moclear">New chat</button>':''}</div>
+    <div class="mo-log" id="moLog">${moMsgs()}</div>
+    ${moBeta()?moNote():''}
+    <form class="mo-in" id="moForm"><textarea id="moIn" rows="1" ${moReady()?'':'disabled'} placeholder="${moReady()?'Ask about a wallet, a token, burns, launches, the calls…':moWhy()}" aria-label="Message"></textarea><button class="btn btn-g" type="submit" ${MO_BUSY||!moReady()?'disabled':''}>Send</button></form>
+  </div></section>
+  <section><div class="grid2">
+    <div class="card rv d1"><h3>Morning briefing</h3><p class="sub">One message in your Telegram at your hour, on its own: weather, traffic on your trips, headlines, Torch rewards to claim, the calls, your bags. Included while you have a balance.</p>
+      <div class="row"><div class="l"><b>Briefing</b><span>One message every morning</span></div>${sw(br.on!==false,'data-br="on"')}</div>
+      <div class="row"><div class="l"><b>Time</b><span>Your local time</span></div><select id="moHour" class="mo-sel">${HRS.map(h=>`<option value="${h}" ${h===hr?'selected':''}>${moTime(h)}</option>`).join('')}</select></div>
+      <div class="row"><div class="l"><b>Weather</b><span>${E((MO&&MO.home)?'At '+MO.home:'Tell it where you live in the chat')}</span></div>${sw(br.parts.weather!==false,'data-br="weather"')}</div>
+      <div class="row"><div class="l"><b>Your trips</b><span>Traffic on your way to work, the gym, anywhere you go often</span></div>${sw(br.parts.commute!==false,'data-br="commute"')}</div>
+      <div class="row"><div class="l"><b>Headlines</b><span>From the news sources you follow</span></div>${sw(br.parts.news!==false,'data-br="news"')}</div>
+      <div class="row"><div class="l"><b>Torch rewards</b><span>${E((MO&&MO.torch_profile)?'What you can claim as '+MO.torch_profile:'Tell it your Torch profile name in the chat')}</span></div>${sw(br.parts.rewards!==false,'data-br="rewards"')}</div>
+      <div class="row"><div class="l"><b>Engine calls</b><span>Weather calls you can see</span></div>${sw(br.parts.calls,'data-br="calls"')}</div>
+      <div class="row"><div class="l"><b>Crypto Edition</b><span>Prices and windows with an edge</span></div>${sw(br.parts.crypto,'data-br="crypto"')}</div>
+      <div class="row"><div class="l"><b>Your bags</b><span>Value on Robinhood Chain, change since yesterday</span></div>${sw(br.parts.bags,'data-br="bags"')}</div>
+      <div class="row"><div class="l"><b>Moving on Torch</b><span>Launches with the most volume</span></div>${sw(br.parts.moving,'data-br="moving"')}</div>
+      <div style="margin-top:12px"><button class="btn btn-sm" data-act="mobrief">Send me one now</button></div>
+    </div>
+    <div class="card rv"><h3>Reminders, alerts, trips, news</h3><p class="sub">Set them in the chat. It messages you in Telegram when it is time.</p>
+      <div class="mem" id="moList">${moList()}</div></div>
+    ${moModelCard()}
+    <div class="card rv"><h3>Memory</h3><p class="sub">What Your Engine remembers about you. Delete anything, any time.</p>
+      <div class="row"><div class="l"><b>Remember new things</b><span>${mem.paused?'Paused. Nothing new gets saved.':'On. It saves what matters.'}</span></div>${sw(!mem.paused,'data-mem="pause"')}</div>
+      <div class="row"><div class="l"><b>Wallets and bags</b><span>Which chains and tokens you care about</span></div>${sw(mem.cats.wallets!==false,'data-cat="wallets"')}</div>
+      <div class="row"><div class="l"><b>Markets you follow</b><span>Cities, coins, tokens</span></div>${sw(mem.cats.markets!==false,'data-cat="markets"')}</div>
+      <div class="row"><div class="l"><b>Personal notes</b><span>How you like your answers</span></div>${sw(mem.cats.notes!==false,'data-cat="notes"')}</div>
+      <div class="mem" id="memList">${(mem.items||[]).length?mem.items.map(i=>`<div class="it"><p>${E(i.text)}<small>${E(i.cat)}</small></p><button class="x" data-del="${E(i.id)}" aria-label="Delete">×</button></div>`).join(''):'<div class="note">Nothing saved yet.</div>'}</div>
+      ${(mem.items||[]).length?'<div style="margin-top:12px"><button class="btn btn-sm btn-red" data-act="wipe">Delete everything</button></div>':''}
+    </div>
+    ${walletsCard()}
+    <div class="card rv d1"><h3>Balance</h3><p class="sub">One balance for Your Engine and OddsEngine AI.</p>
+      <div class="credit"><div class="big">${usd(b.usd||0)}</div><span class="note">${b.odds_equiv?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
+      <div style="margin-top:14px"><button class="btn btn-sm" data-act="toai">Top up</button></div>
+    </div>
+  </div></section>`;
+};
+
+async function moLoad(){
+  if(!connected()||DEMO)return;
+  try{MO=await api('/v1/engine/agent');MO_LOG=[];
+    if(typeof MODELS!=='undefined'&&!MODELS.length&&typeof loadModels==='function')await loadModels();
+    if(MO.inbox&&MO.inbox.length)MO.inbox.forEach(x=>toast(x.text.split('\n')[0]));
+    if(MO.live&&!FEAT.engine){FEAT.engine=true;}
+    const off=-new Date().getTimezoneOffset()/60;if(MO.live&&MO.utc_offset_hours!==off){api('/v1/engine/agent/briefing',{method:'POST',body:JSON.stringify({utc_offset_hours:off})}).then(()=>{MO.utc_offset_hours=off;}).catch(()=>{});}
+    if(TAB==='engine')render();}catch(e){}
+}
+function moScroll(){const l=$('#moLog');if(l)l.scrollTop=l.scrollHeight;}
+async function moSend(t){
+  if(MO_BUSY)return;if(!connected()){toast('Connect your wallet first');return;}
+  if(!MO_LOG.length&&MO&&MO.history)MO_LOG=MO.history.slice();
+  MO_LOG.push({role:'user',content:t});MO_BUSY=true;setRing('thinking');$('#moLog').innerHTML=moMsgs();moScroll();
+  try{const r=await api('/v1/engine/ask',{method:'POST',body:JSON.stringify({text:t})});
+    MO_LOG.push({role:'assistant',content:r.text,cost:r.trial?null:r.cost_usd,tools:r.tools,images:r.images||[],data:r.image_data||[]});
+    if(r.trial&&MO&&MO.access){MO.access.trial_left=r.trial_left;}
+    if(ME&&ME.balance&&r.balance_usd!=null)ME.balance.usd=r.balance_usd;
+    const ag=await api('/v1/engine/agent').catch(()=>null);if(ag){const h=MO_LOG;MO=ag;MO_LOG=h;const l=$('#moList');if(l){l.innerHTML=moList();moBindList();}}
+    const me=await api('/v1/engine/me').catch(()=>null);if(me&&ME){ME.memory=me.memory;}
+  }catch(e){MO_LOG.push({role:'assistant',content:(e&&e.message)||'Something went wrong.'});}
+  MO_BUSY=false;setRing('idle');const l=$('#moLog');if(l){l.innerHTML=moMsgs();moScroll();}
+}
+function moBindList(){document.querySelectorAll('[data-mrm]').forEach(b=>b.onclick=async()=>{const [kind,id]=b.dataset.mrm.split(':');b.closest('.it').remove();await save('/v1/engine/agent/remove',{kind,id});toast('Removed');});}
+const _bind2=bind;
+bind=function(){
+  _bind2();
+  const f=$('#moForm');if(f){const ta=$('#moIn');
+    ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();f.requestSubmit();}};
+    ta.oninput=()=>{ta.style.height='46px';ta.style.height=Math.min(160,ta.scrollHeight)+'px';};
+    f.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!t)return;ta.value='';ta.style.height='46px';moSend(t);};moScroll();}
+  document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{const ta=$('#moIn');if(!ta)return;ta.value=b.dataset.sug;ta.focus();});
+  const h=$('#moHour');if(h)h.onchange=async()=>{const off=-new Date().getTimezoneOffset()/60;if(await save('/v1/engine/agent/briefing',{hour:+h.value,utc_offset_hours:off})){if(MO)MO.briefing_local_hour=+h.value;toast('Briefing at '+moTime(+h.value));}};
+  moBindList();
+  const mt=$('#moTxt');if(mt)mt.onchange=async()=>{if(await save('/v1/engine/agent/models',{text_model:mt.value||'reset'})){if(MO){MO.defaults=MO.defaults||{};MO.defaults.text_model=mt.value||null;}toast(mt.value?'Answers from '+mt.options[mt.selectedIndex].text:'Your Engine picks the model');}};
+  const mi=$('#moImg');if(mi)mi.onchange=async()=>{if(await save('/v1/engine/agent/models',{image_model:mi.value})){if(MO){MO.defaults=MO.defaults||{};MO.defaults.image_model=mi.value;}toast('Images from '+mi.options[mi.selectedIndex].text);}};
+};
+const _act2=act;
+act=async function(a){
+  if(a==='moclear'){MO_LOG=[];if(MO)MO.history=[];await save('/v1/engine/agent/clear',{});render();return;}
+  if(a==='mobrief'){try{const r=await api('/v1/engine/agent/briefing/now',{method:'POST',body:'{}'});toast(r.sent_to_telegram?'Sent to your Telegram':'Link Telegram to get it on your phone');if(!r.sent_to_telegram){MO_LOG=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]).concat([{role:'assistant',content:r.text,cost:0}]);render();}}catch(e){toast(e.message);}return;}
+  return _act2(a);
+};
+const _load2=load;
+load=async function(){await _load2();await moLoad();moTabBeta();};
 
 /* ---------- load ---------- */
 function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Only you see this view. Visitors see Chat, Models and Account only when the ai switch is on.';document.body.appendChild(b);}
