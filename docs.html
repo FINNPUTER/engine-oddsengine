@@ -47,7 +47,7 @@ ol li,ul li{margin:4px 0}
 <div class="lay">
 <nav class="toc" aria-label="Contents">
   <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
-  <a href="#api">API quickstart</a><a href="#agents" class="feat-agents" hidden>Agents, MCP, x402</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
+  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
 </nav>
 <main>
 <span class="eb">Docs</span>
@@ -121,8 +121,63 @@ print(r.choices[0].message.content)</code></pre>
 <li>Keys are stored as a hash. A new key is shown once. Revoke a key any time on the Account page.</li>
 </ul>
 
+<section class="feat-x402" hidden>
+<h2 id="x402">For agents: pay per request with x402</h2>
+<p>Your agent needs no account and no API key. It needs a wallet with money in it. It calls the API, gets <code>402 Payment Required</code> with a price, signs a payment and sends the request again. We settle it on chain and answer. The agent pays no gas.</p>
+<p>Endpoint: <code>POST https://web-production-6b61c.up.railway.app/v1/chat/completions</code>, same body as OpenAI. 460+ models, pick one with <code>"model"</code>.</p>
+<div class="feat-usdc" hidden>
+<h3>Pay in USDC on Base (any x402 client)</h3>
+<p>We speak standard x402 (v1 and v2, scheme <code>exact</code>, USDC on Base). Any x402 library works without changes. Our margin from every payment buys $ODDS, half of it gets burned. <a href="https://web-production-6b61c.up.railway.app/v1/x402/buybacks" target="_blank" rel="noopener">See every buyback and burn</a>.</p>
+<p><b>JavaScript</b></p>
+<pre><code>npm i @x402/fetch @x402/evm viem
+
+import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { ExactEvmScheme } from "@x402/evm";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.AGENT_KEY);
+const pay = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(account) }],
+});
+const r = await pay("https://web-production-6b61c.up.railway.app/v1/chat/completions", {
+  method: "POST", headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ model: "deepseek/deepseek-v4-flash",
+    messages: [{ role: "user", content: "Hello" }] }),
+});
+console.log((await r.json()).choices[0].message.content);</code></pre>
+<p><b>Python</b></p>
+<pre><code>pip install "x402[requests,evm]" eth-account
+
+from eth_account import Account
+from x402 import x402ClientSync
+from x402.mechanisms.evm import EthAccountSigner
+from x402.mechanisms.evm.exact import ExactEvmScheme
+from x402.http.clients import x402_requests
+
+client = x402ClientSync()
+client.register("eip155:8453", ExactEvmScheme(signer=EthAccountSigner(Account.from_key(AGENT_KEY))))
+s = x402_requests(client)
+r = s.post("https://web-production-6b61c.up.railway.app/v1/chat/completions",
+           json={"model": "deepseek/deepseek-v4-flash", "messages": [{"role": "user", "content": "Hello"}]})
+print(r.json()["choices"][0]["message"]["content"])</code></pre>
+</div>
+<h3>Pay in $ODDS on Robinhood Chain</h3>
+<p>Pick the <code>permit</code> option of the 402 answer. Sign an EIP-2612 permit for that amount and send the request again with the <code>X-PAYMENT</code> header. Get $ODDS on Torch first.</p>
+<pre><code>X-PAYMENT: base64({"x402Version":1,"scheme":"permit","network":"robinhood",
+  "payload":{"owner":"0x...","value":"&lt;maxAmountRequired&gt;","deadline":1790000000,"signature":"0x..."}})</code></pre>
+<ul>
+<li>Spender, token, chain id and the EIP-712 domain are in <code>extra</code> of the permit option.</li>
+</ul>
+<h3>Good to know</h3>
+<ul>
+<li>One payment covers at least $0.05 plus $0.01 for gas. What the request does not use stays as credit on the paying wallet.</li>
+<li>Next time, if the credit covers the request, we use the credit and move no money. The agent still signs, that proves it is the same wallet.</li>
+<li>The answer carries <code>PAYMENT-RESPONSE</code> (and <code>X-PAYMENT-RESPONSE</code>) with the transaction.</li>
+<li>Use a normal wallet (EOA) for the agent and keep only small amounts on it.</li>
+</ul>
+</section>
 <section class="feat-agents" hidden>
-<h2 id="agents">Agents, MCP and x402</h2>
+<h2 id="agents">Agent keys and MCP</h2>
 <h3>A key for your agent, without a browser</h3>
 <p>Your agent signs in with its own wallet and gets a key with limits you choose.</p>
 <pre><code>GET  /v1/engine/nonce?address=0xYOUR_WALLET     -> { "message": "..." }
@@ -138,16 +193,6 @@ POST /v1/agents/key
 <p>Point Claude, Cursor or any MCP client at <code>https://web-production-6b61c.up.railway.app/mcp</code> with the header <code>Authorization: Bearer oe_live_...</code>. Tools: <code>list_models</code>, <code>estimate_cost</code>, <code>chat</code>, <code>compare</code>, <code>balance</code>.</p>
 <pre><code>{"mcpServers":{"oddsengine":{"type":"http","url":"https://web-production-6b61c.up.railway.app/mcp",
   "headers":{"Authorization":"Bearer oe_live_..."}}}}</code></pre>
-<h3>Pay per request with x402</h3>
-<p>No account, no key. Call <code>/v1/chat/completions</code> without a key and you get <code>402</code> with the price in $ODDS. Sign an EIP-2612 permit for that amount and send the same request again with the <code>X-PAYMENT</code> header. We settle it on Robinhood Chain and answer. You pay no gas.</p>
-<pre><code>X-PAYMENT: base64({"x402Version":1,"scheme":"permit","network":"robinhood",
-  "payload":{"owner":"0x...","value":"&lt;maxAmountRequired&gt;","deadline":1790000000,"signature":"0x..."}})</code></pre>
-<ul>
-<li>Spender, token, chain id and the EIP-712 domain are in <code>accepts[0].extra</code> of the 402 answer.</li>
-<li>One payment covers at least $0.05 plus $0.01 for gas. What the request does not use stays as credit on your wallet.</li>
-<li>Next time, send a fresh permit. If your credit covers the request we use the credit and move no tokens.</li>
-<li>The answer carries <code>X-PAYMENT-RESPONSE</code> with the transaction.</li>
-</ul>
 </section>
 <h2 id="images">Images</h2>
 <h3>Send an image</h3>
@@ -189,7 +234,7 @@ POST /v1/agents/key
 <script>
 (function(){var h={};try{var a=localStorage.getItem('oe_admin');if(a)h['X-OddsEngine-Admin']=a;}catch(e){}
 fetch('https://web-production-6b61c.up.railway.app/v1/features',{headers:h}).then(function(r){return r.json()}).then(function(d){
-var f=d.features||{};if((f.agents&&f.ai)||d.admin){document.querySelectorAll('.feat-agents').forEach(function(e){e.hidden=false});if(location.hash==='#agents'){var t=document.getElementById('agents');if(t)t.scrollIntoView();}}}).catch(function(){});})();
+var f=d.features||{};function sh(c,ok){if(ok||d.admin){document.querySelectorAll(c).forEach(function(e){e.hidden=false});}}sh('.feat-agents',f.agents&&f.ai);sh('.feat-x402',f.x402&&f.ai);sh('.feat-usdc',f.x402usdc&&f.x402&&f.ai);if(location.hash){var t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView();}}).catch(function(){});})();
 </script>
 </body>
 </html>
