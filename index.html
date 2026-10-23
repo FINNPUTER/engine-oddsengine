@@ -1249,7 +1249,7 @@ const BUY_ODDS='https://app.torchpad.fun/trade/robinhood/0x9c87B4cfa21266d1638f4
 /* =================== 2.30: Models, Account, motion, top up =================== */
 const CDN='https://d2ol7oe51mr4n9.cloudfront.net/user_3JTRZAxrDiNnMw8N7r4orqaTziL/';
 const MEDIA={intro:['media/intro.mp4',CDN+'e4d1c8ed-f6d5-4a5b-8e83-9bfcc2667380.mp4'],introM:['media/intro-m.mp4',CDN+'b8c84676-0f54-4778-9530-60f32b357f05.mp4'],
-  loop:['media/loop.mp4',CDN+'e87f643f-8bb2-4cf3-8541-65f2b2e58bf7.mp4'],loopM:['media/loop-m.mp4',CDN+'46d7e78b-c317-4cd4-8543-848dd2f31534.mp4']};
+  loop:[CDN+'ff77fd8f-ea64-400a-8d50-17ffb91c37d9.mp4',CDN+'e87f643f-8bb2-4cf3-8541-65f2b2e58bf7.mp4'],loopM:[CDN+'377a9364-9c36-4197-90da-f1c8c1e98187.mp4',CDN+'46d7e78b-c317-4cd4-8543-848dd2f31534.mp4']};
 function setSrc(v,list){v.innerHTML=list.map(u=>`<source src="${u}" type="video/mp4">`).join('');v.load();}
 if(location.hash==='#models')TAB='models';
 const AI_TABS=['chat','models','ai'];
@@ -1665,6 +1665,19 @@ adminCard=function(){
   setTimeout(()=>{const b=$('#alTest');if(b)b.onclick=async()=>{b.disabled=true;try{const r=await api('/v1/admin/ai/alert-test',{method:'POST',body:'{}'});toast(r.ok?'Sent, check Telegram':'Could not send, check TELEGRAM_BOT_TOKEN and TELEGRAM_PRIVATE_CHAT_ID');}catch(e){toast(e.message);}b.disabled=false;};},0);
   return _adminCard0().replace(/(<div class="kv">)/,al+'$1').replace(/<\/div><\/section>\s*$/,extra+'</div></section>');
 };
+
+/* Torch referral: every Torch link first passes our referral, then lands where it pointed */
+(function(){var REF='https://app.torchpad.fun/r/REF026455';
+document.addEventListener('click',function(e){
+  if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+  var a=e.target&&e.target.closest?e.target.closest('a[href*="app.torchpad.fun"]'):null;if(!a)return;
+  var h=a.href;if(/\/r\/|\/api\//.test(h))return;
+  e.preventDefault();
+  var home=/^https:\/\/app\.torchpad\.fun\/?(\?.*)?$/.test(h);
+  var w=null;try{w=window.open(REF,'_blank');}catch(x){}
+  if(!w){location.href=home?REF:h;return;}
+  if(!home)setTimeout(function(){try{w.location.href=h;}catch(x){}},1800);
+},true);})();
 
 /* ---------- Your Engine: the agent (2.33) ---------- */
 let MO=null, MO_BUSY=false, MO_LOG=[];
