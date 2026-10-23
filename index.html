@@ -1905,6 +1905,10 @@ engineView=function(){
     </div>
     <div class="card rv"><h3>Reminders, alerts, trips, news</h3><p class="sub">Set them in the chat. It messages you in Telegram when it is time.</p>
       <div class="mem" id="moList">${moList()}</div></div>
+    <div class="card rv"><h3>From OddsEngine</h3><p class="sub">What Your Engine sends you on its own. Switch off anything you do not want.</p>
+      <div class="row"><div class="l"><b>OddsEngine news</b><span>What the team posts in the channel and on X, straight to your Telegram</span></div>${sw(!MO||MO.official_news!==false,'data-set="official_news"')}</div>
+      <div class="row"><div class="l"><b>Check-ins</b><span>Asks how your training, meeting or appointment went</span></div>${sw(!MO||MO.check_ins!==false,'data-set="check_ins"')}</div>
+    </div>
     ${moMailCard()}
     ${moModelCard()}
     <div class="card rv"><h3>Memory</h3><p class="sub">What Your Engine remembers about you. Delete anything, any time.</p>
@@ -2029,6 +2033,7 @@ bind=function(){
   _bind3();
   const mp=$('#mailProv');if(mp)mp.onchange=()=>{MAIL_P=mp.value;render();};
   document.querySelectorAll('[data-mailhead]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({headers_only:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.headers_only=on;toast(on?'Only sender and subject from now on':'Your Engine can read mail text when you ask');}catch(e){toast('Could not save: '+e.message);}});
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=async()=>{const k=b.dataset.set,on=!b.classList.contains('on');try{await api('/v1/engine/settings',{method:'POST',body:JSON.stringify({[k]:on})});b.classList.toggle('on',on);if(MO)MO[k]=on;toast(k==='official_news'?(on?'OddsEngine news on':'OddsEngine news off'):(on?'Check-ins on':'Check-ins off'));}catch(e){toast('Could not save: '+e.message);}});
   document.querySelectorAll('[data-mailwatch]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({watch:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.watch=on;toast(on?'Important mail goes to Telegram':'Mail alerts off');}catch(e){toast('Could not save: '+e.message);}});
 };
 const _act3=act;
