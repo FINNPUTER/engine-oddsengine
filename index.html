@@ -609,6 +609,15 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 .mo-betanote{margin:10px 2px 0;font-size:12.5px;color:var(--dim);line-height:1.5}
 .mo-betanote a{color:var(--g,#2ef08c)}
 @media(max-width:440px){.mo-tb{display:none}}
+.mo-bnote{margin:6px 0 4px;font-size:12.5px}
+.mo-brains{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}
+.mo-br{text-align:left;cursor:pointer;border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:14px;padding:11px 12px;color:inherit;font:inherit;display:flex;flex-direction:column;gap:3px}
+.mo-br b{font-size:14px}.mo-br b i{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--g,#2ef08c);margin-left:4px}
+.mo-br span{font-size:11.5px;color:var(--dim)}.mo-br em{font-style:normal;font-size:12px;font-family:var(--mono);color:var(--tx,#eafff2)}
+.mo-br.on{border-color:var(--g,#2ef08c);background:rgba(46,240,140,.1);box-shadow:0 0 24px rgba(46,240,140,.12)}
+.mo-sup{width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);color:inherit;border:1px solid var(--line);border-radius:14px;padding:12px;font:inherit;margin-top:8px;resize:vertical}
+.mo-supf{display:inline-block;margin-top:10px;cursor:pointer;font-size:13.5px;color:var(--g,#2ef08c);border:1px dashed rgba(46,240,140,.45);border-radius:12px;padding:9px 12px}
+.mo-supp{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.mo-supp img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 
 </style>
 </head>
@@ -1678,19 +1687,24 @@ function moMsgs(){
 }
 function moReady(){const m=ME||{};const L=m.linked||{};const b=m.balance||{};if(!connected())return false;if(MO&&MO.access)return !!(MO.access.ready||(MO.access.telegram&&MO.access.trial_left>0));return !!(L.wallet&&L.telegram&&(b.usd||0)>=0.05);}
 function moWhy(){if(!connected())return 'Connect your wallet to start';const m=ME||{};const L=m.linked||{};const a=(MO&&MO.access)||{missing:[]};if(!L.telegram||(a.missing||[]).includes('telegram'))return 'Link Telegram to start';return 'Top up with $ODDS to start';}
-function moNote(){const u=(MO&&MO.feedback_url)||'https://t.me/OddsEngineCommunity';return `<p class="mo-betanote">Your Engine is in beta. It gets better every day. If an answer looks off, tell us in the <a href="${E(u)}" target="_blank" rel="noopener">Your Engine Beta topic</a>.</p>`;}
+function moNote(){const u=MO&&MO.feedback_url;return `<p class="mo-betanote">Your Engine is in beta. Something off? Just write "feedback:" and what happened. It goes privately to the team, nobody else sees it.${u?` Testers chat: <a href="${E(u)}" target="_blank" rel="noopener">beta group</a>.`:''}</p>`;}
 function moBeta(){return !MO||MO.beta_label!==false;}
 function moTabBeta(){const t=document.querySelector('.tabs [data-tab="engine"]');if(!t)return;const on=moBeta();let b=t.querySelector('.mo-tb');if(on&&!b){b=document.createElement('span');b.className='mo-tb';b.textContent='Beta';t.appendChild(b);}if(!on&&b)b.remove();}
 function moImg(id){return API+'/v1/chat/img/'+encodeURIComponent(id)+'?key='+encodeURIComponent(TOKEN);}
 function moImgs(ids){if(!ids||!ids.length)return '';return '<div class="mo-imgs">'+ids.map(id=>`<a href="${moImg(id)}" target="_blank" rel="noopener"><img src="${moImg(id)}" alt="Generated image" loading="lazy"></a><a class="mo-dl" href="${moImg(id)}&dl=1">Download</a>`).join('')+'</div>';}
 function moData(us){if(!us||!us.length)return '';return '<div class="mo-imgs">'+us.filter(u=>/^data:image\//.test(u)).map(u=>`<img src="${u}" alt="Generated image"><a class="mo-dl" href="${u}" download="oddsengine.png">Download</a>`).join('')+'</div>';}
+function moC(v){v=+v||0;return '$'+(v<0.01?v.toFixed(4):v<1?v.toFixed(3):v.toFixed(2));}
+function moBrain(){const bs=(MO&&MO.brains)||[];const k=(MO&&MO.brain)||'auto';return bs.find(b=>b.key===k)||bs[0]||null;}
 function moModelCard(){
   const d=(MO&&MO.defaults)||{};const ms=(typeof MODELS!=='undefined'&&MODELS)||[];
   const txt=ms.filter(m=>m.kind!=='image'&&m.id!=='oddsengine/auto'&&(m.picked||m.id===d.text_model));
   const img=ms.filter(m=>m.kind==='image');
   const opt=(m,sel)=>`<option value="${E(m.id)}" ${m.id===sel?'selected':''}>${E(m.name||m.id)}</option>`;
-  return `<div class="card rv"><h3>Models</h3><p class="sub">Every model of OddsEngine AI works here too. Say "ask GPT…" or "make me an image…", by text or voice.</p>
-    <div class="row"><div class="l"><b>Answers</b><span>Live data always goes through Your Engine</span></div><select id="moTxt" class="mo-sel mo-wide"><option value="">Your Engine picks</option>${txt.map(m=>opt(m,d.text_model)).join('')}</select></div>
+  const bs=(MO&&MO.brains)||[];const bk=(MO&&MO.brain)||'auto';const cur=moBrain();
+  return `<div class="card rv"><h3>Intelligence and models</h3><p class="sub">Every answer comes off your balance: what the model costs plus the OddsEngine fee. Pick how Your Engine thinks.</p>
+    ${bs.length?`<div class="mo-brains" id="moBrain">${bs.map(b=>`<button type="button" class="mo-br ${b.key===bk?'on':''}" data-brain="${E(b.key)}"><b>${E(b.label)}${b.key==='auto'?' <i>recommended</i>':''}</b><span>${E(b.names.join(' + '))}</span><em>about ${moC(b.usd_per_answer.typical)} per answer</em></button>`).join('')}</div>
+    <p class="note mo-bnote">${E(cur?cur.info:'')}. A normal answer costs about ${moC(cur?cur.usd_per_answer.typical:0)}, short ones from ${moC(cur?cur.usd_per_answer.low:0)}, long research up to ${moC(cur?cur.usd_per_answer.high:0)}.</p>`:''}
+    <div class="row"><div class="l"><b>Ask another model</b><span>For general questions. Live data always goes through Your Engine</span></div><select id="moTxt" class="mo-sel mo-wide"><option value="">Your Engine picks</option>${txt.map(m=>opt(m,d.text_model)).join('')}</select></div>
     <div class="row"><div class="l"><b>Images</b><span>Used when you ask for a picture</span></div><select id="moImg" class="mo-sel mo-wide">${img.length?img.map(m=>opt(m,d.image_model)).join(''):`<option>${E(d.image_model||'')}</option>`}</select></div>
     <p class="note" style="margin-top:10px">You pay what the model costs plus the OddsEngine fee, from the same balance.</p></div>`;
 }
@@ -1731,7 +1745,7 @@ engineView=function(){
       <div class="step ${b.usd?'done':''}"><div class="n">${b.usd?'✓':'3'}</div><div><b>Top up with $ODDS</b><span>Try it first: ${(MO&&MO.access&&MO.access.trial_total)||10} free messages once Telegram is linked. After that everything comes off your balance. Answers, images and other models at cost plus the fee. Briefing, reminders and alerts run while there is a balance.</span>${b.usd?'':'<div><button class="btn btn-sm" data-act="toai">Top up</button></div>'}</div></div>
     </div></div></section>`}
   <section class="rv"><div class="card mo-chat">
-    <div class="mo-head"><h3>Talk to it</h3><span class="note">It picks the right model for each question. You pay what it costs plus the OddsEngine fee.</span>${(MO&&MO.history&&MO.history.length)||MO_LOG.length?'<button class="btn btn-sm" data-act="moclear">New chat</button>':''}</div>
+    <div class="mo-head"><h3>Talk to it</h3><span class="note">${moBrain()?'Thinking: '+E(moBrain().label)+' · about '+moC(moBrain().usd_per_answer.typical)+' per answer, from your balance.':'Every answer comes off your balance: model cost plus the OddsEngine fee.'}</span>${(MO&&MO.history&&MO.history.length)||MO_LOG.length?'<button class="btn btn-sm" data-act="moclear">New chat</button>':''}</div>
     <div class="mo-log" id="moLog">${moMsgs()}</div>
     ${moBeta()?moNote():''}
     <form class="mo-in" id="moForm"><textarea id="moIn" rows="1" ${moReady()?'':'disabled'} placeholder="${moReady()?'Ask about a wallet, a token, burns, launches, the calls…':moWhy()}" aria-label="Message"></textarea><button class="btn btn-g" type="submit" ${MO_BUSY||!moReady()?'disabled':''}>Send</button></form>
@@ -1803,17 +1817,38 @@ bind=function(){
   document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{const ta=$('#moIn');if(!ta)return;ta.value=b.dataset.sug;ta.focus();});
   const h=$('#moHour');if(h)h.onchange=async()=>{const off=-new Date().getTimezoneOffset()/60;if(await save('/v1/engine/agent/briefing',{hour:+h.value,utc_offset_hours:off})){if(MO)MO.briefing_local_hour=+h.value;toast('Briefing at '+moTime(+h.value));}};
   moBindList();
+  document.querySelectorAll('[data-brain]').forEach(b=>b.onclick=async()=>{const k=b.dataset.brain;if(MO&&MO.brain===k)return;if(await save('/v1/engine/agent/models',{brain:k})){if(MO)MO.brain=k;toast('Your Engine now thinks with '+b.querySelector('b').firstChild.textContent.trim());render();}});
   const mt=$('#moTxt');if(mt)mt.onchange=async()=>{if(await save('/v1/engine/agent/models',{text_model:mt.value||'reset'})){if(MO){MO.defaults=MO.defaults||{};MO.defaults.text_model=mt.value||null;}toast(mt.value?'Answers from '+mt.options[mt.selectedIndex].text:'Your Engine picks the model');}};
   const mi=$('#moImg');if(mi)mi.onchange=async()=>{if(await save('/v1/engine/agent/models',{image_model:mi.value})){if(MO){MO.defaults=MO.defaults||{};MO.defaults.image_model=mi.value;}toast('Images from '+mi.options[mi.selectedIndex].text);}};
 };
+function supportSheet(){
+  $('#sheetIn').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0;font-family:var(--disp)">Support</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>
+   <p class="note" style="margin:8px 0 12px">Something broken, a question about your balance, an idea? Write it here. A human reads every message.${connected()?' Your wallet is attached so we can look it up.':''}</p>
+   <textarea id="supTx" class="mo-sup" rows="5" maxlength="4000" placeholder="What happened?"></textarea>
+   <label class="mo-supf"><input id="supImg" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden><span>+ Add screenshots</span></label><div id="supPrev" class="mo-supp"></div>
+   <input id="supCt" class="mo-sup" maxlength="80" placeholder="Telegram @name or email, so we can answer (optional)">
+   <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end"><button class="btn btn-g" data-act="supsend" type="button">Send</button></div>
+   <p class="note" style="margin-top:10px">Faster in Telegram: write /support and your message to the OddsEngine bot.</p>`;
+  $('#sheet').classList.add('show');bind();SUP_IMG=[];
+  const fi=$('#supImg');if(fi)fi.onchange=async()=>{for(const f of [...fi.files].slice(0,3-SUP_IMG.length)){try{SUP_IMG.push(await supShrink(f));}catch(e){}}fi.value='';$('#supPrev').innerHTML=SUP_IMG.map(u=>`<img src="${u}" alt="Screenshot">`).join('');};
+}
+let SUP_IMG=[];
+function supShrink(f){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.85));};im.onerror=no;im.src=r.result;};r.onerror=no;r.readAsDataURL(f);});}
+function supLink(){const f=document.querySelector('footer.wrap div:last-child');if(f&&!f.querySelector('[data-act="support"]')){const a=document.createElement('a');a.href='#';a.dataset.act='support';a.textContent='Support';a.onclick=e=>{e.preventDefault();supportSheet();};f.appendChild(document.createTextNode(' · '));f.appendChild(a);}}
 const _act2=act;
 act=async function(a){
+  if(a==='support'){supportSheet();return;}
+  if(a==='supsend'){const t=($('#supTx').value||'').trim();if(t.length<3&&!SUP_IMG.length){toast('Write a few words first');return;}
+    try{const r=await api('/v1/support',{method:'POST',body:JSON.stringify({text:t,contact:$('#supCt').value||'',page:location.hash||'/',images:SUP_IMG})});SUP_IMG=[];
+      $('#sheetIn').innerHTML='<h3 style="margin:0 0 8px;font-family:var(--disp)">Got it</h3><p class="note">Ticket #'+E(r.ticket)+'. We read every message and get back to you.</p><div style="margin-top:12px;text-align:right"><button class="btn" data-act="closesheet" type="button">Close</button></div>';bind();
+    }catch(e){toast(e.message||'Could not send, try again');}
+    return;}
   if(a==='moclear'){MO_LOG=[];if(MO)MO.history=[];await save('/v1/engine/agent/clear',{});render();return;}
   if(a==='mobrief'){try{const r=await api('/v1/engine/agent/briefing/now',{method:'POST',body:'{}'});toast(r.sent_to_telegram?'Sent to your Telegram':'Link Telegram to get it on your phone');if(!r.sent_to_telegram){MO_LOG=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]).concat([{role:'assistant',content:r.text,cost:0}]);render();}}catch(e){toast(e.message);}return;}
   return _act2(a);
 };
 const _load2=load;
-load=async function(){await _load2();await moLoad();moTabBeta();};
+load=async function(){await _load2();supLink();await moLoad();moTabBeta();};
 
 /* ---------- load ---------- */
 function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Only you see this view. Visitors see Chat, Models and Account only when the ai switch is on.';document.body.appendChild(b);}
