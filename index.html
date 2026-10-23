@@ -619,6 +619,21 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 .mo-supf{display:inline-block;margin-top:10px;cursor:pointer;font-size:13.5px;color:var(--g,#2ef08c);border:1px dashed rgba(46,240,140,.45);border-radius:12px;padding:9px 12px}
 .mo-supp{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.mo-supp img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 
+/* 2.36 email + calendar */
+.mo-h4{margin:16px 0 4px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim2)}
+.mo-mail{display:grid;gap:10px;margin-top:6px}
+.mo-mail input{height:46px;border-radius:14px;border:1px solid var(--line2);background:rgba(8,14,11,.85);color:var(--tx);padding:0 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+.mo-mail input:focus{border-color:rgba(34,240,138,.55);box-shadow:0 0 0 3px rgba(34,240,138,.12)}
+.mo-mail .btn{justify-self:start}
+.mo-mail .note a{color:var(--g)}
+
+.mo-priv{margin-top:6px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.03);padding:10px 14px}
+.mo-priv summary{cursor:pointer;font-weight:600;color:var(--g2);list-style:none}
+.mo-priv summary::-webkit-details-marker{display:none}
+.mo-priv summary::before{content:"\25B8  ";color:var(--g)}
+.mo-priv[open] summary::before{content:"\25BE  "}
+.mo-priv ul{margin:8px 0 2px 18px;padding:0;display:grid;gap:6px;color:var(--dim);font-size:13.5px;line-height:1.45}
+
 /* ---------- 2.35 own dropdown ---------- */
 .oesel{position:relative;display:inline-flex;min-width:0;vertical-align:middle}
 .oesel.mo-sel{height:auto;border:0;background:none;padding:0}
@@ -1830,15 +1845,16 @@ function moModelCard(){
     <p class="note" style="margin-top:10px">You pay what the model costs plus the OddsEngine fee, from the same balance.</p></div>`;
 }
 function moList(){
-  const m=MO||{};const r=m.reminders||[],a=m.alerts||[],w=m.watches||[],c=m.commutes||[],nw=m.news||[];
+  const m=MO||{};const r=m.reminders||[],a=m.alerts||[],w=m.watches||[],c=m.commutes||[],nw=m.news||[],sg=m.signals||[];
   const DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];const dl=d=>(d&&d.length===7)?'Daily':(d&&d.join()==='0,1,2,3,4')?'Weekdays':(d||[]).map(i=>DN[i]).join(' ');
   const row=(kind,id,t,s)=>`<div class="it"><p>${E(t)}<small>${E(s)}</small></p><button class="x" data-mrm="${kind}:${E(id)}" aria-label="Remove">×</button></div>`;
   const all=[...r.map(x=>row('reminder',x.id,x.text,'Reminder · '+x.local_time)),
     ...a.map(x=>row('alert',x.id,x.asset+(x.above!=null?' above $'+x.above:' below $'+x.below),'Price alert')),
     ...w.map(x=>row('watch',x.id,x.title||x.url,'Watching · '+x.url)),
     ...c.map(x=>row('commute',x.id,x.name+' at '+x.time,'Trip · '+dl(x.days)+' · to '+x.to)),
+    ...sg.map(x=>row('signal',x.id,x.kind==='split'?((x.coin||'All coins').toUpperCase()+(x.tf?' '+x.tf:'')+': crowd vs engine '+x.threshold+' pts'):((x.coin||'BTC and ETH').toUpperCase()+' above X: edge '+x.threshold+'c'),'Signal alert')),
     ...nw.map(x=>row('news',x.id,x.name,(x.mode==='briefing'?'News · in the briefing':'News · sent as it happens')+(x.keywords&&x.keywords.length?' · only '+x.keywords.join(', '):'')))];
-  return all.length?all.join(''):'<div class="note">Nothing yet. Ask in the chat: "remind me…", "alert me when…", "watch this page…", "I drive to the gym every weekday at 5".</div>';
+  return all.length?all.join(''):'<div class="note">Nothing yet. Ask in the chat: "remind me…", "alert me when…", "watch this page…", "tell me when crowd and engine split on BTC", "I drive to the gym every weekday at 5".</div>';
 }
 engineView=function(){
   const m=ME||{};const L=m.linked||{};const b=m.balance||{};
@@ -1876,6 +1892,8 @@ engineView=function(){
       <div class="row"><div class="l"><b>Briefing</b><span>One message every morning</span></div>${sw(br.on!==false,'data-br="on"')}</div>
       <div class="row"><div class="l"><b>Time</b><span>Your local time</span></div><select id="moHour" class="mo-sel">${HRS.map(h=>`<option value="${h}" ${h===hr?'selected':''}>${moTime(h)}</option>`).join('')}</select></div>
       <div class="row"><div class="l"><b>Weather</b><span>${E((MO&&MO.home)?'At '+MO.home:'Tell it where you live in the chat')}</span></div>${sw(br.parts.weather!==false,'data-br="weather"')}</div>
+      <div class="row"><div class="l"><b>Calendar</b><span>${(MO&&MO.calendar&&MO.calendar.connected)?'Today from '+E(MO.calendar.name||'your calendar'):'Connect your calendar below'}</span></div>${sw(br.parts.calendar!==false,'data-br="calendar"')}</div>
+      <div class="row"><div class="l"><b>Email</b><span>${(MO&&MO.mail&&MO.mail.connected)?'Unread and important mail':'Connect your mailbox below'}</span></div>${sw(br.parts.mail!==false,'data-br="mail"')}</div>
       <div class="row"><div class="l"><b>Your trips</b><span>Traffic on your way to work, the gym, anywhere you go often</span></div>${sw(br.parts.commute!==false,'data-br="commute"')}</div>
       <div class="row"><div class="l"><b>Headlines</b><span>From the news sources you follow</span></div>${sw(br.parts.news!==false,'data-br="news"')}</div>
       <div class="row"><div class="l"><b>Torch rewards</b><span>${E((MO&&MO.torch_profile)?'What you can claim as '+MO.torch_profile:'Tell it your Torch profile name in the chat')}</span></div>${sw(br.parts.rewards!==false,'data-br="rewards"')}</div>
@@ -1887,6 +1905,7 @@ engineView=function(){
     </div>
     <div class="card rv"><h3>Reminders, alerts, trips, news</h3><p class="sub">Set them in the chat. It messages you in Telegram when it is time.</p>
       <div class="mem" id="moList">${moList()}</div></div>
+    ${moMailCard()}
     ${moModelCard()}
     <div class="card rv"><h3>Memory</h3><p class="sub">What Your Engine remembers about you. Delete anything, any time.</p>
       <div class="row"><div class="l"><b>Remember new things</b><span>${mem.paused?'Paused. Nothing new gets saved.':'On. It saves what matters.'}</span></div>${sw(!mem.paused,'data-mem="pause"')}</div>
@@ -1970,6 +1989,59 @@ act=async function(a){
 };
 const _load2=load;
 load=async function(){await _load2();supLink();await moLoad();moTabBeta();};
+
+/* ---------- 2.36 email and calendar ---------- */
+const MAIL_PROV=[['gmail','Gmail','https://myaccount.google.com/apppasswords','Google account, Security, 2-Step Verification on, then App passwords. Create one called OddsEngine, copy the 16 letters.'],
+ ['icloud','iCloud','https://account.apple.com','Apple Account, Sign-In and Security, App-Specific Passwords, create one.'],
+ ['gmx','GMX','https://www.gmx.net','GMX settings, POP3 and IMAP: allow access. For 2-factor accounts create an app password.'],
+ ['webde','web.de','https://web.de','web.de settings, POP3/IMAP: allow access. For 2-factor accounts create an app password.'],
+ ['yahoo','Yahoo','https://login.yahoo.com/account/security','Account security, Generate app password.'],
+ ['outlook','Outlook','https://account.microsoft.com/security','Security, Advanced security options, App passwords. Some Microsoft accounts no longer allow this.']];
+let MAIL_P='gmail';
+const MAIL_PRIV=`<details class="mo-priv"><summary>What happens with your mail</summary><ul>
+  <li>Your Engine reads your inbox only when you ask, plus a quick look at sender and subject every 10 minutes for important-mail alerts.</li>
+  <li>We do not store your emails. Your chat keeps your last 16 messages, New chat deletes them.</li>
+  <li>When you ask about a mail, its text goes to the AI model that writes the answer. Switch on "Sender and subject only" and no mail text is ever read.</li>
+  <li>Read only. It can save a draft, it can never send, delete or move anything.</li>
+  <li>Your app password is stored encrypted and deleted the moment you disconnect. You can also revoke it in your Google or Apple account at any time.</li></ul></details>`;
+function moMailCard(){
+  const m=(MO&&MO.mail)||{},c=(MO&&MO.calendar)||{};const p=MAIL_PROV.find(x=>x[0]===MAIL_P)||MAIL_PROV[0];
+  const mailBox=m.connected?`<div class="row"><div class="l"><b>${E(m.email)}</b><span>${m.error?E(m.error):'Connected. Read only, drafts allowed, never sends or deletes.'}</span></div><button class="btn btn-sm" data-act="mailoff">Disconnect</button></div>
+      <div class="row"><div class="l"><b>Important mail right away</b><span>Bills, payments, deadlines, security mails in Telegram</span></div>${sw(m.watch!==false,'data-mailwatch="1"')}</div>
+      <div class="row"><div class="l"><b>Sender and subject only</b><span>Your Engine never reads the text of a mail. Alerts and the briefing still work.</span></div>${sw(!!m.headers_only,'data-mailhead="1"')}</div>
+      ${MAIL_PRIV}`
+    : m.available===false?`<p class="note">Email switches on soon.</p>`
+    : `<div class="mo-mail"><div class="row"><div class="l"><b>Provider</b><span>Use an app password, not your normal password</span></div><select id="mailProv" class="mo-sel">${MAIL_PROV.map(x=>`<option value="${x[0]}" ${x[0]===MAIL_P?'selected':''}>${x[1]}</option>`).join('')}</select></div>
+      <p class="note">${E(p[3])} <a href="${p[2]}" target="_blank" rel="noopener">Open ${E(p[1])}</a></p>
+      <input id="mailAdr" type="email" autocomplete="email" placeholder="you@${p[0]==='webde'?'web.de':p[0]==='icloud'?'icloud.com':p[0]+'.com'}" aria-label="Email address">
+      <input id="mailPw" type="password" autocomplete="off" placeholder="App password" aria-label="App password">
+      <button class="btn btn-g btn-sm" data-act="mailon">Connect mailbox</button>
+      ${MAIL_PRIV}</div>`;
+  const calBox=c.connected?`<div class="row"><div class="l"><b>${E(c.name||'Calendar')}</b><span>Read only. Reminders before events, with traffic when a place is set.</span></div><button class="btn btn-sm" data-act="caloff">Disconnect</button></div>`
+    : `<div class="mo-mail"><p class="note">Paste the secret iCal address. Google Calendar: Settings, your calendar, Secret address in iCal format. iCloud: share the calendar as public. Outlook: Settings, Shared calendars, Publish, ICS link.</p>
+      <input id="calUrl" type="url" placeholder="https://… or webcal://…" aria-label="Calendar link">
+      <button class="btn btn-g btn-sm" data-act="calon">Connect calendar</button></div>`;
+  return `<div class="card rv"><h3>Email and calendar</h3><p class="sub">Ask "what's new in my inbox", "draft a reply to the bank", "what's on tomorrow". Both show up in your morning briefing.</p>
+    <h4 class="mo-h4">Email</h4>${mailBox}<h4 class="mo-h4">Calendar</h4>${calBox}</div>`;
+}
+const _bind3=bind;
+bind=function(){
+  _bind3();
+  const mp=$('#mailProv');if(mp)mp.onchange=()=>{MAIL_P=mp.value;render();};
+  document.querySelectorAll('[data-mailhead]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({headers_only:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.headers_only=on;toast(on?'Only sender and subject from now on':'Your Engine can read mail text when you ask');}catch(e){toast('Could not save: '+e.message);}});
+  document.querySelectorAll('[data-mailwatch]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({watch:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.watch=on;toast(on?'Important mail goes to Telegram':'Mail alerts off');}catch(e){toast('Could not save: '+e.message);}});
+};
+const _act3=act;
+act=async function(a,el){
+  if(a==='mailon'){const email=($('#mailAdr')||{}).value||'',pw=($('#mailPw')||{}).value||'';if(!email||!pw){toast('Email and app password');return;}
+    try{const r=await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({provider:MAIL_P,email,password:pw})});if(MO)MO.mail=r.mail;toast('Mailbox connected');render();}catch(e){toast(e.message);}return;}
+  if(a==='mailoff'){if(!(await ask('Your Engine forgets the app password right away. You can also delete the app password in your account.',{title:'Disconnect mailbox?',ok:'Disconnect'})))return;
+    try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({disconnect:true})});if(MO)MO.mail={connected:false,available:true};toast('Mailbox disconnected');render();}catch(e){toast(e.message);}return;}
+  if(a==='calon'){const url=($('#calUrl')||{}).value||'';if(!url){toast('Paste the calendar link');return;}
+    try{const r=await api('/v1/engine/agent/calendar',{method:'POST',body:JSON.stringify({url})});if(MO)MO.calendar=r.calendar;toast('Calendar connected');render();}catch(e){toast(e.message);}return;}
+  if(a==='caloff'){try{await api('/v1/engine/agent/calendar',{method:'POST',body:JSON.stringify({disconnect:true})});if(MO)MO.calendar={connected:false};toast('Calendar disconnected');render();}catch(e){toast(e.message);}return;}
+  return _act3(a,el);
+};
 
 /* ---------- load ---------- */
 function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Only you see this view. Visitors see Chat, Models and Account only when the ai switch is on.';document.body.appendChild(b);}
