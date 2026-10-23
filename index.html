@@ -619,6 +619,40 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 .mo-supf{display:inline-block;margin-top:10px;cursor:pointer;font-size:13.5px;color:var(--g,#2ef08c);border:1px dashed rgba(46,240,140,.45);border-radius:12px;padding:9px 12px}
 .mo-supp{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.mo-supp img{width:72px;height:72px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 
+/* ---------- 2.35 own dropdown ---------- */
+.oesel{position:relative;display:inline-flex;min-width:0;vertical-align:middle}
+.oesel.mo-sel{height:auto;border:0;background:none;padding:0}
+.mtools .oesel{flex:0 0 auto;min-width:210px}
+.pgtop .oesel{flex:1}
+.pg .oesel{width:100%}
+.oesel>select.oesel-n{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none}
+.oesel-b{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;height:46px;padding:0 14px 0 16px;border-radius:14px;border:1px solid var(--line2);background:linear-gradient(180deg,rgba(18,30,24,.92),rgba(8,14,11,.92));color:var(--tx);font-weight:600;font-size:15px;cursor:pointer;text-align:left;transition:border-color .2s,box-shadow .25s,background .2s}
+.oesel.mo-sel .oesel-b{height:40px;border-radius:12px;font-size:14px}
+.oesel-b span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oesel-b i{flex:0 0 auto;width:10px;height:10px;border-right:2px solid var(--g);border-bottom:2px solid var(--g);transform:translateY(-3px) rotate(45deg);transition:transform .25s}
+.oesel-b:hover,.oesel-b:focus-visible,.oesel.open .oesel-b{border-color:rgba(34,240,138,.55);box-shadow:0 0 0 3px rgba(34,240,138,.12),0 8px 30px rgba(34,240,138,.12);outline:none}
+.oesel.open .oesel-b i{transform:translateY(2px) rotate(-135deg)}
+.oesel-l{position:fixed;z-index:200;min-width:220px;max-height:300px;overflow:auto;padding:6px;border-radius:16px;border:1px solid rgba(34,240,138,.3);background:linear-gradient(180deg,rgba(16,28,22,.98),rgba(6,12,9,.98));box-shadow:0 22px 60px rgba(0,0,0,.65),0 0 40px rgba(34,240,138,.1);backdrop-filter:blur(12px);opacity:0;transform:translateY(-6px) scale(.98);transform-origin:top;pointer-events:none;transition:opacity .16s,transform .18s cubic-bezier(.2,.8,.2,1)}
+.oesel-l.up{transform-origin:bottom;transform:translateY(6px) scale(.98)}
+.oesel>.oesel-l{display:none}
+.oesel-l.open{opacity:1;transform:none;pointer-events:auto}
+.oesel-o{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;font-size:14.5px;color:var(--dim);cursor:pointer;transition:background .15s,color .15s}
+.oesel-o:hover,.oesel-o.hi{background:rgba(34,240,138,.09);color:var(--tx)}
+.oesel-o.on{background:rgba(34,240,138,.14);color:var(--g2);font-weight:600}
+.oesel-o.off{opacity:.4;pointer-events:none}
+.oesel-o em{font-style:normal;color:var(--g)}
+.oesel-l::-webkit-scrollbar{width:8px}.oesel-l::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px}
+@media(max-width:640px){.mtools .oesel{min-width:150px}.oesel-b{font-size:14px}}
+
+/* ---------- wallet picker ---------- */
+.oewal-list{display:grid;gap:8px;margin:16px 0 4px;text-align:left}
+.oewal-b{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line2);background:rgba(255,255,255,.04);color:var(--tx);font-weight:600;font-size:15px;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.oewal-b img{width:32px;height:32px;border-radius:9px;background:#fff1}
+.oewal-b span{flex:1}
+.oewal-b i{font-style:normal;color:var(--g);opacity:.6;transition:transform .2s,opacity .2s}
+.oewal-b:hover,.oewal-b:focus-visible{border-color:rgba(34,240,138,.55);background:rgba(34,240,138,.08);outline:none;transform:translateY(-1px)}
+.oewal-b:hover i{opacity:1;transform:translateX(3px)}
+
 </style>
 </head>
 <body>
@@ -1047,11 +1081,12 @@ async function act(a){
   if(a==='cmpclear'){CMP=[];renderModels();cmpBar();}
   if(a==='closesheet')$('#sheet').classList.remove('show');
   if(a==='more'){MF.n+=innerWidth<700?12:999;renderModels();}
-  if(a==='logout'){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(e){}ME=null;await load();toast('Disconnected');}
+  if(a==='logout'){window.OE_ETH=null;TOKEN='';try{localStorage.removeItem('oe_engine');}catch(e){}ME=null;await load();toast('Disconnected');}
 }
 async function connect(){
   if(DEMO){toast('Preview mode');return;}
-  const eth=window.ethereum;
+  const eth=await oeWallet();
+  if(!eth&&typeof OE_WALLETS!=='undefined'&&OE_WALLETS.length>1)return;
   if(!eth){const u=location.host+location.pathname+location.hash;toast('No wallet found in this browser');
     $('#sheetIn').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0;font-family:var(--disp)">Open in your wallet</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>
     <p class="sub" style="margin-top:10px">Connecting needs a wallet browser. Open this page in one of these apps, then tap Connect again.</p>
@@ -1242,6 +1277,79 @@ function chatBind(){
     ta.oninput=()=>{ta.style.height='auto';ta.style.height=Math.min(200,ta.scrollHeight)+'px';};
     ta.onpaste=async e=>{const its=[...(e.clipboardData||{}).items||[]].filter(i=>i.type.startsWith('image/'));if(!its.length)return;e.preventDefault();for(const it of its.slice(0,4-CH.att.length)){try{CH.att.push(await shrink(it.getAsFile()));}catch(_){}}render();};
     f.onsubmit=e=>{e.preventDefault();const t=ta.value.trim();if(!t&&!CH.att.length)return;ta.value='';chatSend(t);};}
+}
+
+/* =================== 2.35: own dropdowns and wallet picker =================== */
+/* Every <select> on the page becomes our own dropdown. The real select stays hidden
+   underneath, so all existing onchange handlers keep working. */
+(function(){
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  function closeAll(except){document.querySelectorAll('.oesel.open').forEach(w=>{if(w!==except&&w._shut)w._shut();});}
+  function enh(s){
+    if(s._oe||s.closest('.oesel'))return;s._oe=1;
+    const w=document.createElement('div');
+    w.className='oesel'+[...s.classList].filter(c=>c!=='oesel-n').map(c=>' '+c).join('');
+    const b=document.createElement('button');b.type='button';b.className='oesel-b';
+    b.setAttribute('aria-haspopup','listbox');b.setAttribute('aria-expanded','false');
+    if(s.getAttribute('aria-label'))b.setAttribute('aria-label',s.getAttribute('aria-label'));
+    const l=document.createElement('div');l.className='oesel-l';l.setAttribute('role','listbox');
+    s.parentNode.insertBefore(w,s);w.appendChild(s);w.appendChild(b);w.appendChild(l);
+    s.classList.add('oesel-n');s.tabIndex=-1;s.setAttribute('aria-hidden','true');
+    let hi=s.selectedIndex;
+    const sync=()=>{const o=s.options[s.selectedIndex];b.innerHTML=`<span>${o?esc(o.text):''}</span><i aria-hidden="true"></i>`;};
+    const build=()=>{l.innerHTML=[...s.options].map((o,i)=>`<div role="option" class="oesel-o${i===s.selectedIndex?' on':''}${i===hi?' hi':''}${o.disabled?' off':''}" data-i="${i}" aria-selected="${i===s.selectedIndex}"><span>${esc(o.text)}</span>${i===s.selectedIndex?'<em aria-hidden="true">✓</em>':''}</div>`).join('');
+      const h=l.querySelector('.hi')||l.querySelector('.on');if(h)h.scrollIntoView({block:'nearest'});};
+    const place=()=>{const r=b.getBoundingClientRect();const up=innerHeight-r.bottom<280&&r.top>innerHeight-r.bottom;
+      const wd=Math.max(r.width,220);let x=r.right-wd;if(x<8)x=Math.min(r.left,innerWidth-wd-8);
+      l.style.left=Math.max(8,x)+'px';l.style.width=wd+'px';
+      if(up){l.style.top='';l.style.bottom=(innerHeight-r.top+8)+'px';l.style.maxHeight=Math.min(300,r.top-16)+'px';}
+      else{l.style.bottom='';l.style.top=(r.bottom+8)+'px';l.style.maxHeight=Math.min(300,innerHeight-r.bottom-16)+'px';}
+      l.classList.toggle('up',up);};
+    const open=()=>{closeAll(w);hi=s.selectedIndex;build();document.body.appendChild(l);place();w.classList.add('open');requestAnimationFrame(()=>l.classList.add('open'));b.setAttribute('aria-expanded','true');};
+    const shut=()=>{w.classList.remove('open');l.classList.remove('open');b.setAttribute('aria-expanded','false');setTimeout(()=>{if(!w.classList.contains('open')&&l.parentNode===document.body)w.appendChild(l);},180);};
+    w._shut=shut;
+    const pick=i=>{const o=s.options[i];if(!o||o.disabled)return;if(i!==s.selectedIndex){s.selectedIndex=i;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));}sync();shut();b.focus();};
+    b.addEventListener('click',e=>{e.stopPropagation();w.classList.contains('open')?shut():open();});
+    l.addEventListener('click',e=>{e.stopPropagation();const o=e.target.closest('.oesel-o');if(o)pick(+o.dataset.i);});
+    b.addEventListener('keydown',e=>{
+      const isOpen=w.classList.contains('open');const n=s.options.length;
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();if(!isOpen){open();return;}hi=Math.max(0,Math.min(n-1,hi+(e.key==='ArrowDown'?1:-1)));build();}
+      else if(e.key==='Enter'||e.key===' '){e.preventDefault();isOpen?pick(hi):open();}
+      else if(e.key==='Escape'){shut();}
+      else if(e.key==='Tab'){shut();}
+    });
+    s.addEventListener('change',sync);
+    new MutationObserver(sync).observe(s,{childList:true,subtree:true,attributes:true});
+    sync();
+  }
+  document.addEventListener('click',()=>closeAll());
+  addEventListener('resize',()=>closeAll());
+  addEventListener('scroll',e=>{if(e.target&&e.target.closest&&e.target.closest('.oesel-l'))return;closeAll();},true);
+  const run=()=>document.querySelectorAll('select:not(.oesel-n)').forEach(enh);
+  new MutationObserver(run).observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+})();
+
+/* Wallet picker: when more than one wallet is installed, the visitor picks it in our own
+   window instead of whatever the browser grabs first (EIP-6963). */
+const OE_WALLETS=[];
+addEventListener('eip6963:announceProvider',e=>{const d=e.detail;if(d&&d.info&&d.provider&&!OE_WALLETS.some(w=>w.info.uuid===d.info.uuid))OE_WALLETS.push(d);});
+try{dispatchEvent(new Event('eip6963:requestProvider'));}catch(e){}
+function oeWallet(){
+  return new Promise(res=>{
+    if(window.OE_ETH){res(window.OE_ETH);return;}
+    if(OE_WALLETS.length<2){res(OE_WALLETS[0]?OE_WALLETS[0].provider:window.ethereum);return;}
+    const d=document.createElement('div');d.className='oeask oewal';
+    d.innerHTML=`<div class="oeask-bg"></div><div class="oeask-box" role="dialog" aria-modal="true" aria-labelledby="oewT"><div class="oeask-ring"></div><h3 id="oewT">Choose your wallet</h3><p>Pick the one that holds your $ODDS.</p>
+      <div class="oewal-list">${OE_WALLETS.map((w,i)=>`<button class="oewal-b" data-i="${i}"><img src="${E(w.info.icon)}" alt="" width="32" height="32"><span>${E(w.info.name)}</span><i aria-hidden="true">→</i></button>`).join('')}</div>
+      <div class="oeask-btns"><button class="btn" data-x="1">Cancel</button></div></div>`;
+    document.body.appendChild(d);requestAnimationFrame(()=>d.classList.add('on'));
+    const done=v=>{d.classList.remove('on');document.removeEventListener('keydown',kd);setTimeout(()=>d.remove(),200);res(v);};
+    const kd=e=>{if(e.key==='Escape')done(null);};document.addEventListener('keydown',kd);
+    d.querySelector('.oeask-bg').onclick=()=>done(null);d.querySelector('[data-x]').onclick=()=>done(null);
+    d.querySelectorAll('.oewal-b').forEach(b=>b.onclick=()=>{const p=OE_WALLETS[+b.dataset.i].provider;window.OE_ETH=p;done(p);});
+    setTimeout(()=>{const f=d.querySelector('.oewal-b');if(f)f.focus();},30);
+  });
 }
 
 const BUY_ODDS='https://app.torchpad.fun/trade/robinhood/0x9c87B4cfa21266d1638f437c96dBe1012CB81111';
@@ -1486,8 +1594,8 @@ function topupBox(){
     const amt=Number(QUOTE.odds).toLocaleString('en-US',{maximumFractionDigits:2});
     return `<h3>Top up ${usd(QUOTE.usd)}</h3>
      <div class="qbox">${left>0?`<p>Send exactly <b>${amt} $ODDS</b>. You get <b>${usd(QUOTE.usd)}</b>, price held for <b id="qLeft">${mm}:${String(ss).padStart(2,'0')}</b>.</p>`:'<p>This price ran out. Pick an amount again.</p>'}
-     ${left>0&&window.ethereum?`<button class="btn btn-g" data-act="qpay">Send with my wallet</button>`:''}
-     ${left>0?`<details class="qman"${window.ethereum?'':' open'}><summary>Send it by hand (Torch wallet)</summary>
+     ${left>0&&(window.OE_ETH||window.ethereum||(typeof OE_WALLETS!=='undefined'&&OE_WALLETS.length))?`<button class="btn btn-g" data-act="qpay">Send with my wallet</button>`:''}
+     ${left>0?`<details class="qman"${(window.OE_ETH||window.ethereum)?'':' open'}><summary>Send it by hand (Torch wallet)</summary>
        <p class="note">Send from ${E(m.short)} or a Torch wallet you linked below.</p>
        <div class="addr"><code>${amt}</code><button class="copy" data-copy="${E(String(QUOTE.odds))}">Copy amount</button></div>
        <div class="addr"><code>${E(QUOTE.to)}</code><button class="copy" data-copy="${E(QUOTE.to)}">Copy address</button></div></details>`:''}
@@ -1534,7 +1642,7 @@ function quoteTick(){
     if(el)el.textContent=Math.floor(left/60000)+':'+String(Math.floor(left/1000)%60).padStart(2,'0');},1000);
 }
 async function qPay(){
-  const eth=window.ethereum;if(!eth||!QUOTE)return;
+  const eth=window.OE_ETH||await oeWallet();if(!eth||!QUOTE)return;
   const w=$('#qWait');
   try{
     const [from]=await eth.request({method:'eth_requestAccounts'});
