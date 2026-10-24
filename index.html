@@ -2139,9 +2139,9 @@ async function moLoad(){
   try{MO=await api('/v1/engine/agent');MO_LOG=[];
     if(typeof MODELS!=='undefined'&&!MODELS.length&&typeof loadModels==='function')await loadModels();
     if(MO.inbox&&MO.inbox.length)MO.inbox.forEach(x=>toast(x.text.split('\n')[0]));
-    if(MO.live&&!FEAT.engine){FEAT.engine=true;}
+    const neu=MO.live&&!FEAT.engine;if(neu){FEAT.engine=true;}
     const off=-new Date().getTimezoneOffset()/60;if(MO.live&&MO.utc_offset_hours!==off){api('/v1/engine/agent/briefing',{method:'POST',body:JSON.stringify({utc_offset_hours:off})}).then(()=>{MO.utc_offset_hours=off;}).catch(()=>{});}
-    if(TAB==='engine')render();}catch(e){}
+    if(TAB==='engine'||neu)render();}catch(e){}
 }
 function moScroll(){const l=$('#moLog');if(l)l.scrollTop=l.scrollHeight;}
 let MO_IMG=[];
