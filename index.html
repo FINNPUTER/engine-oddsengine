@@ -865,6 +865,8 @@ body.rp-open{overflow:hidden}
 .rp-map .gx-cl{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 @media (max-width:600px){.rp-map .gx{height:400px}.rp-map .gx-cl{grid-template-columns:1fr}}
 
+.rp-stats .rp-sub{display:block;margin-top:4px;font-size:12px;color:var(--mute,#8a9a92);font-family:inherit}
+
 </style>
 </head>
 <body>
@@ -2108,6 +2110,8 @@ engineView=function(){
       <div class="row"><div class="l"><b>Crypto Edition</b><span>Prices and windows with an edge</span></div>${sw(br.parts.crypto,'data-br="crypto"')}</div>
       <div class="row"><div class="l"><b>Your bags</b><span>Value on Robinhood Chain, change since yesterday</span></div>${sw(br.parts.bags,'data-br="bags"')}</div>
       <div class="row"><div class="l"><b>Moving on Torch</b><span>Launches with the most volume</span></div>${sw(br.parts.moving,'data-br="moving"')}</div>
+      <div class="row"><div class="l"><b>Your coins</b><span>${(MO&&MO.coins&&MO.coins.length)?E(MO.coins.join(', ')):'Pick the coins you want every morning'}</span></div>${sw(br.parts.coins!==false,'data-br="coins"')}</div>
+      <div class="mo-mail"><input id="moCoins" maxlength="200" placeholder="TORCH, ODDS, SOL, BTC or a contract" value="${E(((MO&&MO.coins)||[]).join(', '))}" aria-label="Your coins"><button class="btn btn-g btn-sm" data-act="coins">Save</button></div>
       <div class="row"><div class="l"><b>Stocks</b><span>${(MO&&MO.stocks&&MO.stocks.length)?E(moStk(MO.stocks)):'Pick your stocks and indices below'}</span></div>${sw(br.parts.stocks!==false,'data-br="stocks"')}</div>
       <div class="mo-mail"><input id="moStocks" maxlength="120" placeholder="AAPL, TSLA, NVDA, S&amp;P 500, DAX, Gold" value="${E(moStk((MO&&MO.stocks)||[]))}" aria-label="Your stocks"><button class="btn btn-g btn-sm" data-act="stocks">Save</button></div>
       <p class="note" style="margin-top:8px">Or just tell it in the chat what you want in your briefing, like "only weather, calendar and my stocks". It does exactly that.</p>
@@ -2168,12 +2172,25 @@ async function moSend(t){
     MO_LOG.push({role:'assistant',content:r.text,cost:r.trial?null:r.cost_usd,tools:r.tools,images:r.images||[],data:r.image_data||[],cards:r.cards||[]});
     if(r.trial&&MO&&MO.access){MO.access.trial_left=r.trial_left;}
     if(r.open_report&&innerWidth>700)setTimeout(()=>{location.hash='#token='+r.open_report;},350);
+    if(r.open_report&&r.deep_running)moDeepWait(r.open_report);
     if(ME&&ME.balance&&r.balance_usd!=null)ME.balance.usd=r.balance_usd;
     const ag=await api('/v1/engine/agent').catch(()=>null);if(ag){const h=MO_LOG;MO=ag;MO_LOG=h;const l=$('#moList');if(l){l.innerHTML=moList();moBindList();}}
     const me=await api('/v1/engine/me').catch(()=>null);if(me&&ME){ME.memory=me.memory;}
   }catch(e){MO_LOG.push({role:'assistant',content:(e&&e.message)||'Something went wrong.'});}
   MO_BUSY=false;setRing('idle');const l=$('#moLog');if(l){l.innerHTML=moMsgs();moScroll();}
 }
+/* 2.44: the deep scan lands in the web chat too, with a button straight into the full report and holder map */
+const MO_DEEP={};
+async function moDeepWait(q){if(MO_DEEP[q])return;MO_DEEP[q]=1;
+  for(let i=0;i<16;i++){await new Promise(r=>setTimeout(r,12000));
+    let r=null;try{r=await api('/v1/engine/scan?q='+encodeURIComponent(q));}catch(e){continue;}
+    if((r.deep||{}).state==='ready'){
+      MO_LOG.push({role:'assistant',content:`Deep scan for $${r.symbol||''} is in. Bundles, clusters and the holder map are ready in the full report.`,
+        cards:[{text:r.card||'',buttons:[[['Full report and holder map','#token='+q]]]}]});
+      const l=$('#moLog');if(l){l.innerHTML=moMsgs();moScroll();}
+      toast('Deep scan is in for $'+(r.symbol||''));delete MO_DEEP[q];return;}
+    if((r.deep||{}).state!=='running')break;}
+  delete MO_DEEP[q];}
 function moBindList(){document.querySelectorAll('[data-mrm]').forEach(b=>b.onclick=async()=>{const [kind,id]=b.dataset.mrm.split(':');b.closest('.it').remove();await save('/v1/engine/agent/remove',{kind,id});toast('Removed');});}
 const _bind2=bind;
 bind=function(){
@@ -2264,6 +2281,7 @@ bind=function(){
   document.querySelectorAll('[data-news]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');b.disabled=true;if(await newsSet({slug:b.dataset.news,on,mode:'briefing'}))toast(on?'Added to your briefing. Switch to Instant for live posts':'Removed');b.disabled=false;});
   document.querySelectorAll('[data-newsmode]').forEach(s=>s.onchange=async()=>{const x=((MO&&MO.news_catalog)||[]).find(y=>y.slug===s.dataset.newsmode)||{};if(await newsSet({slug:s.dataset.newsmode,on:true,mode:s.value,keywords:(x.keywords||[]).join(', ')}))toast(s.value==='instant'?'Sent to your Telegram as it happens':'Collected in your morning briefing');});
   document.querySelectorAll('[data-act="newsadd"]').forEach(b=>b.onclick=async()=>{const v=(($('#moNewsAdd')||{}).value||'').trim();if(!v){toast('Paste a channel or RSS link');return;}b.disabled=true;if(await newsSet({source:v,on:true,mode:'briefing'}))toast('Added');b.disabled=false;});
+  document.querySelectorAll('[data-act="coins"]').forEach(b=>b.onclick=async()=>{const v=(($('#moCoins')||{}).value||'').trim();b.disabled=true;try{const r=await api('/v1/engine/agent/coins',{method:'POST',body:JSON.stringify({coins:v})});if(MO)MO.coins=r.coins;toast(r.now&&r.now.length?r.now.join('  '):'Saved');render();}catch(e){toast(e.message);}b.disabled=false;});
   document.querySelectorAll('[data-act="stocks"]').forEach(b=>b.onclick=async()=>{const v=(($('#moStocks')||{}).value||'').trim();b.disabled=true;try{const r=await api('/v1/engine/agent/stocks',{method:'POST',body:JSON.stringify({tickers:v})});if(MO)MO.stocks=r.stocks;toast(r.now&&r.now.length?r.now.join('  '):'Saved');render();}catch(e){toast(e.message);}b.disabled=false;});
   document.querySelectorAll('[data-act="torchon"]').forEach(b=>b.onclick=async()=>{const n=(($('#torchName')||{}).value||'').trim();if(!n){toast('Type your Torch profile name');return;}b.disabled=true;try{const r=await api('/v1/engine/agent/torch',{method:'POST',body:JSON.stringify({name:n})});if(MO)MO.torch_profile=r.profile;toast('Saved: '+r.profile);render();}catch(e){toast(e.message);}b.disabled=false;});
   document.querySelectorAll('[data-act="torchoff"]').forEach(b=>b.onclick=async()=>{try{await api('/v1/engine/agent/torch',{method:'POST',body:JSON.stringify({remove:true})});if(MO)MO.torch_profile=null;render();}catch(e){toast(e.message);}});
@@ -2384,18 +2402,21 @@ function rpAgo(ts){const s=Math.max(0,(Date.now()-Date.parse(ts))/1000);return s
 function rpEl(){let el=$('#rp');if(!el){el=document.createElement('div');el.id='rp';el.className='rp';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);}return el;}
 function rpHead(live){return `<div class="rp-face ${live?'live':''}" aria-hidden="true"><img src="robot-ring.webp" alt=""><i class="rp-eye"></i></div>`;}
 function rpPing(){const f=document.querySelector('.rp-face');if(!f)return;f.classList.remove('ping');void f.offsetWidth;f.classList.add('ping');}
-function rpClose(){if(typeof gxStop==='function')gxStop();const el=$('#rp');if(el)el.classList.remove('show');document.body.classList.remove('rp-open');clearInterval(RP_T);clearInterval(RP_FULL);RP_T=RP_FULL=null;RP=null;
+function rpClose(){if(typeof gxStop==='function')gxStop();const el=$('#rp');if(el)el.classList.remove('show');document.body.classList.remove('rp-open');clearInterval(RP_T);clearTimeout(RP_FULL);RP_T=RP_FULL=null;RP=null;
   if(/token=/.test(location.hash))history.replaceState(null,'',location.pathname+(TAB&&TAB!=='engine'?'#'+TAB:''));}
 function rpMsg(t,btn){const el=rpEl();el.innerHTML=`<div class="rp-in"><div class="rp-top">${rpHead(false)}<div class="rp-id"><h1>Live report</h1><p>${E(RP_Q.split(':').pop())}</p></div><div class="rp-act"><button class="x" data-rp="close" aria-label="Close">×</button></div></div><div class="rp-card rp-empty"><p>${t}</p>${btn||''}</div></div>`;el.classList.add('show');document.body.classList.add('rp-open');rpBind();}
 async function rpOpen(q){
-  RP_Q=q;RP=null;clearInterval(RP_T);clearInterval(RP_FULL);
-  if(!connected()){rpMsg('Connect your wallet to open the live report. It is part of Your Engine.','<button class="btn btn-g" data-act="connect">Connect wallet</button>');return;}
+  RP_Q=q;RP=null;clearInterval(RP_T);clearTimeout(RP_FULL);
   rpMsg('<span class="typing"><i></i><i></i><i></i></span> Reading the chain…');
   try{RP=await api('/v1/engine/scan?q='+encodeURIComponent(q));}
-  catch(e){rpMsg(e.status===403?'The live report opens soon. Your Engine already sends the report in Telegram.':E(e.message||'Could not load this coin.'));return;}
+  catch(e){if(e.status===401){rpMsg('Connect your wallet to open the live report. It is part of Your Engine.','<button class="btn btn-g" data-act="connect">Connect wallet</button>');return;}
+    rpMsg(e.status===403?'The live report opens soon. Your Engine already sends the report in Telegram.':E(e.message||'Could not load this coin.'));return;}
   rpDraw();
-  RP_T=setInterval(rpTick,10000);RP_FULL=setInterval(async()=>{if(document.hidden||!RP)return;try{const r=await api('/v1/engine/scan?q='+encodeURIComponent(RP_Q));const tr=RP.trades;RP=r;if(!RP.trades||!RP.trades.length)RP.trades=tr;rpDraw(true);}catch(e){}},90000);
+  RP_T=setInterval(rpTick,10000);rpVoll();
 }
+/* 2.44: while the deep scan runs, refresh every 12 s so bundles, clusters and the holder map appear by themselves */
+function rpVoll(){clearTimeout(RP_FULL);const lauf=RP&&(RP.deep||{}).state==='running';
+  RP_FULL=setTimeout(async()=>{if(!RP)return;if(!document.hidden){try{const r=await api('/v1/engine/scan?q='+encodeURIComponent(RP_Q));const tr=RP.trades;const war=(RP.deep||{}).state;RP=r;if(!RP.trades||!RP.trades.length)RP.trades=tr;rpDraw(true);if(war==='running'&&(RP.deep||{}).state==='ready')toast('Deep scan is in: bundles, clusters and holder map');}catch(e){}}rpVoll();},lauf?12000:90000);}
 async function rpTick(){
   if(document.hidden||!RP||!RP.market||!RP.market.pair)return;
   try{const d=await api(`/v1/engine/scan/trades?chain=${encodeURIComponent(RP.chain)}&pair=${encodeURIComponent(RP.market.pair)}&token=${encodeURIComponent(RP.address)}&dev=${encodeURIComponent((RP.dev||{}).address||'')}`);
@@ -2481,10 +2502,10 @@ function rpDraw(keep){
   <div class="rp-top">${rpHead(true)}
     <div class="rp-id">${r.image?`<img class="rp-logo" src="${E(r.image)}" alt="" onerror="this.remove()">`:''}<div><h1>$${E(r.symbol||rpShort(r.address))}${r.name&&String(r.name).toLowerCase()!==String(r.symbol||'').toLowerCase()?` <span>${E(r.name)}</span>`:''}</h1>
       <p>${[r.chain_name,r.venue,r.age?r.age+' old':''].filter(Boolean).map(E).join(' · ')}</p></div></div>
-    <div class="rp-px"><b id="rpPx">${rpPx(m.price)}</b><span class="${(+ch.h1||0)>=0?'up':'dn'}">${ch.h1!=null?rpPct(ch.h1)+' 1h':''}${ch.h24!=null?' · '+rpPct(ch.h24)+' 24h':''}</span></div>
+    <div class="rp-px"><b id="rpPx">${rpPx(m.price)}</b>${ch.h1!=null?`<span class="${(+ch.h1||0)>=0?'up':'dn'}">${rpPct(ch.h1)} 1h</span>`:''}${ch.h24!=null?`<span class="${(+ch.h24||0)>=0?'up':'dn'}">${ch.h1!=null?' · ':''}${rpPct(ch.h24)} 24h</span>`:''}</div>
     <div class="rp-act"><button class="btn btn-sm" data-rp="watch">Watch it</button><button class="x" data-rp="close" aria-label="Close">×</button></div>
   </div>
-  <div class="rp-stats"><div><span>Market cap</span><b id="rpMc">${rpUsd(m.mcap)}</b></div><div><span>Liquidity</span><b id="rpLq">${rpUsd(m.liq)}</b></div><div><span>Volume 1h</span><b>${rpUsd(vol)}</b></div><div><span>1h buys / sells</span><b>${tx.buys!=null?tx.buys+' / '+tx.sells:'n/a'}</b></div><div><span>Holders</span><b>${sp.holders?(+sp.holders).toLocaleString('en-US'):'n/a'}</b></div></div>
+  <div class="rp-stats"><div><span>Market cap</span><b id="rpMc">${rpUsd(m.mcap)}</b></div><div><span>Liquidity</span><b id="rpLq">${rpUsd(m.liq)}</b></div><div><span>Volume 1h</span><b>${rpUsd(vol)}</b><small class="rp-sub">24h ${rpUsd(((m.vol||{}).h24))}</small></div><div><span>Buys / sells 1h</span><b>${tx.buys!=null?tx.buys+' / '+tx.sells:'n/a'}</b><small class="rp-sub">24h ${(((m.txns||{}).h24)||{}).buys!=null?m.txns.h24.buys+' / '+m.txns.h24.sells:'n/a'}</small></div><div><span>Holders</span><b>${sp.holders?(+sp.holders).toLocaleString('en-US'):'n/a'}</b></div></div>
   <div class="rp-grid">
     <div class="rp-card rp-verdict ${lv[1]}" style="grid-area:v"><div class="rp-vh"><i></i><h2>${E(v.title||lv[0])}</h2>${r.risk_score!=null?`<span class="mono">Score ${E(r.risk_score)}/100</span>`:''}</div><p>${E(v.reason||'')}</p>
       ${(v.bad||[]).length||(v.good||[]).length?`<div class="rp-gb">${(v.bad||[]).slice(0,5).map(x=>`<div class="b">${E(x)}</div>`).join('')}${(v.good||[]).slice(0,4).map(x=>`<div class="g">${E(x)}</div>`).join('')}</div>`:''}
