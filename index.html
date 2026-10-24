@@ -1711,7 +1711,7 @@ function modelsView(){
     <h1 class="rv d1"><span class="shiny">Every model.<br>One chat.</span></h1>
     <p class="lead rv d2">Claude, GPT, Gemini, Grok, DeepSeek and every other model worth using. Pick one with a tap, switch whenever you like.</p>
     <div class="payline rv d2"><span><i>✓</i>Pay only for what you use</span><span><i>✓</i>No subscription</span><span><i>✓</i>Top up from $1 in $ODDS</span></div>
-    <div class="hstats rv d2"><div><b data-cu="${n}">${n}</b><span>models</span></div><div><b>${c?cents(c):'n/a'}</b><span>cheapest message</span></div><div><b>${pct(myFee())}</b><span>${connected()&&ME.ai&&ME.ai.holder&&ME.ai.holder.markup<ME.ai.base_markup?'your fee as a holder':'fee, less if you hold $ODDS'}</span></div></div>
+    <div class="hstats rv d2"><div><b data-cu="${n}">${n}</b><span>models</span></div><div><b>${c?(c<0.01?(c*100<0.1?'<0.1':(c*100).toFixed(c*100<1?2:1))+'¢':cents(c)):'n/a'}</b><span>cheapest message</span></div><div><b>${pct(myFee())}</b><span>${connected()&&ME.ai&&ME.ai.holder&&ME.ai.holder.markup<ME.ai.base_markup?'your fee as a holder':'fee, less if you hold $ODDS'}</span></div></div>
     <div class="rv d3 hcta"><button class="btn btn-g" data-go="chat">Start chatting</button><button class="btn" data-go="ai">${connected()?'Top up':'Connect wallet'}</button><a class="btn" href="${BUY_ODDS}" target="_blank" rel="noopener">Get $ODDS</a></div>
   </section>
   <section class="rv" id="models"><div class="card">
