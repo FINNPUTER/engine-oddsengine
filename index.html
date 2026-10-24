@@ -2155,6 +2155,7 @@ async function moSend(t){
   try{const r=await api('/v1/engine/ask',{method:'POST',body:JSON.stringify({text:t,images:imgs})});
     MO_LOG.push({role:'assistant',content:r.text,cost:r.trial?null:r.cost_usd,tools:r.tools,images:r.images||[],data:r.image_data||[],cards:r.cards||[]});
     if(r.trial&&MO&&MO.access){MO.access.trial_left=r.trial_left;}
+    if(r.open_report&&innerWidth>700)setTimeout(()=>{location.hash='#token='+r.open_report;},350);
     if(ME&&ME.balance&&r.balance_usd!=null)ME.balance.usd=r.balance_usd;
     const ag=await api('/v1/engine/agent').catch(()=>null);if(ag){const h=MO_LOG;MO=ag;MO_LOG=h;const l=$('#moList');if(l){l.innerHTML=moList();moBindList();}}
     const me=await api('/v1/engine/me').catch(()=>null);if(me&&ME){ME.memory=me.memory;}
