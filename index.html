@@ -648,6 +648,9 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 .mo-att button{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);background:#08100c;color:var(--tx);cursor:pointer;line-height:1}
 .mo-m.u .mo-imgs img{max-width:220px}
 
+.mo-ng{margin:14px 0 2px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim2)}
+.mo-nr{display:flex;align-items:center;gap:8px}.mo-nr .mo-sel{min-width:0;padding:6px 8px}
+
 /* ---------- 2.35 own dropdown ---------- */
 .oesel{position:relative;display:inline-flex;min-width:0;vertical-align:middle}
 .oesel.mo-sel{height:auto;border:0;background:none;padding:0}
@@ -2105,10 +2108,16 @@ engineView=function(){
       <div class="row"><div class="l"><b>Crypto Edition</b><span>Prices and windows with an edge</span></div>${sw(br.parts.crypto,'data-br="crypto"')}</div>
       <div class="row"><div class="l"><b>Your bags</b><span>Value on Robinhood Chain, change since yesterday</span></div>${sw(br.parts.bags,'data-br="bags"')}</div>
       <div class="row"><div class="l"><b>Moving on Torch</b><span>Launches with the most volume</span></div>${sw(br.parts.moving,'data-br="moving"')}</div>
+      <div class="row"><div class="l"><b>Stocks</b><span>${(MO&&MO.stocks&&MO.stocks.length)?E(moStk(MO.stocks)):'Pick your stocks and indices below'}</span></div>${sw(br.parts.stocks!==false,'data-br="stocks"')}</div>
+      <div class="mo-mail"><input id="moStocks" maxlength="120" placeholder="AAPL, TSLA, NVDA, S&amp;P 500, DAX, Gold" value="${E(moStk((MO&&MO.stocks)||[]))}" aria-label="Your stocks"><button class="btn btn-g btn-sm" data-act="stocks">Save</button></div>
+      <p class="note" style="margin-top:8px">Or just tell it in the chat what you want in your briefing, like "only weather, calendar and my stocks". It does exactly that.</p>
       <div style="margin-top:12px"><button class="btn btn-sm" data-act="mobrief">Send me one now</button></div>
     </div>
     <div class="card rv"><h3>Reminders, alerts, trips, news</h3><p class="sub">Set them in the chat. It messages you in Telegram when it is time.</p>
       <div class="mem" id="moList">${moList()}</div></div>
+    <div class="card rv"><h3>News</h3><p class="sub">Pick your sources. Each one comes straight to your Telegram as it happens, or collected in your morning briefing.</p>
+      ${moNews()}
+      <div class="mo-mail" style="margin-top:10px"><input id="moNewsAdd" maxlength="200" placeholder="Any public Telegram channel (@name) or RSS link" aria-label="Add a news source"><button class="btn btn-g btn-sm" data-act="newsadd">Add</button></div></div>
     <div class="card rv"><h3>From OddsEngine</h3><p class="sub">What Your Engine sends you on its own. Switch off anything you do not want.</p>
       <div class="row"><div class="l"><b>OddsEngine news</b><span>What the team posts in the channel and on X, straight to your Telegram</span></div>${sw(!MO||MO.official_news!==false,'data-set="official_news"')}</div>
       <div class="row"><div class="l"><b>Check-ins</b><span>Asks how your training, meeting or appointment went</span></div>${sw(!MO||MO.check_ins!==false,'data-set="check_ins"')}</div>
@@ -2134,6 +2143,9 @@ engineView=function(){
   </div></section>`;
 };
 
+function moStk(l){const m={'^GSPC':'S&P 500','^IXIC':'Nasdaq','^DJI':'Dow','^GDAXI':'DAX','^N225':'Nikkei','^FTSE':'FTSE','GC=F':'Gold','CL=F':'Oil','^VIX':'VIX'};return l.map(x=>m[x]||x.replace('^','')).join(', ');}
+function moNews(){const L=(MO&&MO.news_catalog)||[];if(!L.length)return '<p class="note">Log in to pick your news.</p>';const g={};L.forEach(x=>(g[x.group]=g[x.group]||[]).push(x));
+  return Object.entries(g).map(([k,xs])=>`<p class="mo-ng">${E(k)}</p>`+xs.map(x=>`<div class="row"><div class="l"><b>${E(x.name)}</b><span>${x.on?(x.mode==='instant'?'As it happens':'In your briefing')+(x.keywords&&x.keywords.length?' · only '+E(x.keywords.join(', ')):''):'Off'}</span></div><div class="mo-nr">${x.on?`<select class="mo-sel" data-newsmode="${E(x.slug)}"><option value="instant" ${x.mode==='instant'?'selected':''}>Instant</option><option value="briefing" ${x.mode!=='instant'?'selected':''}>Briefing</option></select>`:''}${sw(!!x.on,'data-news="'+E(x.slug)+'"')}</div></div>`).join('')).join('');}
 async function moLoad(){
   if(!connected()||DEMO)return;
   try{MO=await api('/v1/engine/agent');MO_LOG=[];
@@ -2248,6 +2260,11 @@ bind=function(){
   _bind3();
   const mp=$('#mailProv');if(mp)mp.onchange=()=>{MAIL_P=mp.value;render();};
   document.querySelectorAll('[data-mailhead]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({headers_only:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.headers_only=on;toast(on?'Only sender and subject from now on':'Your Engine can read mail text when you ask');}catch(e){toast('Could not save: '+e.message);}});
+  const newsSet=async(body)=>{try{const r=await api('/v1/engine/agent/news',{method:'POST',body:JSON.stringify(body)});if(MO)MO.news_catalog=r.catalog;render();return true;}catch(e){toast(e.message);return false;}};
+  document.querySelectorAll('[data-news]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');b.disabled=true;if(await newsSet({slug:b.dataset.news,on,mode:'briefing'}))toast(on?'Added to your briefing. Switch to Instant for live posts':'Removed');b.disabled=false;});
+  document.querySelectorAll('[data-newsmode]').forEach(s=>s.onchange=async()=>{const x=((MO&&MO.news_catalog)||[]).find(y=>y.slug===s.dataset.newsmode)||{};if(await newsSet({slug:s.dataset.newsmode,on:true,mode:s.value,keywords:(x.keywords||[]).join(', ')}))toast(s.value==='instant'?'Sent to your Telegram as it happens':'Collected in your morning briefing');});
+  document.querySelectorAll('[data-act="newsadd"]').forEach(b=>b.onclick=async()=>{const v=(($('#moNewsAdd')||{}).value||'').trim();if(!v){toast('Paste a channel or RSS link');return;}b.disabled=true;if(await newsSet({source:v,on:true,mode:'briefing'}))toast('Added');b.disabled=false;});
+  document.querySelectorAll('[data-act="stocks"]').forEach(b=>b.onclick=async()=>{const v=(($('#moStocks')||{}).value||'').trim();b.disabled=true;try{const r=await api('/v1/engine/agent/stocks',{method:'POST',body:JSON.stringify({tickers:v})});if(MO)MO.stocks=r.stocks;toast(r.now&&r.now.length?r.now.join('  '):'Saved');render();}catch(e){toast(e.message);}b.disabled=false;});
   document.querySelectorAll('[data-act="torchon"]').forEach(b=>b.onclick=async()=>{const n=(($('#torchName')||{}).value||'').trim();if(!n){toast('Type your Torch profile name');return;}b.disabled=true;try{const r=await api('/v1/engine/agent/torch',{method:'POST',body:JSON.stringify({name:n})});if(MO)MO.torch_profile=r.profile;toast('Saved: '+r.profile);render();}catch(e){toast(e.message);}b.disabled=false;});
   document.querySelectorAll('[data-act="torchoff"]').forEach(b=>b.onclick=async()=>{try{await api('/v1/engine/agent/torch',{method:'POST',body:JSON.stringify({remove:true})});if(MO)MO.torch_profile=null;render();}catch(e){toast(e.message);}});
   const lg=$('#moLang');if(lg)lg.onchange=async()=>{try{await api('/v1/engine/settings',{method:'POST',body:JSON.stringify({language:lg.value})});if(MO)MO.language=lg.value==='auto'?null:lg.value;toast('Language saved');}catch(e){toast('Could not save: '+e.message);}};
