@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Docs · OddsEngine AI</title>
+<title>Docs · OddsEngine</title>
 <meta name="description" content="How to use OddsEngine AI: chat, models, API keys, prices, top up with $ODDS.">
 <link rel="icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,6 +38,16 @@ th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;verti
 th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim2);font-weight:500}
 .box{padding:14px 16px;border-radius:16px;border:1px solid rgba(34,240,138,.35);background:rgba(34,240,138,.05);margin:14px 0}
 ol li,ul li{margin:4px 0}
+main{min-width:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:12px;margin:16px 0 6px}
+.card{position:relative;padding:16px;border-radius:18px;border:1px solid var(--line);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));overflow:hidden;transition:border-color .25s,transform .25s}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(34,240,138,.14),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none}
+.card:hover{border-color:rgba(34,240,138,.45);transform:translateY(-2px)}.card:hover::before{opacity:1}
+.card b{display:block;font-family:var(--disp);font-size:13.5px;margin-bottom:6px}.card span{color:var(--dim);font-size:14px;line-height:1.5}
+.card i{font-style:normal;font-size:20px;display:block;margin-bottom:8px}
+.msg{font-family:var(--body);background:#182533;border:1px solid rgba(255,90,95,.35);border-radius:14px 14px 14px 4px;padding:12px 14px;margin:12px 0;font-size:14.5px;line-height:1.5;color:#e9f2ee;max-width:520px}
+.msg.ok{border-color:rgba(34,240,138,.4)}
+.rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}.rv.on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.card{transition:none}}
 .eb{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 [hidden]{display:none!important}
 </style>
@@ -46,15 +56,77 @@ ol li,ul li{margin:4px 0}
 <div class="top"><a class="b" href="./"><svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true"><path d="M44.5 15.2A20 20 0 1 0 49 19.6" fill="none" stroke="#22f08a" stroke-width="9"/></svg>ODDSENGINE</a><span class="sp"></span><a class="btn" href="./#chat">Open chat</a></div>
 <div class="lay">
 <nav class="toc" aria-label="Contents">
+  <a href="#engine">Your Engine</a><a href="#scan">Scans</a><a href="#chart">Charts and X</a><a href="#guard">Wallet Guard</a><a href="#bag">Bag watch</a><a href="#briefing">Briefing</a><a href="#groups">In your group</a><a href="#ai">OddsEngine AI</a>
   <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
   <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
 </nav>
 <main>
 <span class="eb">Docs</span>
-<h1>OddsEngine AI</h1>
+<h1>Your Engine</h1>
+<p class="lead">Your own agent in Telegram and on engine.oddsengine.live. It scans any coin, reads charts, watches your wallet and your bags, and briefs you every morning. Free scans, everything else is paid per answer from your balance.</p>
+
+<h2 id="engine" class="rv">What it does</h2>
+<div class="cards rv">
+<div class="card"><i>🔎</i><b>Scan any coin</b><span>Paste a contract, a chart link or a $ticker. Bundles, clusters, dev, locks, token forwards and a live holder map.</span></div>
+<div class="card"><i>📈</i><b>Read the chart</b><span>Trend, RSI, MACD, support and resistance from real candles. Facts, no guessing.</span></div>
+<div class="card"><i>🛡️</i><b>Wallet Guard</b><span>An alert in seconds when your wallet approves an unknown spender. Revoke in one tap.</span></div>
+<div class="card"><i>⚠️</i><b>Bag watch</b><span>Dev sells, wallet groups dumping, liquidity pulled, locks ending: on every coin you hold.</span></div>
+<div class="card"><i>☀️</i><b>Morning briefing</b><span>Weather, calendar, news, stocks and your coins in one message, at your time.</span></div>
+<div class="card"><i>💬</i><b>Ask anything</b><span>Every major AI model, images, voice notes, reminders, alerts, YouTube summaries.</span></div>
+</div>
+<p>Start in Telegram: open the bot, connect your wallet on engine.oddsengine.live once, and talk to it like a person. Your Engine never holds your keys. Anything that moves funds is signed by your own wallet.</p>
+
+<h2 id="scan" class="rv">Scans</h2>
+<p>Send a contract address, a mint, a chart link or just <code>$TICKER</code>. Scans are free.</p>
+<ul>
+<li><b>Chains:</b> Solana, Robinhood Chain, Base, Ethereum, BNB Chain, Arbitrum.</li>
+<li><b>Tickers:</b> searched across the whole market. Established coins first, then the coin with real volume and real trades. Pools that fake liquidity are ignored. If two real coins share a ticker, Your Engine asks you for the contract instead of guessing.</li>
+<li><b>The card:</b> verdict, market, safety, holders, dev, locks with unlock date, copycats and narrative. It arrives in seconds.</li>
+<li><b>Deep scan:</b> about a minute later the bundles, snipers, fresh wallets, same funder clusters and token forwards are in. It lands in your chat on Telegram and on the website, and the full report updates by itself.</li>
+<li><b>Token forwards:</b> tokens sent from wallet to wallet without a sale. Early buyers or the dev hiding supply in new wallets shows up here, with what those wallets still hold and whether the same collection wallets did this on other coins.</li>
+<li><b>Full report:</b> chart, live trades, the 3D holder map and project research. Opens right inside Telegram, no login needed.</li>
+</ul>
+
+<h2 id="chart" class="rv">Charts and X</h2>
+<p>Ask "is SOL bullish?" or "TA on $PONS". Your Engine pulls real candles (Coinbase, GeckoTerminal, Yahoo for stocks) and computes EMA 20/50/200, RSI, MACD, volatility, support, resistance and volume on 1h and 1d. It tells you what the chart shows, never where the price goes.</p>
+<p>Ask "what is X saying about $TORCH" for a live read of posts on X: how many it read, the mood split, the loud accounts and signs of botted shilling, with links. When it finds little, it says so.</p>
+
+<h2 id="guard" class="rv">Wallet Guard</h2>
+<p>Most wallet drains start with one bad approval from a scam link. Turn Wallet Guard on (say "turn on wallet guard" or use the switch on the site) and Your Engine watches your connected wallets.</p>
+<div class="msg">🚨 <b>Dangerous approval on 0x7a3f…c21e</b><br>Spender 0x9f2c…ef01: a plain wallet, not a contract.<br>It can now move unlimited TORCH. Revoke it now, before anything is taken.</div>
+<ul>
+<li><b>Approvals:</b> token approvals, NFT approve all and Permit2 to a spender we do not know. Known routers like Uniswap, 1inch or Torch do not alert you.</li>
+<li><b>Solana:</b> new delegates and changes of token account owner.</li>
+<li><b>Tokens taken:</b> when someone moves your tokens with an old approval.</li>
+<li><b>Tokens leaving without a swap:</b> if it was not you, your key may be exposed. Move the rest to a fresh wallet.</li>
+<li><b>Revoke now:</b> every alert has a button. Your own wallet signs one small transaction that sets the permission to zero.</li>
+<li><b>Wallet check:</b> say "check my wallet" for every open approval, with risk and a revoke button, plus one tap to revoke all risky ones.</li>
+</ul>
+<div class="box"><b>Good to know.</b> The chain records which contract got an approval, not the website you signed it on. Connected sites live in your wallet app (MetaMask: Connected sites, Phantom: Connected apps, Rabby: Connected dapps). Disconnecting a site does not remove an approval. Revoking does. If your seed phrase or private key is exposed, nothing can stop a drain: move everything to a new wallet. Never type a seed phrase anywhere, Your Engine will never ask for it.</div>
+<p>Live alerts: Robinhood Chain, Arbitrum and Solana. The wallet check covers Base, Ethereum and BNB Chain too.</p>
+
+<h2 id="bag" class="rv">Bag watch</h2>
+<p>Part of Wallet Guard. Every scanner checks a coin once, before you buy. Your Engine keeps watching every coin you hold and messages you when:</p>
+<ul>
+<li>the dev sells, with how much of their bag and of the supply,</li>
+<li>a top holder or a wallet group with the same funder dumps,</li>
+<li>liquidity is pulled,</li>
+<li>the price drops 30% within minutes,</li>
+<li>a token lock is about to end or has ended.</li>
+</ul>
+<div class="msg">⚠️ <b>$TEST: something just happened in a coin you hold</b><br>🧑‍💻 Dev sold 50% of their bag (5% of supply), still holds 5%.<br>💧 Liquidity fell from $50K to $20K. Possible LP pull.</div>
+<p>Coins in your wallets are picked up by themselves (worth $5 or more). Add any other coin with "watch $XYZ", stop one with "stop watching $XYZ".</p>
+
+<h2 id="briefing" class="rv">Morning briefing</h2>
+<p>Tell it your city and the hour, and what you want in it: weather, calendar, mail, trips, news, your coins, stocks, the engine's weather calls. A list adds to your briefing, "only weather and calendar" switches the rest off. ODDS and TORCH are in by default, add any coin. The time follows the city you set, summer and winter time included.</p>
+
+<h2 id="groups" class="rv">In your group</h2>
+<p>Add the bot to any Telegram group. When someone posts a contract, a chart link or <code>/scan &lt;CA&gt;</code>, it answers in the same topic with the report card, free, and fills in the deep scan in the same message.</p>
+
+<h2 id="ai" class="rv">OddsEngine AI</h2>
 <p class="lead">Every major AI model in one chat and behind one API key. You pay per message with $ODDS. No subscription, no card, no email.</p>
 
-<h2 id="start">Start in three steps</h2>
+<h2 id="start" class="rv">Start in three steps</h2>
 <ol>
 <li><b>Connect a wallet.</b> MetaMask, Rabby or any wallet that works on Robinhood Chain. You sign one message. That is not a transaction and costs nothing.</li>
 <li><b>Top up.</b> Pick an amount in dollars, send the $ODDS your wallet shows you. Your balance is in dollars from then on.</li>
@@ -232,6 +304,9 @@ POST /v1/agents/key
 </main>
 </div>
 <script>
+(function(){var io='IntersectionObserver' in window?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('on');io.unobserve(e.target);}});},{rootMargin:'0px 0px -8% 0px'}):null;
+document.querySelectorAll('.rv').forEach(function(el,i){if(io){el.style.transitionDelay=(i%4)*60+'ms';io.observe(el);}else el.classList.add('on');});
+document.querySelectorAll('.card').forEach(function(c){c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});});})();
 (function(){var h={};try{var a=localStorage.getItem('oe_admin');if(a)h['X-OddsEngine-Admin']=a;}catch(e){}
 fetch('https://web-production-6b61c.up.railway.app/v1/features',{headers:h}).then(function(r){return r.json()}).then(function(d){
 var f=d.features||{};function sh(c,ok){if(ok||d.admin){document.querySelectorAll(c).forEach(function(e){e.hidden=false});}}sh('.feat-agents',f.agents&&f.ai);sh('.feat-x402',f.x402&&f.ai);sh('.feat-usdc',f.x402usdc&&f.x402&&f.ai);if(location.hash){var t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView();}}).catch(function(){});})();

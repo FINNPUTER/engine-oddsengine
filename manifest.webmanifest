@@ -1,0 +1,22 @@
+{
+  "name": "OddsEngine",
+  "short_name": "OddsEngine",
+  "description": "Your Engine, token scans, Wallet Guard, weather and crypto calls in one app.",
+  "id": "/?app=1",
+  "start_url": "./?app=1",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#030605",
+  "theme_color": "#030605",
+  "categories": ["finance", "utilities"],
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ],
+  "shortcuts": [
+    {"name": "Scan a coin", "url": "./#scan", "icons": [{"src": "icon-192.png", "sizes": "192x192"}]},
+    {"name": "Wallet", "url": "./#wallet", "icons": [{"src": "icon-192.png", "sizes": "192x192"}]}
+  ]
+}

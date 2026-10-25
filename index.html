@@ -11,6 +11,11 @@
 <meta property="og:image" content="https://engine.oddsengine.live/robot-ring.webp">
 <link rel="icon" href="icon-180.png">
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="OddsEngine">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -867,6 +872,103 @@ body.rp-open{overflow:hidden}
 
 .rp-stats .rp-sub{display:block;margin-top:4px;font-size:12px;color:var(--mute,#8a9a92);font-family:inherit}
 
+.rp-fw{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px;font-size:13px}.rp-fw li{line-height:1.45;word-break:break-word}.rp-tag{font-size:11px;padding:1px 6px;border-radius:999px;background:rgba(255,184,77,.15);color:#ffb84d}.rp-red{color:#ff6b6b}
+
+/* =================== v38: app shell =================== */
+.mb-bar{display:none}
+.toast{pointer-events:none}
+@media (max-width:820px){
+  .mb-bar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;z-index:75;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));
+    height:62px;padding:6px;border-radius:22px;background:rgba(6,12,9,.93);border:1px solid rgba(34,240,138,.18);
+    backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);box-shadow:0 12px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05)}
+  .mb-bar button{border:0;background:none;color:var(--dim2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:16px;cursor:pointer;
+    font:600 10.5px/1 'Instrument Sans',system-ui,sans-serif;letter-spacing:.02em;-webkit-tap-highlight-color:transparent;transition:color .2s,background .2s;position:relative;min-width:0}
+  .mb-bar svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+  .mb-bar button.on{color:var(--g);background:rgba(34,240,138,.09)}
+  .mb-bar button.on svg{transform:translateY(-1px) scale(1.08);filter:drop-shadow(0 0 8px rgba(34,240,138,.55))}
+  .mb-bar button.on::after{content:"";position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--g);box-shadow:0 0 8px var(--g)}
+  .mb-bar button:active svg{transform:scale(.9)}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  body.rp-open .mb-bar,body.cdr .mb-bar{display:none}
+.toast{pointer-events:none}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom))}
+  .nav .tabs{display:none}
+  .nav>.brand,.nav>.brand span{display:flex!important;align-items:center;gap:8px}
+  .nav>.brand span{display:inline!important;font:800 13px/1 Unbounded,sans-serif;letter-spacing:.06em}
+  body.has-ab .mb-bar{bottom:calc(44px + env(safe-area-inset-bottom))}
+  body.has-ab{padding-bottom:calc(118px + env(safe-area-inset-bottom))}
+  body.has-ab .toast{bottom:calc(122px + env(safe-area-inset-bottom))}
+  .nav{justify-content:space-between}
+  footer.wrap{padding-bottom:8px}
+}
+html.pwa .nav{top:calc(6px + env(safe-area-inset-top))}
+html.pwa body{padding-top:env(safe-area-inset-top)}
+html.pwa footer.wrap{display:none}
+
+.mb-view{max-width:720px;margin:0 auto;padding:6px 0 10px}
+.mb-hd{margin:18px 0 16px}
+.mb-hd h1{font:800 clamp(26px,7vw,40px)/1.05 Unbounded,system-ui,sans-serif;margin:8px 0 8px;letter-spacing:-.02em;
+  background:linear-gradient(100deg,#fff 0%,#c9ffe2 40%,var(--g) 70%,#fff 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mbShine 6s linear infinite}
+@keyframes mbShine{to{background-position:-220% 0}}
+.mb-hd .lead{font-size:14.5px;margin:0;color:var(--dim)}
+.mb-h3{font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--dim2);margin:22px 2px 10px}
+.mb-wide{width:100%;justify-content:center;margin-top:14px;display:flex}
+
+.mb-scan{display:flex;gap:8px;padding:6px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid var(--line2);transition:border-color .2s,box-shadow .2s}
+.mb-scan:focus-within{border-color:rgba(34,240,138,.55);box-shadow:0 0 0 4px rgba(34,240,138,.08),0 0 30px rgba(34,240,138,.12)}
+.mb-scan input{flex:1;min-width:0;border:0;background:none;color:var(--tx);font:500 16px/1.2 'JetBrains Mono',monospace;padding:12px 10px;outline:none}
+.mb-scan input::placeholder{color:var(--dim2)}
+.mb-chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0}
+.mb-chips button{border:1px solid var(--line2);background:rgba(255,255,255,.03);color:var(--tx);border-radius:999px;padding:8px 14px;font:600 13px/1 'Instrument Sans',sans-serif;cursor:pointer}
+.mb-chips button:active{transform:scale(.96)}
+#mbScanOut{margin-top:12px}
+.mb-tip{margin-top:18px}.mb-tip b{display:block;margin-bottom:4px}.mb-tip .btn{margin-top:10px}
+
+.mb-list{display:grid;gap:8px}
+.mb-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 12px;width:100%;text-align:left;padding:14px 14px;border-radius:16px;
+  background:rgba(255,255,255,.035);border:1px solid var(--line);color:var(--tx);text-decoration:none;cursor:pointer;font:inherit;transition:border-color .2s,background .2s,transform .15s}
+.mb-row:active{transform:scale(.985)}
+@media (hover:hover){.mb-row:hover{border-color:rgba(34,240,138,.35);background:rgba(34,240,138,.05)}}
+.mb-sym{font-weight:700;font-size:14.5px;white-space:nowrap}
+.mb-sub{color:var(--dim);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mb-go{color:var(--g);font-size:20px;line-height:1}
+.mb-res{grid-template-columns:auto auto 1fr}
+.mb-res .mb-sub{white-space:normal}
+.mb-chip{font:700 11px/1 'JetBrains Mono',monospace;padding:5px 8px;border-radius:999px;letter-spacing:.04em}
+.mb-chip.ok{background:rgba(34,240,138,.14);color:var(--g)}
+.mb-chip.no{background:rgba(255,93,108,.13);color:var(--red)}
+.mb-err p{margin:0 0 10px}
+
+.mb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mb-st{padding:14px 10px;border-radius:16px;background:linear-gradient(180deg,rgba(34,240,138,.07),rgba(255,255,255,.02));border:1px solid rgba(34,240,138,.16);text-align:center;min-width:0}
+.mb-st span{display:block;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2)}
+.mb-st b{display:block;font:800 clamp(22px,6vw,30px)/1.1 Unbounded,sans-serif;color:var(--g);margin:8px 0 4px;text-shadow:0 0 22px rgba(34,240,138,.35)}
+.mb-st i{font-style:normal;font-size:11.5px;color:var(--dim)}
+
+.mb-px{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,46%),1fr));gap:8px}
+.mb-pc{padding:14px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--line);min-width:0}
+.mb-pc span{display:block;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--dim2)}
+.mb-pc b{display:block;font:700 17px/1.2 'JetBrains Mono',monospace;margin-top:8px;overflow:hidden;text-overflow:ellipsis}
+
+.mb-card{margin-top:10px}
+.mb-ct{display:flex;gap:12px;align-items:flex-start}
+.mb-ct b{display:block;font-size:15.5px;margin-bottom:2px}
+.mb-ct .note{margin:0}
+.mb-ic{flex:0 0 40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:19px;background:rgba(34,240,138,.08);border:1px solid rgba(34,240,138,.2)}
+.mb-guard{border-color:rgba(34,240,138,.3);background:radial-gradient(400px 160px at 0% 0%,rgba(34,240,138,.1),transparent 70%),rgba(255,255,255,.03)}
+.mb-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.mb-btns:empty{display:none}
+
+.mb-sheet{position:fixed;inset:0;z-index:160;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
+.mb-sheet.show{background:rgba(0,0,0,.6);pointer-events:auto;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.mb-sin{width:100%;max-width:520px;margin:10px;padding:22px 20px calc(20px + env(safe-area-inset-bottom));border-radius:26px;background:#07100c;border:1px solid rgba(34,240,138,.25);
+  box-shadow:0 -10px 60px rgba(0,0,0,.6),0 0 60px rgba(34,240,138,.08);transform:translateY(110%);transition:transform .32s cubic-bezier(.2,1.2,.4,1)}
+.mb-sheet.show .mb-sin{transform:none}
+.mb-sin h3{font:800 20px/1.2 Unbounded,sans-serif;margin:0 0 12px}
+.mb-sin .btn{width:100%;justify-content:center;display:flex;margin-top:14px}
+.mb-steps{margin:0;padding-left:20px;display:grid;gap:10px;font-size:15px}
+.mb-ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(255,255,255,.08)}
+
 </style>
 </head>
 <body>
@@ -915,7 +1017,7 @@ const DEMO=/[?&]demo=1/.test(location.search);
 let TOKEN='';try{TOKEN=localStorage.getItem('oe_engine')||'';}catch(e){}
 function hdr(){const h={'Content-Type':'application/json'};if(ADMIN)h['X-OddsEngine-Admin']=ADMIN;if(TOKEN)h['X-OddsEngine-Key']=TOKEN;return h;}
 async function api(p,opt){const r=await fetch(API+p,Object.assign({headers:hdr()},opt||{}));let j=null;try{j=await r.json();}catch(e){}
-  if(!r.ok){const m=(j&&(j.detail||(j.error&&j.error.message)))||('error '+r.status);const er=new Error(m);er.status=r.status;throw er;}return j;}
+  if(!r.ok){const m=(j&&(j.detail||(j.error&&j.error.message)))||('error '+r.status);const er=new Error(m);er.status=r.status;er.body=j;throw er;}return j;}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2800);}
 const usd=(v,d)=>v==null?'n/a':'$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:d==null?2:d,maximumFractionDigits:d==null?2:d});
 const px=v=>v==null?'auto':(v<0.1?'$'+v.toFixed(3):'$'+v.toFixed(2));
@@ -2125,6 +2227,7 @@ engineView=function(){
     <div class="card rv"><h3>From OddsEngine</h3><p class="sub">What Your Engine sends you on its own. Switch off anything you do not want.</p>
       <div class="row"><div class="l"><b>OddsEngine news</b><span>What the team posts in the channel and on X, straight to your Telegram</span></div>${sw(!MO||MO.official_news!==false,'data-set="official_news"')}</div>
       <div class="row"><div class="l"><b>Check-ins</b><span>Asks how your training, meeting or appointment went</span></div>${sw(!MO||MO.check_ins!==false,'data-set="check_ins"')}</div>
+      ${MO&&MO.switches&&MO.switches.guard?`<div class="row"><div class="l"><b>Wallet Guard</b><span>A message in seconds when your wallet approves an unknown spender or tokens leave without a swap, with a Revoke button. Free</span></div>${sw(!!MO.guard,'data-set="guard"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.smart?`<div class="row"><div class="l"><b>Smart money calls</b><span>A message in Telegram when several top rated wallets buy the same coin. Free</span></div>${sw(!!MO.smart_calls,'data-set="smart_calls"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.voice?`<div class="row"><div class="l"><b>Voice replies</b><span>A voice note in Telegram gets a voice note back. Costs a little more than text</span></div>${sw(!!MO.voice_replies,'data-set="voice_replies"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.lang?`<div class="row"><div class="l"><b>Language</b><span>Answers, briefing, alerts and news in this language</span></div><select id="moLang" class="mo-sel mo-wide"><option value="auto">Like I write</option>${Object.entries(MO.languages||{}).map(([k,v])=>`<option value="${E(k)}" ${MO.language===k?'selected':''}>${E(v)}</option>`).join('')}</select></div>`:''}
@@ -2156,7 +2259,8 @@ async function moLoad(){
     if(typeof MODELS!=='undefined'&&!MODELS.length&&typeof loadModels==='function')await loadModels();
     if(MO.inbox&&MO.inbox.length)MO.inbox.forEach(x=>toast(x.text.split('\n')[0]));
     const neu=MO.live&&!FEAT.engine;if(neu){FEAT.engine=true;}
-    const off=-new Date().getTimezoneOffset()/60;if(MO.live&&MO.utc_offset_hours!==off){api('/v1/engine/agent/briefing',{method:'POST',body:JSON.stringify({utc_offset_hours:off})}).then(()=>{MO.utc_offset_hours=off;}).catch(()=>{});}
+    const off=-new Date().getTimezoneOffset()/60;let tzn='';try{tzn=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+    if(MO.live&&(MO.utc_offset_hours!==off||(tzn&&MO.tz_name!==tzn))){api('/v1/engine/agent/briefing',{method:'POST',body:JSON.stringify({utc_offset_hours:off,tz_name:tzn})}).then(()=>{MO.utc_offset_hours=off;MO.tz_name=tzn;}).catch(()=>{});}
     if(TAB==='engine'||neu)render();}catch(e){}
 }
 function moScroll(){const l=$('#moLog');if(l)l.scrollTop=l.scrollHeight;}
@@ -2203,7 +2307,7 @@ bind=function(){
     ta.onpaste=async e=>{const its=[...(e.clipboardData||{}).items||[]].filter(x=>x.type&&x.type.startsWith('image/'));if(!its.length)return;e.preventDefault();for(const it of its.slice(0,4-MO_IMG.length)){try{MO_IMG.push(await moShrink(it.getAsFile()));}catch(_){}}moAttDraw();};
     moAttDraw();}
   document.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{const ta=$('#moIn');if(!ta)return;ta.value=b.dataset.sug;ta.focus();});
-  const h=$('#moHour');if(h)h.onchange=async()=>{const off=-new Date().getTimezoneOffset()/60;if(await save('/v1/engine/agent/briefing',{hour:+h.value,utc_offset_hours:off})){if(MO)MO.briefing_local_hour=+h.value;toast('Briefing at '+moTime(+h.value));}};
+  const h=$('#moHour');if(h)h.onchange=async()=>{const off=-new Date().getTimezoneOffset()/60;let tzn='';try{tzn=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}if(await save('/v1/engine/agent/briefing',{hour:+h.value,utc_offset_hours:off,tz_name:tzn})){if(MO)MO.briefing_local_hour=+h.value;toast('Briefing at '+moTime(+h.value));}};
   moBindList();
   document.querySelectorAll('[data-brain]').forEach(b=>b.onclick=async()=>{const k=b.dataset.brain;if(MO&&MO.brain===k)return;if(await save('/v1/engine/agent/models',{brain:k})){if(MO)MO.brain=k;toast('Your Engine now thinks with '+b.querySelector('b').firstChild.textContent.trim());render();}});
   const mt=$('#moTxt');if(mt)mt.onchange=async()=>{if(await save('/v1/engine/agent/models',{text_model:mt.value||'reset'})){if(MO){MO.defaults=MO.defaults||{};MO.defaults.text_model=mt.value||null;}toast(mt.value?'Answers from '+mt.options[mt.selectedIndex].text:'Your Engine picks the model');}};
@@ -2311,6 +2415,14 @@ function trBox(msg){
   const head=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0;font-family:var(--disp)">${t&&t.ok?(t.side==='buy'?'Buy':'Sell')+' $'+E(t.symbol):'Trade'}</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>`;
   if(!t)return head+`<p class="sub" style="margin-top:12px">Loading the trade…</p>`;
   if(!t.ok)return head+`<p class="sub" style="margin-top:12px">${E(t.error||'This trade is not available.')}</p>${t.hashes&&t.hashes.length&&t.explorer?`<p><a href="${E(t.explorer)}/tx/${E(t.hashes[t.hashes.length-1])}" target="_blank" rel="noopener">View transaction</a></p>`:''}`;
+  if(t.kind==='revoke')return head.replace(/<h3([^>]*)>[^<]*<\/h3>/,'<h3$1>Revoke approval</h3>')+`<div class="mo-tr">
+    <div class="row"><div class="l"><b>Chain</b></div><span>${E(t.chain_name||t.chain)}</span></div>
+    <div class="row"><div class="l"><b>Token</b></div><span>${E(t.symbol||trShort(t.token))}</span></div>
+    ${t.count?`<div class="row"><div class="l"><b>Approvals</b></div><span>${t.count} risky, all at once</span></div>`:`<div class="row"><div class="l"><b>${t.chain==='solana'?'Delegate':'Spender'}</b></div><span class="mono">${E(trShort(t.spender))}</span></div>`}
+    <div class="row"><div class="l"><b>Wallet</b></div><span class="mono">${E(trShort(t.wallet||t.known_wallet))}</span></div>
+    <p class="note">Your wallet signs one small transaction that sets this permission to zero. Afterwards the ${t.chain==='solana'?'delegate':'spender'} can no longer move your tokens. Your Engine never holds your keys.</p>
+    <div class="msg" id="trMsg">${E(msg||'')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-g" data-act="trgo">${t.chain==='solana'?'Connect and revoke':'Revoke in wallet'}</button><button class="btn" data-act="closesheet">Cancel</button></div></div>`;
   const imp=t.impact_pct!=null?Math.abs(+t.impact_pct):null;
   if(t.chain==='solana')return head+`<div class="mo-tr">
     <div class="row"><div class="l"><b>Chain</b></div><span>Solana</span></div>
@@ -2366,7 +2478,7 @@ async function trGo(){
       else throw e;}
     for(let i=0;i<t.txs.length;i++){
       const x=t.txs[i];
-      say(t.txs.length>1?(i===0?'Step 1 of 2: approve in your wallet.':'Step 2 of 2: confirm the swap in your wallet.'):'Confirm in your wallet.');
+      say(t.kind==='revoke'?(t.txs.length>1?`Revoke ${i+1} of ${t.txs.length}: confirm in your wallet.`:'Confirm the revoke in your wallet.'):t.txs.length>1?(i===0?'Step 1 of 2: approve in your wallet.':'Step 2 of 2: confirm the swap in your wallet.'):'Confirm in your wallet.');
       const p={from,to:x.to,data:x.data,value:x.value||'0x0'};if(x.gas)p.gas=x.gas;
       const h=await eth.request({method:'eth_sendTransaction',params:[p]});
       hashes.push(h);
@@ -2377,6 +2489,7 @@ async function trGo(){
     }
     await api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes,ok:true})}).catch(()=>{});
     const last=hashes[hashes.length-1];
+    if(t.kind==='revoke'){say('Revoked. '+(t.explorer?`<a href="${E(t.explorer)}/tx/${E(last)}" target="_blank" rel="noopener">View transaction</a>`:''));const b0=document.querySelector('[data-act="trgo"]');if(b0)b0.remove();return;}
     say('Done. '+(t.explorer?`<a href="${E(t.explorer)}/tx/${E(last)}" target="_blank" rel="noopener">View transaction</a>`:'')+' Your Engine confirms it in Telegram too.');
     const b=document.querySelector('[data-act="trgo"]');if(b)b.remove();
   }catch(e){
@@ -2516,7 +2629,7 @@ function rpDraw(keep){
     <div class="rp-card" style="grid-area:s"><h3>Safety</h3><div class="rp-chips">${rpChips()}</div></div>
     <div class="rp-card" style="grid-area:h"><h3>Supply</h3>${rpBar('Top 10 wallets',sp.top10_pct,40)}${rpBar('Bundled',sp.bundled_pct,10)}${rpBar('Fresh wallets',sp.fresh_pct,30)}
       ${sp.clusters!=null||sp.same_funder!=null?`<p class="rp-mini">Clusters <b>${sp.clusters||0}</b> · same funder <b>${sp.same_funder||0}</b> · snipers <b>${sp.snipers||0}</b>${sp.largest_pct!=null?` · largest <b>${rpN(sp.largest_pct)}%</b>`:''}</p>`:''}
-      ${sp.top_note?`<p class="note">${E(sp.top_note)}</p>`:''}</div>
+      ${sp.top_note?`<p class="note">${E(sp.top_note)}</p>`:''}${rpFwd(r)}</div>
     <div class="rp-card" style="grid-area:d"><h3>Dev</h3>${dv.address?`<p class="rp-dev"><a class="mono" href="${E(dv.explorer||exp+ap+dv.address)}" target="_blank" rel="noopener">${E(rpShort(dv.address))}</a>${dv.holds_pct!=null?` holds <b>${rpN(dv.holds_pct)}%</b>`:''}</p>
       ${dv.launches_seen?`<p class="rp-mini">Launched ${dv.launches_seen} other coin${dv.launches_seen==1?'':'s'} we saw${dv.launches_ran?`, <b>${dv.launches_ran}</b> ran`:dv.launches_ran===0?', none ran':''}</p>`:'<p class="rp-mini">No earlier launches we know of.</p>'}`:'<p class="note">Dev wallet not known for this coin.</p>'}
       ${sm.checked?`<h3 style="margin-top:14px">Smart wallets</h3><p class="rp-mini"><b>${sm.found}</b> of the first ${sm.checked} buyers are wallets we score${sm.best?` · best score ${E(sm.best)}`:''}</p>`:''}
@@ -2530,6 +2643,14 @@ function rpDraw(keep){
   el.classList.add('show');document.body.classList.add('rp-open');if(keep)el.scrollTop=scroll;rpBind();
   const gh=$('#gxHost');if(gh&&typeof gxMount==='function')gxMount(gh,r);
 }
+/* 2.46: token forwards, tokens sent wallet to wallet without a sale */
+function rpFwd(r){const f=r.forwards;if(!f||!f.checked)return '';const exp=r.explorer_base||'';const ap=r.addr_path||'/address/';
+  const lk=a=>`<a class="mono" href="${E(exp+ap+a)}" target="_blank" rel="noopener">${E(rpShort(a))}</a>`;
+  if(!f.count)return `<h3 style="margin-top:14px">Token forwards</h3><p class="rp-mini">None. No early buyer or dev moved tokens to other wallets without selling.</p>`;
+  const kopf=`<p class="rp-mini"><b>${f.count}</b> from ${f.senders} wallet${f.senders==1?'':'s'} to ${f.receivers}${f.to_fresh?` · <b>${f.to_fresh}</b> to fresh wallets`:''}${f.still_held_pct?` · receivers still hold <b>${rpN(f.still_held_pct)}%</b>`:''}${f.from_dev?` · <b class="rp-red">dev forwarded ${rpN(f.dev_forwarded_pct)}%</b>`:''}</p>`;
+  const zeilen=(f.list||[]).slice(0,6).map(x=>`<li>${lk(x.from)} <span class="note">${E(x.src)}</span> → ${lk(x.to)}${x.fresh?' <span class="rp-tag">new</span>':''} <span class="note">${rpN(x.pct)}%${x.holds_pct!=null?' · holds '+rpN(x.holds_pct)+'%':''}</span></li>`).join('');
+  const sam=(f.collectors||[]).filter(c=>c.other_tokens||c.from_wallets>1).slice(0,3).map(c=>`<li>${lk(c.wallet)} <span class="note">collected from ${c.from_wallets} wallet${c.from_wallets==1?'':'s'} here${c.other_tokens?`, also on ${c.other_tokens} other coin${c.other_tokens==1?'':'s'}`:''}</span></li>`).join('');
+  return `<h3 style="margin-top:14px">Token forwards</h3>${kopf}<ul class="rp-fw">${zeilen}</ul>${(f.list||[]).length>6?`<p class="note">+${f.list.length-6} more</p>`:''}${sam?`<h3 style="margin-top:12px">Collection wallets</h3><ul class="rp-fw">${sam}</ul>`:''}`;}
 function rpBind(){
   document.querySelectorAll('[data-rp]').forEach(b=>b.onclick=async()=>{
     const a=b.dataset.rp;
@@ -2781,6 +2902,177 @@ async function gxMount(host,r){
       v.project(cam);el.style.opacity=(on&&v.z<1)?op:0;el.style.transform=`translate(${((v.x+1)/2*w).toFixed(1)}px,${((1-v.y)/2*h).toFixed(1)}px) translate(-50%,-100%)`;});
   })(t0);
 }
+
+/* =================== v38: OddsEngine as an app (PWA): bottom bar, Scan, Weather, Crypto, Wallet, install, push =================== */
+const MB_TABS=['scan','weather','crypto','wallet'];
+const MB_BAR=[['engine','Engine','M12 3a9 9 0 1 0 6.4 2.6M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8'],['scan','Scan','M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 0 0 0-13M15.5 15.5L20 20'],['weather','Weather','M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 11a3.5 3.5 0 0 0 1 7'],['crypto','Crypto','M5 19V9M10 19V5M15 19v-7M20 19V8'],['wallet','Wallet','M4 7h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a1 1 0 0 1-1-1V7l11-3v3M16 13h.01']];
+let MB_INSTALL=null,MB_W=null,MB_C=null,MB_PUSH=null,MB_RECENT=[];
+try{MB_RECENT=JSON.parse(localStorage.getItem('oe_scans')||'[]')}catch(e){}
+(function(){const h=(location.hash||'').slice(1);if(MB_TABS.includes(h))TAB=h;})();
+const mbStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+const mbIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.MSStream;
+document.documentElement.classList.toggle('pwa',mbStandalone());
+
+/* ---------- service worker + install ---------- */
+if('serviceWorker' in navigator&&location.protocol==='https:'){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();MB_INSTALL=e;if(TAB==='wallet')render();});
+addEventListener('appinstalled',()=>{MB_INSTALL=null;toast('OddsEngine is on your home screen');});
+async function mbInstall(){
+  if(mbStandalone())return toast('You are already in the app');
+  if(MB_INSTALL){MB_INSTALL.prompt();try{await MB_INSTALL.userChoice;}catch(e){}MB_INSTALL=null;return;}
+  mbSheet(`<h3>Get the app</h3>${mbIOS()?`<ol class="mb-steps"><li>Tap <b>Share</b> <span class="mb-ico">⬆︎</span> at the bottom of Safari</li><li>Scroll and tap <b>Add to Home Screen</b></li><li>Open OddsEngine from your home screen</li></ol><p class="note">On iPhone this only works in Safari.</p>`:`<ol class="mb-steps"><li>Open the browser menu <b>⋮</b></li><li>Tap <b>Install app</b> or <b>Add to Home screen</b></li><li>Open OddsEngine from your home screen</li></ol>`}<button class="btn btn-g" data-mb="close">Got it</button>`);
+}
+function mbSheet(html){let s=$('#mbSheet');if(!s){s=document.createElement('div');s.id='mbSheet';s.className='mb-sheet';document.body.appendChild(s);s.onclick=e=>{if(e.target===s||e.target.closest('[data-mb="close"]'))s.classList.remove('show');};}
+  s.innerHTML=`<div class="mb-sin">${html}</div>`;requestAnimationFrame(()=>s.classList.add('show'));}
+
+/* ---------- push ---------- */
+function mbB64(s){const p='='.repeat((4-s.length%4)%4);const b=atob((s+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from([...b].map(c=>c.charCodeAt(0)));}
+async function mbPushState(){
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)||!('Notification' in window))return MB_PUSH='unsupported';
+  if(Notification.permission==='denied')return MB_PUSH='denied';
+  try{const r=await navigator.serviceWorker.getRegistration();const s=r&&await r.pushManager.getSubscription();return MB_PUSH=s?'on':'off';}catch(e){return MB_PUSH='off';}
+}
+async function mbPushOn(){
+  if(!connected())return connect();
+  if(mbIOS()&&!mbStandalone())return mbSheet(`<h3>Alerts on iPhone</h3><p>Apple only sends alerts to web apps on your home screen. Add OddsEngine to your home screen first, open it from there and switch alerts on.</p><button class="btn btn-g" data-mb="install">Show me how</button>`);
+  try{
+    const p=await Notification.requestPermission();if(p!=='granted'){toast('Alerts are blocked in your browser settings');await mbPushState();return render();}
+    const reg=await navigator.serviceWorker.register('sw.js');await navigator.serviceWorker.ready;
+    const {key}=await api('/v1/push/key');
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:mbB64(key)});
+    await api('/v1/push/subscribe',{method:'POST',body:JSON.stringify({subscription:sub.toJSON()})});
+    MB_PUSH='on';toast('Alerts are on');render();
+    api('/v1/push/test',{method:'POST'}).catch(()=>{});
+  }catch(e){toast(e.message||'Could not switch alerts on');}
+}
+async function mbPushOff(){
+  try{const r=await navigator.serviceWorker.getRegistration();const s=r&&await r.pushManager.getSubscription();
+    if(s){if(connected())await api('/v1/push/unsubscribe',{method:'POST',body:JSON.stringify({endpoint:s.endpoint})}).catch(()=>{});await s.unsubscribe();}
+  }catch(e){}MB_PUSH='off';toast('Alerts are off');render();
+}
+
+/* ---------- views ---------- */
+function mbHead(eye,title,sub){return `<section class="mb-hd rv d1"><span class="eyebrow"><b>●</b> ${eye}</span><h1>${title}</h1>${sub?`<p class="lead">${sub}</p>`:''}</section>`;}
+function scanView(){
+  return mbHead('Scan','Scan any coin','Paste a contract address, a chart link or a $ticker. Solana, Base, Ethereum, BNB Chain, Arbitrum and Robinhood Chain.')+
+  `<form class="mb-scan rv d2" id="mbScanF" autocomplete="off"><input id="mbScanQ" inputmode="text" placeholder="CA, link or $TICKER" aria-label="Contract address, link or ticker"><button class="btn btn-g" type="submit">Scan</button></form>
+  <div id="mbScanOut"></div>
+  <div class="mb-chips rv d2">${['$ODDS','$TORCH'].map(t=>`<button data-mbq="${t}">${t}</button>`).join('')}<button data-mbpaste="1">Paste</button></div>
+  ${MB_RECENT.length?`<h3 class="mb-h3 rv d3">Recent</h3><div class="mb-list rv d3">${MB_RECENT.map(r=>`<button class="mb-row" data-mbq="${E(r.q)}"><span class="mb-sym">${E(r.sym||'?')}</span><span class="mb-sub mono">${E(r.chain||'')} · ${E(rpShort(r.addr||r.q))}</span><span class="mb-go">›</span></button>`).join('')}</div>`:''}
+  <div class="card mb-tip rv d3"><b>Deep scan in the chat</b><p class="note">Send the same CA to Your Engine and it runs the full deep scan: bundles, clusters, holder map and token forwards.</p><button class="btn btn-sm" data-mbgo="engine">Open Your Engine</button></div>`;
+}
+async function mbScan(q){
+  q=String(q||'').trim();if(!q)return;const out=$('#mbScanOut');
+  if(out)out.innerHTML='<p class="note"><span class="typing"><i></i><i></i><i></i></span> Looking it up…</p>';
+  try{const r=await api('/v1/engine/scan?q='+encodeURIComponent(q.replace(/^\$/,'')));
+    if(out)out.innerHTML='';
+    MB_RECENT=[{q:r.chain+':'+r.address,sym:'$'+(r.symbol||'?'),chain:r.chain_name||r.chain,addr:r.address}].concat(MB_RECENT.filter(x=>x.addr!==r.address)).slice(0,8);
+    try{localStorage.setItem('oe_scans',JSON.stringify(MB_RECENT));}catch(e){}
+    location.hash='#token='+r.chain+':'+r.address;
+  }catch(e){
+    const c=(e.body&&e.body.error&&e.body.error.candidates)||[];
+    if(!out)return toast(e.message);
+    out.innerHTML=`<div class="card mb-err"><p>${E(e.message||'Could not find this coin.')}</p>${c.length?`<div class="mb-list">${c.map(x=>`<button class="mb-row" data-mbq="${E(x.address)}"><span class="mb-sym">${E(x.chain)}</span><span class="mb-sub">MC ${rpUsd(x.mcap_usd)} · Vol ${rpUsd(x.volume_24h_usd)} · <span class="mono">${E(rpShort(x.address))}</span></span><span class="mb-go">›</span></button>`).join('')}</div>`:''}</div>`;
+    mbBind();
+  }
+}
+function mbLegs(l){if(!l)return '';if(!Array.isArray(l))return E(l);return l.map(x=>E(typeof x==='object'?(x.label||x.temp||''):x)).join(' / ');}
+function mbHit(xs){const k=xs.filter(r=>typeof r.outcome_hit==='boolean');const h=k.filter(r=>r.outcome_hit).length;return {n:k.length,h,p:k.length?Math.round(h/k.length*100):null};}
+function weatherView(){
+  const W=MB_W;
+  if(!W)return mbHead('Weather Engine','Weather calls','Every call on Polymarket weather markets, with hits and misses.')+'<p class="note"><span class="typing"><i></i><i></i><i></i></span> Loading the record…</p>';
+  if(W.err)return mbHead('Weather Engine','Weather calls','')+`<div class="card mb-err"><p>${E(W.err)}</p><button class="btn btn-sm" data-mbre="w">Try again</button></div>`;
+  const all=W.signals||[];const day=d=>{const t=Date.now()-d*864e5;return all.filter(r=>Date.parse(r.date||r.published_ts||0)>=t);};
+  const a=mbHit(day(7)),b=mbHit(day(30)),c=mbHit(all);
+  const st=(l,x)=>`<div class="mb-st"><span>${l}</span><b>${x.p==null?'n/a':x.p+'%'}</b><i>${x.h} of ${x.n} hit</i></div>`;
+  return mbHead('Weather Engine','Weather calls','Every call on Polymarket weather markets, with hits and misses. The engine is not always right, so every miss stays on the record.')+
+  `<div class="mb-stats rv d2">${st('7 days',a)}${st('30 days',b)}${st('All time',c)}</div>
+  <h3 class="mb-h3 rv d3">Latest results</h3>
+  <div class="mb-list rv d3">${all.filter(r=>typeof r.outcome_hit==='boolean').slice(0,25).map(r=>`<div class="mb-row mb-res"><span class="mb-chip ${r.outcome_hit?'ok':'no'}">${r.outcome_hit?'Hit':'Miss'}</span><span class="mb-sym">${E(r.city||'')}</span><span class="mb-sub">${E(r.date||'')}${r.legs?' · ours '+mbLegs(r.legs):''}${r.outcome_label?' · came in '+E(r.outcome_label):''}</span></div>`).join('')||'<p class="note">No results yet.</p>'}</div>
+  <a class="btn btn-g mb-wide rv d3" href="https://public.oddsengine.live" target="_blank" rel="noopener">Open the Weather Engine</a>`;
+}
+function cryptoView(){
+  const C=MB_C;
+  if(!C)return mbHead('Crypto Edition','Crypto markets','Live prices and the strategies the engine runs on Polymarket crypto markets.')+'<p class="note"><span class="typing"><i></i><i></i><i></i></span> Loading live data…</p>';
+  if(C.err||C.enabled===false)return mbHead('Crypto Edition','Crypto markets','')+`<div class="card mb-err"><p>${E(C.err||'Crypto Edition is not open right now.')}</p><button class="btn btn-sm" data-mbre="c">Try again</button></div>`;
+  const px=C.prices||{};const as=(C.assets||[]).filter(a=>px[a.id]!=null);
+  const mods=(C.modules||[]).filter(m=>m.all&&m.all.n);
+  return mbHead('Crypto Edition','Crypto markets','Live prices and the strategies the engine runs on Polymarket crypto markets.')+
+  `<div class="mb-px rv d2">${as.map(a=>`<div class="mb-pc"><span>${E(a.sym||a.id)}</span><b>${rpPx(px[a.id])}</b></div>`).join('')||'<p class="note">Prices are loading on the server.</p>'}</div>
+  ${mods.length?`<h3 class="mb-h3 rv d3">Strategies</h3><div class="mb-list rv d3">${mods.map(m=>`<div class="mb-row"><span class="mb-sym">${E(m.name||m.id)}</span><span class="mb-sub">${Math.round(m.all.win_rate*100)}% won · ${m.all.n} trades</span></div>`).join('')}</div>`:''}
+  <p class="note rv d3">${C.stale?'Live data is a few minutes behind right now. ':''}Not financial advice.</p>
+  <a class="btn btn-g mb-wide rv d3" href="https://terminal.oddsengine.live" target="_blank" rel="noopener">Open the terminal</a>`;
+}
+function walletView(){
+  const on=connected();const m=ME||{};const b=m.balance||{};
+  const pushTxt={on:'Alerts are on. Wallet Guard, Bag Watch, price alerts and your briefing land on this phone.',off:'Get Wallet Guard, Bag Watch, price alerts and your briefing as phone notifications.',denied:'Alerts are blocked for this site. Allow notifications in your browser settings, then come back.',unsupported:mbIOS()?'On iPhone, alerts work once OddsEngine is on your home screen.':'This browser cannot show alerts.'}[MB_PUSH||'off'];
+  return mbHead('Wallet','Your wallet',on?`<span class="mono">${E(m.short||short(m.address))}</span>`:'Connect your wallet. One signature, no transaction, no fee.')+
+  (on?'':`<div class="card rv d2"><button class="btn btn-g mb-wide" data-act="connect">Connect wallet</button></div>`)+
+  `<div class="card mb-card mb-guard rv d2"><div class="mb-ct"><span class="mb-ic">🛡</span><div><b>Wallet Guard</b><p class="note">Sees every approval and every token leaving your wallet. Cut risky approvals with one tap. No keys, no seed phrase. Ever.</p></div></div>
+    <div class="mb-btns"><button class="btn btn-g btn-sm" data-mbask="Check my wallet approvals and show what is risky">Check my approvals</button><button class="btn btn-sm" data-mbask="Turn on Wallet Guard for my wallet">Watch my wallet</button></div></div>
+  <div class="card mb-card rv d2"><div class="mb-ct"><span class="mb-ic">👜</span><div><b>Bag Watch</b><p class="note">Alerts when a dev sells, liquidity drops, a top holder dumps or a lock ends on a coin you hold.</p></div></div>
+    <div class="mb-btns"><button class="btn btn-sm" data-mbask="Show my bag watch">Show my bags</button></div></div>
+  <div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic">🔔</span><div><b>Phone alerts</b><p class="note">${pushTxt}</p></div></div>
+    <div class="mb-btns">${MB_PUSH==='on'?'<button class="btn btn-sm" data-mb="pushoff">Switch off</button><button class="btn btn-sm" data-mb="pushtest">Send a test</button>':MB_PUSH==='denied'?'':(MB_PUSH==='unsupported'&&mbIOS())?'<button class="btn btn-g btn-sm" data-mb="install">Add to home screen</button>':MB_PUSH==='unsupported'?'':'<button class="btn btn-g btn-sm" data-mb="pushon">Switch alerts on</button>'}</div></div>
+  ${on?`<div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic">⚡</span><div><b>Credit</b><p class="note">${usd(b.usd||0)} left for Your Engine and AI.</p></div></div><div class="mb-btns"><button class="btn btn-sm" data-mbgo="ai">Top up</button></div></div>`:''}
+  <h3 class="mb-h3 rv d3">More</h3>
+  <div class="mb-list rv d3">
+    <button class="mb-row" data-mbgo="chat"><span class="mb-sym">AI Chat</span><span class="mb-sub">Every top model in one chat</span><span class="mb-go">›</span></button>
+    <button class="mb-row" data-mbgo="models"><span class="mb-sym">Models</span><span class="mb-sub">Prices and what each one is good at</span><span class="mb-go">›</span></button>
+    <button class="mb-row" data-mbgo="ai"><span class="mb-sym">Account</span><span class="mb-sub">Credit, usage, API key</span><span class="mb-go">›</span></button>
+    ${mbStandalone()?'':'<button class="mb-row" data-mb="install"><span class="mb-sym">Get the app</span><span class="mb-sub">Add OddsEngine to your home screen</span><span class="mb-go">›</span></button>'}
+    <a class="mb-row" href="docs.html"><span class="mb-sym">Docs</span><span class="mb-sub">How everything works</span><span class="mb-go">›</span></a>
+    <a class="mb-row" href="https://t.me/OddsEngineCommunity" target="_blank" rel="noopener"><span class="mb-sym">Community</span><span class="mb-sub">Telegram</span><span class="mb-go">›</span></a>
+    ${on?'<button class="mb-row" data-act="logout"><span class="mb-sym">Disconnect</span><span class="mb-sub">Sign out on this device</span><span class="mb-go">›</span></button>':''}
+  </div>`;
+}
+async function mbLoadW(){try{MB_W=await api('/v1/record?limit=400');}catch(e){MB_W={err:e.message||'Could not load the record.'};}if(TAB==='weather')render();}
+async function mbLoadC(){try{MB_C=await api('/v1/crypto');}catch(e){MB_C={err:e.message||'Could not load live data.'};}if(TAB==='crypto')render();}
+let MB_CT=null;
+
+/* ---------- bottom bar ---------- */
+function mbActive(){return ['chat','models','ai'].includes(TAB)?'wallet':TAB;}
+function mbBar(){
+  let b=$('#mbBar');
+  if(!b){b=document.createElement('nav');b.id='mbBar';b.className='mb-bar';b.setAttribute('aria-label','App');
+    b.innerHTML=MB_BAR.map(([k,l,d])=>`<button data-mbtab="${k}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg><span>${l}</span></button>`).join('');
+    document.body.appendChild(b);b.querySelectorAll('[data-mbtab]').forEach(x=>x.onclick=()=>{if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}if(typeof rpClose==='function'&&$('#rp.show'))rpClose();go(x.dataset.mbtab);});}
+  document.body.classList.toggle('has-ab',!!$('.admin-bar'));
+  const a=mbActive();b.querySelectorAll('[data-mbtab]').forEach(x=>{x.classList.toggle('on',x.dataset.mbtab===a);x.setAttribute('aria-current',x.dataset.mbtab===a?'page':'false');});
+}
+function mbBind(){
+  document.querySelectorAll('[data-mbq]').forEach(x=>x.onclick=()=>{const q=x.dataset.mbq;const i=$('#mbScanQ');if(i)i.value=q;mbScan(q);});
+  document.querySelectorAll('[data-mbgo]').forEach(x=>x.onclick=()=>go(x.dataset.mbgo));
+  document.querySelectorAll('[data-mbre]').forEach(x=>x.onclick=()=>{if(x.dataset.mbre==='w'){MB_W=null;render();mbLoadW();}else{MB_C=null;render();mbLoadC();}});
+  document.querySelectorAll('[data-mbask]').forEach(x=>x.onclick=()=>{if(!connected())return connect();const t=x.dataset.mbask;go('engine');setTimeout(()=>{if(typeof moSend==='function')moSend(t);},500);});
+  const p=document.querySelector('[data-mbpaste]');if(p)p.onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$('#mbScanQ').value=t.trim();mbScan(t);}}catch(e){toast('Long press the field and paste');}};
+  const f=$('#mbScanF');if(f)f.onsubmit=e=>{e.preventDefault();const i=$('#mbScanQ');i.blur();mbScan(i.value);};
+}
+document.addEventListener('click',e=>{const x=e.target.closest('[data-mb]');if(!x)return;const a=x.dataset.mb;
+  if(a==='install'){const s=$('#mbSheet');if(s)s.classList.remove('show');mbInstall();}
+  else if(a==='pushon')mbPushOn();else if(a==='pushoff')mbPushOff();
+  else if(a==='pushtest')api('/v1/push/test',{method:'POST'}).then(r=>toast(r.ok?'Test sent':'No device found, switch alerts on again')).catch(er=>toast(er.message));});
+
+/* ---------- hook into the page ---------- */
+const mbRender0=render;
+render=function(){
+  if(!MB_TABS.includes(TAB)){mbRender0();mbBar();return;}
+  document.querySelectorAll('.tabs button').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-selected','false');});
+  document.body.classList.remove('teaser','chatmode','aimode','cdr');document.documentElement.style.overflow='';
+  if(typeof bgShow==='function')bgShow(false);
+  $('#view').innerHTML=`<div class="mb-view">${TAB==='scan'?scanView():TAB==='weather'?weatherView():TAB==='crypto'?cryptoView():walletView()}</div>`;
+  if(TAB==='weather'&&!MB_W)mbLoadW();
+  if(TAB==='crypto'){if(!MB_C)mbLoadC();clearInterval(MB_CT);MB_CT=setInterval(()=>{if(TAB!=='crypto'){clearInterval(MB_CT);return;}if(!document.hidden)mbLoadC();},15000);}
+  if(TAB==='wallet'&&MB_PUSH==null)mbPushState().then(()=>{if(TAB==='wallet')render();});
+  bind();reveal();spot();mbBind();mbBar();
+  $('#walletBtn').textContent=connected()?(innerWidth<440?ME.address.slice(0,4)+'…'+ME.address.slice(-3):(ME.short||short(ME.address))):'Connect';
+};
+const mbFit0=fitChat;
+fitChat=function(){mbFit0();const c=$('.chat'),b=$('#mbBar');if(c&&b&&getComputedStyle(b).display!=='none')c.style.height=Math.max(320,parseFloat(c.style.height)-b.offsetHeight)+'px';};
+const mbGo0=go;
+go=function(t){mbGo0(t);if(MB_TABS.includes(t))history.replaceState(null,'','#'+t);};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&TAB==='wallet')mbPushState().then(()=>{if(TAB==='wallet')render();});});
 
 /* ---------- load ---------- */
 function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Only you see this view. Visitors see Chat, Models and Account only when the ai switch is on.';document.body.appendChild(b);}
