@@ -1103,7 +1103,7 @@ function engineView(){
       <div class="chips rv d3">
         <span class="chip ${L.wallet?'ok':''}"><span class="d"></span>Wallet ${L.wallet?'linked':'not linked'}</span>
         <span class="chip ${L.telegram?'ok':''}"><span class="d"></span>Telegram ${L.telegram?'linked':'not linked'}</span>
-        <span class="chip ${b.usd?'ok':''}"><span class="d"></span>${b.usd?usd(b.usd)+' credit':'No credit yet'}</span>
+        <span class="chip ${(b.team||b.usd)?'ok':''}"><span class="d"></span>${(b.team||b.usd)?(b.team?'Team account':usd(b.usd)+' credit'):'No credit yet'}</span>
       </div>
     </div>
     ${face('idle')}
@@ -1112,7 +1112,7 @@ function engineView(){
     <div class="steps">
       <div class="step ${L.wallet?'done':''}"><div class="n">${L.wallet?'✓':'1'}</div><div><b>Connect your wallet</b><span>Sign one message. No transaction, no fee.</span>${L.wallet?'':'<div><button class="btn btn-g btn-sm" data-act="connect">Connect</button></div>'}</div></div>
       <div class="step ${L.telegram?'done':''}"><div class="n">${L.telegram?'✓':'2'}</div><div><b>Link Telegram</b><span>One tap opens the OddsEngine bot.</span>${L.telegram?'':'<div><button class="btn btn-sm" data-act="tg">Link Telegram</button></div>'}</div></div>
-      <div class="step ${b.usd?'done':''}"><div class="n">${b.usd?'✓':'3'}</div><div><b>Top up with $ODDS</b><span>One balance for Your Engine and AI.</span>${b.usd?'':'<div><button class="btn btn-sm" data-act="toai">How</button></div>'}</div></div>
+      <div class="step ${(b.team||b.usd)?'done':''}"><div class="n">${(b.team||b.usd)?'✓':'3'}</div><div><b>Top up with $ODDS</b><span>One balance for Your Engine and AI.</span>${(b.team||b.usd)?'':'<div><button class="btn btn-sm" data-act="toai">How</button></div>'}</div></div>
     </div></div></section>`}
   <section><div class="grid2">
     <div class="card rv d1"><h3>Morning briefing</h3><p class="sub">Every morning in your Telegram. Pick what goes in.</p>
@@ -1132,7 +1132,7 @@ function engineView(){
     </div>
     ${walletsCard()}
     <div class="card rv d1"><h3>Balance</h3><p class="sub">One balance for Your Engine and OddsEngine AI.</p>
-      <div class="credit"><div class="big">${usd(b.usd||0)}</div><span class="note">${b.odds_equiv?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
+      <div class="credit"><div class="big">${b.team?'No charge':usd(b.usd||0)}</div><span class="note">${b.odds_equiv?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
       <div style="margin-top:14px"><button class="btn btn-sm" data-act="toai">Top up</button></div>
     </div>
   </div></section>`;
@@ -1203,7 +1203,7 @@ function accountCard(){
   const m=ME,b=m.balance||{};
   return `<div class="acct">
     <div><h3>Your balance</h3><p class="sub">Shared with Your Engine. Locked in dollars the moment it arrives, so it doesn't move with the price.</p>
-      <div class="credit"><div class="big">${usd(b.usd||0)}</div><span class="note">${b.odds_equiv!=null?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
+      <div class="credit"><div class="big">${b.team?'No charge':usd(b.usd||0)}</div><span class="note">${b.odds_equiv!=null?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
       <div class="kv"><div><span>Deposited</span><b>${usd(b.deposited||0)}</b></div><div><span>Used</span><b>${usd(b.spent||0,(b.spent||0)<1?4:2)}</b></div><div><span>Wallet</span><b>${E(m.short||short(m.address))}</b></div></div>
       ${(m.deposits||[]).length?`<div class="deps">${m.deposits.slice(0,4).map(d=>`<div class="d"><span>${Number(d.odds).toLocaleString('en-US')} $ODDS · ${ago(d.ts)}</span><b>+${usd(d.usd)}</b></div>`).join('')}</div>`:''}
     </div>
@@ -1496,12 +1496,12 @@ function msgHtml(m){
 }
 
 function chatView(){
-  const m=chatModel();const b=(ME&&ME.balance)||{};const low=connected()&&(b.usd||0)<0.01&&!m.free;
+  const m=chatModel();const b=(ME&&ME.balance)||{};const low=connected()&&(b.usd||0)<0.01&&!b.team&&!m.free;
   return `<div class="chat ${CH.drawer?'dopen':''}">
    <aside class="cside" id="cSide">
      <button class="btn btn-g cnew" data-cact="new">+ New chat</button>
      <div class="clist" id="cList">${connected()?(CH.list.length?CH.list.map(c=>`<div class="ci ${CH.cur===c.id?'on':''}" data-open="${E(c.id)}"><span class="ct">${E(String(c.title||"New chat").replace(/[*_`#]/g,""))}</span><span class="cw">${ago(c.updated)}</span><button class="cdel" data-cdel="${E(c.id)}" aria-label="Delete chat">×</button></div>`).join(''):'<div class="note" style="padding:10px">Your chats show up here.</div>'):'<div class="note" style="padding:10px">Connect your wallet to save chats.</div>'}</div>
-     <div class="cfoot">${connected()?`<div class="cbal"><span>Balance</span><b>${usd(b.usd||0)}</b></div><div class="cfb"><button class="btn btn-sm" data-act="toai">Top up</button><button class="btn btn-sm btn-red" data-cact="wipe">Delete all</button></div>`:'<button class="btn btn-g btn-sm" data-act="connect">Connect wallet</button>'}</div>
+     <div class="cfoot">${connected()?`<div class="cbal"><span>Balance</span><b>${b.team?'Team':usd(b.usd||0)}</b></div><div class="cfb"><button class="btn btn-sm" data-act="toai">Top up</button><button class="btn btn-sm btn-red" data-cact="wipe">Delete all</button></div>`:'<button class="btn btn-g btn-sm" data-act="connect">Connect wallet</button>'}</div>
    </aside>
    <div class="cshade" data-cact="drawer"></div>
    <section class="cmain">
@@ -1893,8 +1893,8 @@ function accountView(){
   const m=ME||{};
   return `<section class="ahero">
     <span class="eyebrow rv"><b>●</b> Your account</span>
-    <h1 class="rv d1"><span class="shiny">${connected()?usd((m.balance||{}).usd||0):'Pay per message.'}</span></h1>
-    <p class="lead rv d2">${connected()?'Your balance in dollars. It does not move with the token price.':'No subscription, no card. Connect a wallet, top up with $ODDS, chat with every model.'}</p>
+    <h1 class="rv d1"><span class="shiny">${connected()?((m.balance||{}).team?'Team account':usd((m.balance||{}).usd||0)):'Pay per message.'}</span></h1>
+    <p class="lead rv d2">${connected()?((m.balance||{}).team?'No charge on this wallet. Usage is still counted below.':'Your balance in dollars. It does not move with the token price.'):'No subscription, no card. Connect a wallet, top up with $ODDS, chat with every model.'}</p>
   </section>
   <section class="rv" id="account"><div class="card">${connected()?accountCard():connectCard()}</div></section>
   ${connected()?`<section class="rv"><div class="card">${tierCard()}</div></section>`:`<section class="rv"><div class="card">${tierCard()}</div></section>`}
@@ -1915,7 +1915,7 @@ function accountCard(){
   const m=ME,b=m.balance||{};
   return `<div class="acct">
     <div><h3>Balance</h3>
-      <div class="credit"><div class="big">${usd(b.usd||0)}</div><span class="note">${b.odds_equiv!=null?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
+      <div class="credit"><div class="big">${b.team?'No charge':usd(b.usd||0)}</div><span class="note">${b.team?'Team account':b.odds_equiv!=null?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
       <div class="kv"><div><span>Topped up</span><b>${usd(b.deposited||0)}</b></div><div><span>Used</span><b>${usd(b.spent||0,(b.spent||0)<1?4:2)}</b></div><div><span>Wallet</span><b>${E(m.short||short(m.address))}</b></div></div>
       ${(m.deposits||[]).length?`<div class="deps">${m.deposits.slice(0,4).map(d=>`<div class="d"><span>${Number(d.odds).toLocaleString('en-US')} $ODDS · ${ago(d.ts)}</span><b>+${usd(d.usd)}</b></div>`).join('')}</div>`:''}
     </div>
@@ -2194,7 +2194,7 @@ engineView=function(){
       <div class="chips rv d3">
         <span class="chip ${L.wallet?'ok':''}"><span class="d"></span>Wallet ${L.wallet?'linked':'not linked'}</span>
         <span class="chip ${L.telegram?'ok':''}"><span class="d"></span>Telegram ${L.telegram?'linked':'not linked'}</span>
-        <span class="chip ${b.usd?'ok':''}"><span class="d"></span>${b.usd?usd(b.usd)+' balance':'No balance yet'}</span>
+        <span class="chip ${(b.team||b.usd)?'ok':''}"><span class="d"></span>${(b.team||b.usd)?(b.team?'Team account':usd(b.usd)+' balance'):'No balance yet'}</span>
         ${(!b.usd&&MO&&MO.access&&MO.access.telegram)?`<span class="chip ${MO.access.trial_left>0?'ok':''}"><span class="d"></span>${MO.access.trial_left} free message${MO.access.trial_left===1?'':'s'} left</span>`:''}
       </div>
     </div>
@@ -2204,7 +2204,7 @@ engineView=function(){
     <div class="steps">
       <div class="step ${L.wallet?'done':''}"><div class="n">${L.wallet?'✓':'1'}</div><div><b>Connect your wallet</b><span>Sign one message. No transaction, no fee.</span>${L.wallet?'':'<div><button class="btn btn-g btn-sm" data-act="connect">Connect</button></div>'}</div></div>
       <div class="step ${L.telegram?'done':''}"><div class="n">${L.telegram?'✓':'2'}</div><div><b>Link Telegram</b><span>For the morning briefing, alerts and voice notes.</span>${L.telegram?'':'<div><button class="btn btn-sm" data-act="tg">Link Telegram</button></div>'}</div></div>
-      <div class="step ${b.usd?'done':''}"><div class="n">${b.usd?'✓':'3'}</div><div><b>Top up with $ODDS</b><span>Try it first: ${(MO&&MO.access&&MO.access.trial_total)||10} free messages once Telegram is linked. After that everything comes off your balance. Answers, images and other models at cost plus the fee. Briefing, reminders and alerts run while there is a balance.</span>${b.usd?'':'<div><button class="btn btn-sm" data-act="toai">Top up</button></div>'}</div></div>
+      <div class="step ${(b.team||b.usd)?'done':''}"><div class="n">${(b.team||b.usd)?'✓':'3'}</div><div><b>Top up with $ODDS</b><span>Try it first: ${(MO&&MO.access&&MO.access.trial_total)||10} free messages once Telegram is linked. After that everything comes off your balance. Answers, images and other models at cost plus the fee. Briefing, reminders and alerts run while there is a balance.</span>${(b.team||b.usd)?'':'<div><button class="btn btn-sm" data-act="toai">Top up</button></div>'}</div></div>
     </div></div></section>`}
   <section class="rv"><div class="card mo-chat">
     <div class="mo-head"><h3>Talk to it</h3><span class="note">${moBrain()?'Thinking: '+E(moBrain().label)+' · about '+moC(moBrain().usd_per_answer.typical)+' per answer, from your balance.':'Every answer comes off your balance: model cost plus the OddsEngine fee.'}</span>${(MO&&MO.history&&MO.history.length)||MO_LOG.length?'<button class="btn btn-sm" data-act="moclear">New chat</button>':''}</div>
@@ -2261,7 +2261,7 @@ engineView=function(){
     </div>
     ${walletsCard()}
     <div class="card rv d1"><h3>Balance</h3><p class="sub">One balance for Your Engine and OddsEngine AI.</p>
-      <div class="credit"><div class="big">${usd(b.usd||0)}</div><span class="note">${b.odds_equiv?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
+      <div class="credit"><div class="big">${b.team?'No charge':usd(b.usd||0)}</div><span class="note">${b.odds_equiv?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
       <div style="margin-top:14px"><button class="btn btn-sm" data-act="toai">Top up</button></div>
     </div>
   </div></section>`;
@@ -3032,7 +3032,7 @@ function walletView(){
     <div class="mb-btns"><button class="btn btn-sm" data-mbask="Show my bag watch">Show my bags</button></div></div>
   <div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-bell.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Phone alerts</b><p class="note">${pushTxt}</p></div></div>
     <div class="mb-btns">${MB_PUSH==='on'?'<button class="btn btn-sm" data-mb="pushoff">Switch off</button><button class="btn btn-sm" data-mb="pushtest">Send a test</button>':MB_PUSH==='denied'?'':(MB_PUSH==='unsupported'&&mbIOS())?'<button class="btn btn-g btn-sm" data-mb="install">Add to home screen</button>':MB_PUSH==='unsupported'?'':'<button class="btn btn-g btn-sm" data-mb="pushon">Switch alerts on</button>'}</div></div>
-  ${on?`<div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-bolt.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Credit</b><p class="note">${(b.usd||0)>0.005?`${usd(b.usd)} left for Your Engine and AI.`:'No credit left. Top up with $ODDS and everything runs again.'}</p></div></div><div class="mb-btns"><button class="btn btn-sm" data-mbgo="ai">Top up</button></div></div>`:''}
+  ${on?`<div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-bolt.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Credit</b><p class="note">${b.team?'Team account. No charge on this wallet.':(b.usd||0)>0.005?`${usd(b.usd)} left for Your Engine and AI.`:'No credit left. Top up with $ODDS and everything runs again.'}</p></div></div><div class="mb-btns"><button class="btn btn-sm" data-mbgo="ai">Top up</button></div></div>`:''}
   <h3 class="mb-h3 rv d3">More</h3>
   <div class="mb-list rv d3">
     <button class="mb-row" data-mbgo="chat"><span class="mb-sym">AI Chat</span><span class="mb-sub">Every top model in one chat</span><span class="mb-go">›</span></button>

@@ -1,5 +1,5 @@
 /* OddsEngine app: offline shell and phone alerts. The API is never cached. */
-const V='oe-app-v40';
+const V='oe-app-v41';
 const SHELL=['./','index.html','icon-192.png','icon-512.png','badge-96.png','robot-ring.webp','manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).catch(()=>{}));self.skipWaiting();});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
