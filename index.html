@@ -979,6 +979,13 @@ html.pwa footer.wrap{display:none}
 @media (pointer:coarse) and (max-height:600px) and (min-width:600px){.mb-bar{left:50%;right:auto;width:520px;transform:translateX(-50%);height:56px}}
 .mb-sin{max-height:calc(100dvh - 20px);overflow-y:auto}
 
+/* v40: eigene Symbole statt Emojis */
+.mb-ic-img{flex:0 0 56px;height:56px;background:radial-gradient(circle at 50% 60%,rgba(34,240,138,.14),transparent 70%);border:0;border-radius:16px}
+.mb-ic-img img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 0 10px rgba(34,240,138,.45));animation:mbIc 4.5s ease-in-out infinite}
+.mb-card:nth-child(2n) .mb-ic-img img{animation-delay:-1.6s}
+@keyframes mbIc{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.03)}}
+@media (prefers-reduced-motion:reduce){.mb-ic-img img{animation:none}}
+
 </style>
 </head>
 <body>
@@ -3019,13 +3026,13 @@ function walletView(){
   const pushTxt={on:'Alerts are on. Wallet Guard, Bag Watch, price alerts and your briefing land on this phone.',off:'Get Wallet Guard, Bag Watch, price alerts and your briefing as phone notifications.',denied:'Alerts are blocked for this site. Allow notifications in your browser settings, then come back.',unsupported:mbIOS()?'On iPhone, alerts work once OddsEngine is on your home screen.':'This browser cannot show alerts.'}[MB_PUSH||'off'];
   return mbHead('Wallet','Your wallet',on?`<span class="mono">${E(m.short||short(m.address))}</span>`:'Connect your wallet. One signature, no transaction, no fee.')+
   (on?'':`<div class="card rv d2"><button class="btn btn-g mb-wide" data-act="connect">Connect wallet</button></div>`)+
-  `<div class="card mb-card mb-guard rv d2"><div class="mb-ct"><span class="mb-ic">🛡</span><div><b>Wallet Guard</b><p class="note">Sees every approval and every token leaving your wallet. Cut risky approvals with one tap. No keys, no seed phrase. Ever.</p></div></div>
+  `<div class="card mb-card mb-guard rv d2"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-guard.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Wallet Guard</b><p class="note">Sees every approval and every token leaving your wallet. Cut risky approvals with one tap. No keys, no seed phrase. Ever.</p></div></div>
     <div class="mb-btns"><button class="btn btn-g btn-sm" data-mbask="Check my wallet approvals and show what is risky">Check my approvals</button><button class="btn btn-sm" data-mbask="Turn on Wallet Guard for my wallet">Watch my wallet</button></div></div>
-  <div class="card mb-card rv d2"><div class="mb-ct"><span class="mb-ic">👜</span><div><b>Bag Watch</b><p class="note">Alerts when a dev sells, liquidity drops, a top holder dumps or a lock ends on a coin you hold.</p></div></div>
+  <div class="card mb-card rv d2"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-bag.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Bag Watch</b><p class="note">Alerts when a dev sells, liquidity drops, a top holder dumps or a lock ends on a coin you hold.</p></div></div>
     <div class="mb-btns"><button class="btn btn-sm" data-mbask="Show my bag watch">Show my bags</button></div></div>
-  <div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic">🔔</span><div><b>Phone alerts</b><p class="note">${pushTxt}</p></div></div>
+  <div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-bell.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Phone alerts</b><p class="note">${pushTxt}</p></div></div>
     <div class="mb-btns">${MB_PUSH==='on'?'<button class="btn btn-sm" data-mb="pushoff">Switch off</button><button class="btn btn-sm" data-mb="pushtest">Send a test</button>':MB_PUSH==='denied'?'':(MB_PUSH==='unsupported'&&mbIOS())?'<button class="btn btn-g btn-sm" data-mb="install">Add to home screen</button>':MB_PUSH==='unsupported'?'':'<button class="btn btn-g btn-sm" data-mb="pushon">Switch alerts on</button>'}</div></div>
-  ${on?`<div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic">⚡</span><div><b>Credit</b><p class="note">${usd(b.usd||0)} left for Your Engine and AI.</p></div></div><div class="mb-btns"><button class="btn btn-sm" data-mbgo="ai">Top up</button></div></div>`:''}
+  ${on?`<div class="card mb-card rv d3"><div class="mb-ct"><span class="mb-ic mb-ic-img"><img src="ic-bolt.webp" alt="" width="52" height="52" decoding="async"></span><div><b>Credit</b><p class="note">${(b.usd||0)>0.005?`${usd(b.usd)} left for Your Engine and AI.`:'No credit left. Top up with $ODDS and everything runs again.'}</p></div></div><div class="mb-btns"><button class="btn btn-sm" data-mbgo="ai">Top up</button></div></div>`:''}
   <h3 class="mb-h3 rv d3">More</h3>
   <div class="mb-list rv d3">
     <button class="mb-row" data-mbgo="chat"><span class="mb-sym">AI Chat</span><span class="mb-sub">Every top model in one chat</span><span class="mb-go">›</span></button>
