@@ -1,0 +1,19 @@
+# No startCommand here on purpose.
+#
+# railway.toml applies to EVERY service in the project, so a startCommand of
+# "python main.py" made the `web` service run the worker as well and the API
+# never started at all. With it removed, Railway matches each service to the
+# line in the Procfile that carries its name:
+#
+#   service `worker`  ->  worker: python main.py
+#   service `web`     ->  web: uvicorn api:app --host 0.0.0.0 --port $PORT
+#
+# Rename a service and it picks up the matching process. Nothing to configure.
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+numReplicas = 1
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5

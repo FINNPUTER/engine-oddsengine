@@ -1,0 +1,74 @@
+{
+ "_meta": {
+  "note": "bias_c verschiebt die Mitte der Verteilung: distribution() rechnet mm = m - bias_c, ein NEGATIVER Wert liest also WAERMER. Die Eintraege bis 2026-07-21 stammen aus der Konsistenztabelle. Am 2026-08-03 kamen sechs Staedte dazu, gemessen ueber 155 aufgeloeste Maerkte mit bias.py: der mittlere Restfehler zwischen dem Lesewert der Engine und der Station. Aufgenommen wurden NUR Staedte, deren Versatz mindestens das 3,5-fache seines eigenen Standardfehlers betraegt und deren Streuung unter 1,3 Grad liegt.",
+  "source": "manual seed 2026-07-21; bias.py 2026-08-03",
+  "mode": "measure in paper first; do not stake real money on a corrected city until its own live record proves it green",
+  "nicht_aufgenommen": "chengdu, sao paulo, manila, taipei, chicago: dort ist die Streuung so gross wie der Versatz selbst (Chengdu 2,12 bei 1,85), aus vier bis sieben Messungen nicht vom Rauschen zu trennen. Erst mit mehr Daten."
+ },
+ "cities": {
+  "seoul": {
+   "bias_c": -2.62,
+   "consistency": 0.95
+  },
+  "shanghai": {
+   "bias_c": -1.97,
+   "consistency": 0.95
+  },
+  "guangzhou": {
+   "bias_c": -1.83,
+   "consistency": 0.87
+  },
+  "taipei": {
+   "bias_c": -1.53,
+   "consistency": 0.9
+  },
+  "atlanta": {
+   "bias_c": -1.32,
+   "consistency": 0.83
+  },
+  "chongqing": {
+   "bias_c": -1.31,
+   "consistency": 0.86
+  },
+  "munich": {
+   "bias_c": -1.27,
+   "consistency": 0.9
+  },
+  "los angeles": {
+   "bias_c": 1.15,
+   "consistency": 0.8
+  },
+  "kuala lumpur": {
+   "bias_c": -1.12,
+   "consistency": 0.82
+  },
+  "singapore": {
+   "bias_c": -1.0,
+   "consistency": 0.85
+  },
+  "dallas": {
+   "bias_c": 2.31,
+   "consistency": 0.7
+  },
+  "helsinki": {
+   "bias_c": -1.73,
+   "consistency": 0.73
+  },
+  "panama city": {
+   "bias_c": -1.71,
+   "consistency": 0.62
+  },
+  "cape town": {
+   "bias_c": -1.33,
+   "consistency": 0.73
+  },
+  "istanbul": {
+   "bias_c": -0.93,
+   "consistency": 0.62
+  },
+  "amsterdam": {
+   "bias_c": -0.72,
+   "consistency": 0.57
+  }
+ }
+}

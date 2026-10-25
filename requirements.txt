@@ -1,0 +1,34 @@
+requests>=2.31.0
+
+# Snapshot store — Railway injects DATABASE_URL when you add Postgres.
+psycopg[binary]>=3.1.0
+
+# API service only. The worker never imports these.
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+
+# Wallet-Anmeldung: prueft die Unterschrift und rechnet die Adresse zurueck.
+# Ohne dieses Paket antwortet /v1/auth/verify mit "eth_account missing" --
+# die Anmeldung sieht dann aus wie ein fehlendes Abo, obwohl alles stimmt.
+eth-account>=0.11.0
+
+# Autokauf-Dienst: Orders unterschreiben, senden und einloesen.
+# web und worker brauchen das nicht, installieren es aber mit -- der Preis
+# dafuer, alles in einem Repo zu halten.
+py-clob-client-v2>=0.1.0
+web3>=6.15.0
+
+# $ODDS Anmeldung: prueft die Solana-Unterschrift (Ed25519). Fehlt das
+# Paket, rechnet holder.py in reinem Python weiter, nur langsamer.
+cryptography>=41.0.0
+
+# Your Engine Kalender (seit 2.36): iCal lesen, Wiederholungen und Zeitzonen.
+icalendar>=5.0.0
+recurring-ical-events>=2.1.0
+youtube-transcript-api>=1.2,<2
+
+# Krypto-Lernlabor (seit 2.37): logistische Regression im crypto-Dienst.
+numpy>=1.26
+
+# Your Engine Stimme (seit 2.39): ffmpeg fuer Telegram-Sprachnachrichten, ohne Systempaket.
+imageio-ffmpeg>=0.5
