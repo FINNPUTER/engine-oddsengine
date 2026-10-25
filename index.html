@@ -877,7 +877,7 @@ body.rp-open{overflow:hidden}
 /* =================== v38: app shell =================== */
 .mb-bar{display:none}
 .toast{pointer-events:none}
-@media (max-width:820px){
+@media (max-width:820px),(pointer:coarse) and (max-height:600px){
   .mb-bar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;z-index:75;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));
     height:62px;padding:6px;border-radius:22px;background:rgba(6,12,9,.93);border:1px solid rgba(34,240,138,.18);
     backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);box-shadow:0 12px 40px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.05)}
@@ -968,6 +968,16 @@ html.pwa footer.wrap{display:none}
 .mb-sin .btn{width:100%;justify-content:center;display:flex;margin-top:14px}
 .mb-steps{margin:0;padding-left:20px;display:grid;gap:10px;font-size:15px}
 .mb-ico{display:inline-block;padding:0 6px;border-radius:6px;background:rgba(255,255,255,.08)}
+
+.al-code{font:800 44px/1 'JetBrains Mono',monospace;letter-spacing:.12em;text-align:center;color:var(--g);padding:18px 0;margin:10px 0;border-radius:18px;background:rgba(34,240,138,.07);border:1px solid rgba(34,240,138,.3);text-shadow:0 0 22px rgba(34,240,138,.4)}
+.al-in{width:100%;box-sizing:border-box;font:700 30px/1 'JetBrains Mono',monospace;letter-spacing:.2em;text-align:center;color:var(--tx);background:rgba(255,255,255,.04);border:1px solid var(--line2);border-radius:16px;padding:14px;outline:none;margin-top:6px}
+.al-in:focus{border-color:rgba(34,240,138,.55);box-shadow:0 0 0 4px rgba(34,240,138,.08)}
+.mb-sin .note .typing{vertical-align:middle;margin-right:6px}
+@media (max-width:520px){.acct{grid-template-columns:minmax(0,1fr)!important}.acct>*{min-width:0}.acct .credit .note{flex-basis:100%}}
+.rp-id>div{min-width:0;overflow:hidden}
+@media (max-width:420px){.rp-id h1 span{display:none}.mb-pc b{font-size:clamp(14px,4.3vw,17px)}.mb-scan input{font-size:15px;padding:12px 6px}}
+@media (pointer:coarse) and (max-height:600px) and (min-width:600px){.mb-bar{left:50%;right:auto;width:520px;transform:translateX(-50%);height:56px}}
+.mb-sin{max-height:calc(100dvh - 20px);overflow-y:auto}
 
 </style>
 </head>
@@ -3020,6 +3030,7 @@ function walletView(){
   <div class="mb-list rv d3">
     <button class="mb-row" data-mbgo="chat"><span class="mb-sym">AI Chat</span><span class="mb-sub">Every top model in one chat</span><span class="mb-go">›</span></button>
     <button class="mb-row" data-mbgo="models"><span class="mb-sym">Models</span><span class="mb-sub">Prices and what each one is good at</span><span class="mb-go">›</span></button>
+    ${on?'<button class="mb-row" data-alpair="1"><span class="mb-sym">Log in another device</span><span class="mb-sub">Phone app, tablet or laptop</span><span class="mb-go">›</span></button>':''}
     <button class="mb-row" data-mbgo="ai"><span class="mb-sym">Account</span><span class="mb-sub">Credit, usage, API key</span><span class="mb-go">›</span></button>
     ${mbStandalone()?'':'<button class="mb-row" data-mb="install"><span class="mb-sym">Get the app</span><span class="mb-sub">Add OddsEngine to your home screen</span><span class="mb-go">›</span></button>'}
     <a class="mb-row" href="docs.html"><span class="mb-sym">Docs</span><span class="mb-sub">How everything works</span><span class="mb-go">›</span></a>
@@ -3046,6 +3057,7 @@ function mbBind(){
   document.querySelectorAll('[data-mbgo]').forEach(x=>x.onclick=()=>go(x.dataset.mbgo));
   document.querySelectorAll('[data-mbre]').forEach(x=>x.onclick=()=>{if(x.dataset.mbre==='w'){MB_W=null;render();mbLoadW();}else{MB_C=null;render();mbLoadC();}});
   document.querySelectorAll('[data-mbask]').forEach(x=>x.onclick=()=>{if(!connected())return connect();const t=x.dataset.mbask;go('engine');setTimeout(()=>{if(typeof moSend==='function')moSend(t);},500);});
+  document.querySelectorAll('[data-alpair]').forEach(x=>x.onclick=()=>alPair());
   const p=document.querySelector('[data-mbpaste]');if(p)p.onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$('#mbScanQ').value=t.trim();mbScan(t);}}catch(e){toast('Long press the field and paste');}};
   const f=$('#mbScanF');if(f)f.onsubmit=e=>{e.preventDefault();const i=$('#mbScanQ');i.blur();mbScan(i.value);};
 }
@@ -3073,6 +3085,88 @@ fitChat=function(){mbFit0();const c=$('.chat'),b=$('#mbBar');if(c&&b&&getCompute
 const mbGo0=go;
 go=function(t){mbGo0(t);if(MB_TABS.includes(t))history.replaceState(null,'','#'+t);};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&TAB==='wallet')mbPushState().then(()=>{if(TAB==='wallet')render();});});
+
+/* =================== v39: log in without a wallet in the browser (Telegram, WalletConnect, code) =================== */
+const WC_PROJECT='8bf09d69248f4f4517c67a8ee478ac1a';
+let AL=null,AL_T=null;
+const mbHasInjected=()=>!!(window.OE_ETH||(typeof OE_WALLETS!=='undefined'&&OE_WALLETS.length)||window.ethereum);
+const mbConnect0=connect;
+connect=async function(){
+  if(DEMO)return mbConnect0();
+  if(mbHasInjected()&&!mbStandalone())return mbConnect0();
+  mbLoginSheet();
+};
+function mbLoginSheet(){
+  mbSheet(`<h3>Log in</h3><p class="note" style="margin:0 0 6px">Your keys never leave your wallet. Logging in only proves the wallet is yours.</p>
+  <button class="btn btn-g" data-al="tg">Log in with Telegram</button>
+  <button class="btn" data-al="wc">Connect a wallet</button>
+  <button class="btn" data-al="code">Use a code from another device</button>
+  ${mbHasInjected()?'<button class="btn" data-al="inj">Use this browser\'s wallet</button>':''}
+  <p class="note" style="margin:14px 0 0;font-size:12.5px">Telegram works once your Telegram is linked to your wallet. New here? Use Connect a wallet.</p>`);
+  document.querySelectorAll('[data-al]').forEach(b=>b.onclick=()=>{const a=b.dataset.al;
+    if(a==='tg')alTelegram();else if(a==='wc')alWalletConnect();else if(a==='code')alCode();else{const s=$('#mbSheet');if(s)s.classList.remove('show');mbConnect0();}});
+}
+async function alStart(){const r=await api('/v1/engine/applogin/start',{method:'POST',body:'{}'});AL=r;return r;}
+function alPoll(){clearTimeout(AL_T);const code=AL&&AL.code;if(!code)return;
+  AL_T=setTimeout(async()=>{try{const r=await api('/v1/engine/applogin/poll?code='+code);
+    if(r.state==='ok'&&r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}AL=null;const s=$('#mbSheet');if(s)s.classList.remove('show');await load();toast('Logged in');return;}
+    if(r.state==='waiting')return alPoll();
+    if(r.state==='cancelled')toast('Login cancelled in Telegram');else toast('That login expired, try again');
+  }catch(e){alPoll();}},document.hidden?4000:2000);}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AL)alPoll();});
+async function alTelegram(){
+  try{const r=await alStart();
+    mbSheet(`<h3>Confirm in Telegram</h3><p>Telegram opens with a message from Your Engine. Tap <b>Confirm login</b>, then come back here.</p>
+    <a class="btn btn-g" href="${E(r.telegram)}" target="_blank" rel="noopener">Open Telegram</a>
+    <p class="note" style="margin-top:12px"><span class="typing"><i></i><i></i><i></i></span> Waiting for your confirmation…</p>
+    <button class="btn" data-mb="close">Cancel</button>`);
+    try{window.open(r.telegram,'_blank');}catch(e){}
+    alPoll();
+  }catch(e){toast(e.message||'Could not start the login');}
+}
+async function alCode(){
+  try{const r=await alStart();
+    mbSheet(`<h3>Log in with a code</h3><p>On a device where you are already logged in (your wallet browser or laptop), open <b>engine.oddsengine.live</b>, go to <b>Wallet</b> and tap <b>Log in another device</b>. Enter this code:</p>
+    <div class="al-code">${E(r.pair.slice(0,3))} ${E(r.pair.slice(3))}</div>
+    <p class="note"><span class="typing"><i></i><i></i><i></i></span> Waiting… The code works for 10 minutes.</p>
+    <button class="btn" data-mb="close">Cancel</button>`);
+    alPoll();
+  }catch(e){toast(e.message||'Could not start the login');}
+}
+function alLoadWC(){return new Promise((ok,no)=>{if(window.OE_WC)return ok(window.OE_WC);const s=document.createElement('script');s.src='wc.js?v=39';s.onload=()=>ok(window.OE_WC);s.onerror=()=>no(new Error('Could not load WalletConnect'));document.head.appendChild(s);});}
+let AL_WC=null;
+async function alWCProvider(){
+  if(AL_WC)return AL_WC;
+  const W=await alLoadWC();
+  AL_WC=await W.EthereumProvider.init({projectId:WC_PROJECT,chains:[1],optionalChains:[42161,8453,56,4663],showQrModal:true,
+    methods:['personal_sign','eth_sendTransaction','eth_signTypedData_v4','wallet_switchEthereumChain','wallet_addEthereumChain'],
+    metadata:{name:'OddsEngine',description:'Your Engine, scans, Wallet Guard',url:location.origin,icons:[location.origin+'/icon-192.png']}});
+  return AL_WC;
+}
+async function alWalletConnect(){
+  const s=$('#mbSheet');if(s)s.classList.remove('show');
+  try{toast('Opening WalletConnect…');const p=await alWCProvider();
+    if(!p.session)await p.connect();
+    const addr=(p.accounts||[])[0];if(!addr)throw new Error('No account shared');
+    const n=await api('/v1/engine/nonce?address='+addr);
+    toast('Sign the message in your wallet');
+    const sig=await p.request({method:'personal_sign',params:[n.message,addr]});
+    const r=await api('/v1/engine/login',{method:'POST',body:JSON.stringify({address:addr,signature:sig})});
+    TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}
+    window.OE_ETH=p;await load();toast('Wallet connected');
+  }catch(e){toast((e&&e.code===4001)||/reject|cancel/i.test(e&&e.message||'')?'You cancelled in the wallet':'Could not connect: '+((e&&e.message)||e));}
+}
+/* restore an earlier WalletConnect session so trades and revokes can sign without a new pairing */
+(async()=>{try{if(!localStorage.getItem('oe_engine'))return;if(!Object.keys(localStorage).some(k=>/^wc@2:client/.test(k)))return;
+  if(mbHasInjected()&&!mbStandalone())return;const p=await alWCProvider();if(p.session)window.OE_ETH=p;}catch(e){}})();
+async function alPair(){
+  mbSheet(`<h3>Log in another device</h3><p>Enter the 6 digits shown in the app on your other device.</p>
+  <input class="al-in" id="alIn" inputmode="numeric" maxlength="7" placeholder="000 000" autocomplete="one-time-code">
+  <button class="btn btn-g" id="alGo">Log it in</button><button class="btn" data-mb="close">Cancel</button>`);
+  const i=$('#alIn');setTimeout(()=>i&&i.focus(),250);
+  $('#alGo').onclick=async()=>{try{const r=await api('/v1/engine/applogin/pair',{method:'POST',body:JSON.stringify({code:i.value})});
+    const s=$('#mbSheet');if(s)s.classList.remove('show');toast('Done. '+(r.device||'The other device')+' is logged in.');}catch(e){toast(e.message||'That did not work');}};
+}
 
 /* ---------- load ---------- */
 function adminBar(){if($('.admin-bar'))return;const b=document.createElement('div');b.className='admin-bar';b.textContent=DEMO?'Preview with example data. Nothing here is real.':'Operator view. Only you see this view. Visitors see Chat, Models and Account only when the ai switch is on.';document.body.appendChild(b);}
