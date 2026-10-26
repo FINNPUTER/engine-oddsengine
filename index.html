@@ -11,6 +11,7 @@
 <meta property="og:image" content="https://engine.oddsengine.live/robot-ring.webp">
 <link rel="icon" href="icon-180.png">
 <link rel="apple-touch-icon" href="icon-180.png">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1032,6 +1033,9 @@ function ask(text,o){o=o||{};return new Promise(res=>{
 let ADMIN='';try{const q=new URLSearchParams(location.search).get('admin');if(q){localStorage.setItem('oe_admin',q);history.replaceState(null,'',location.pathname+location.hash);}ADMIN=localStorage.getItem('oe_admin')||'';}catch(e){}
 const DEMO=/[?&]demo=1/.test(location.search);
 let TOKEN='';try{TOKEN=localStorage.getItem('oe_engine')||'';}catch(e){}
+/* 2.50.7: im Telegram-Mini-App automatisch einloggen (initData), wenn Telegram mit einem Wallet verknuepft ist */
+let TG_INIT='';try{TG_INIT=(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)||'';if(!TG_INIT){const m=(location.hash||'').match(/tgWebAppData=([^&]*)/);if(m)TG_INIT=decodeURIComponent(m[1]);}if(TG_INIT)sessionStorage.setItem('oe_tginit',TG_INIT);else TG_INIT=sessionStorage.getItem('oe_tginit')||'';}catch(e){}
+let TG_HINT='';
 function hdr(){const h={'Content-Type':'application/json'};if(ADMIN)h['X-OddsEngine-Admin']=ADMIN;if(TOKEN)h['X-OddsEngine-Key']=TOKEN;return h;}
 async function api(p,opt){const r=await fetch(API+p,Object.assign({headers:hdr()},opt||{}));let j=null;try{j=await r.json();}catch(e){}
   if(!r.ok){const m=(j&&(j.detail||(j.error&&j.error.message)))||('error '+r.status);const er=new Error(m);er.status=r.status;er.body=j;throw er;}return j;}
@@ -2667,7 +2671,7 @@ function rpFwd(r){const f=r.forwards;if(!f||!f.checked)return '';const exp=r.exp
   const kopf=`<p class="rp-mini"><b>${f.count}</b> from ${f.senders} wallet${f.senders==1?'':'s'} to ${f.receivers}${f.to_fresh?` · <b>${f.to_fresh}</b> to fresh wallets`:''}${f.still_held_pct?` · receivers still hold <b>${rpN(f.still_held_pct)}%</b>`:''}${f.from_dev?` · <b class="rp-red">dev forwarded ${rpN(f.dev_forwarded_pct)}%</b>`:''}</p>`;
   const zeilen=(f.list||[]).slice(0,6).map(x=>`<li>${lk(x.from)} <span class="note">${E(x.src)}</span> → ${lk(x.to)}${x.fresh?' <span class="rp-tag">new</span>':''} <span class="note">${rpN(x.pct)}%${x.holds_pct!=null?' · holds '+rpN(x.holds_pct)+'%':''}</span></li>`).join('');
   const sam=(f.collectors||[]).filter(c=>c.other_tokens||c.from_wallets>1).slice(0,3).map(c=>`<li>${lk(c.wallet)} <span class="note">collected from ${c.from_wallets} wallet${c.from_wallets==1?'':'s'} here${c.other_tokens?`, also on ${c.other_tokens} other coin${c.other_tokens==1?'':'s'}`:''}</span></li>`).join('');
-  return `<h3 style="margin-top:14px">Token forwards</h3>${kopf}<ul class="rp-fw">${zeilen}</ul>${(f.list||[]).length>6?`<p class="note">+${f.list.length-6} more</p>`:''}${sam?`<h3 style="margin-top:12px">Collection wallets</h3><ul class="rp-fw">${sam}</ul>`:''}`;}
+  return `<h3 style="margin-top:14px">Token forwards</h3>${kopf}<ul class="rp-fw">${zeilen}</ul>${(f.list||[]).length>6?`<p class="note">+${f.list.length-6} more</p>`:''}<div id="rpFwW"><button class="btn btn-g btn-sm" data-rp="fwdwatch" style="margin-top:10px">🔔 Alert me when they sell or lock</button></div>${sam?`<h3 style="margin-top:12px">Collection wallets</h3><ul class="rp-fw">${sam}</ul>`:''}`;}
 function rpBind(){
   document.querySelectorAll('[data-rp]').forEach(b=>b.onclick=async()=>{
     const a=b.dataset.rp;
@@ -2675,9 +2679,11 @@ function rpBind(){
     if(a==='copy'){try{await navigator.clipboard.writeText(RP.address);toast('Address copied');}catch(e){}return;}
     if(a.startsWith('side:')){RP_SIDE=a.slice(5);const tb=$('#rpTB');if(tb){tb.innerHTML=rpTradeBox();rpBind();}return;}
     if(a.startsWith('q:')){const v=a.slice(2);$('#rpAmt').value=v;$('#rpUnit').value=RP_SIDE==='buy'?'usd':'percent';return;}
+    if(a==='fwdwatch'){b.disabled=true;try{const d=await api('/v1/engine/scan/watchfwd',{method:'POST',body:JSON.stringify({q:RP.chain+':'+RP.address})});$('#rpFwW').innerHTML=`<p class="note" style="margin-top:10px">${E(d.text||'Done.')}</p>`;}
+      catch(e){b.disabled=false;if(e.status===401){$('#rpFwW').innerHTML=`<p class="note" style="margin-top:10px">Alerts go to your Telegram. ${TG_HINT?E(TG_HINT):'Connect your wallet on engine.oddsengine.live and link Telegram once, then it works right here.'}</p><a class="btn btn-sm" href="https://engine.oddsengine.live/#ai" target="_blank" rel="noopener" style="margin-top:8px">Connect wallet</a>`;}else toast(e.message||'Could not set that up');}return;}
     if(a==='research'){const box=$('#rpRes');b.disabled=true;b.innerHTML='<span class="typing"><i></i><i></i><i></i></span> Reading the site, X, Telegram, GitHub…';
       try{const d=await api('/v1/engine/scan/research',{method:'POST',body:JSON.stringify({q:RP.chain+':'+RP.address})});box.innerHTML='<h3>Project research</h3>'+rpResearch(d);}
-      catch(e){b.disabled=false;b.textContent='Run research';toast(e.message||'Research failed');}return;}
+      catch(e){b.disabled=false;b.textContent='Run research';if(e.status===401){box.insertAdjacentHTML('beforeend',`<p class="note" style="margin-top:10px">Research runs on your Your Engine balance. ${TG_HINT?E(TG_HINT):'Connect your wallet on engine.oddsengine.live and link Telegram once, then it works right here.'}</p><a class="btn btn-sm" href="https://engine.oddsengine.live/#ai" target="_blank" rel="noopener" style="margin-top:8px">Connect wallet</a>`);b.style.display='none';}else toast(e.message||'Research failed');}return;}
     if(a==='watch'){b.disabled=true;try{const r=await api('/v1/engine/agent/watch',{method:'POST',body:JSON.stringify({q:RP.chain+':'+RP.address})});toast('Watching $'+(r.symbol||'')+': alerts in Telegram');b.textContent='Watching';}catch(e){toast(e.message||'Could not start the watch');b.disabled=false;}return;}
     if(a==='trade'){const amt=parseFloat(($('#rpAmt').value||'').replace(',','.'));if(!(amt>0)){toast('Enter an amount');return;}
       b.disabled=true;b.textContent='Getting a price…';
@@ -3182,6 +3188,7 @@ async function load(){
   const pm=MODELS.length?null:loadModels();
   try{const d=await api('/v1/features');FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);if(d.admin)PREVIEW=true;}catch(e){}
   ME=null;
+  if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
   if(DEMO)ME=JSON.parse(JSON.stringify(DEMO_ME));
   if(PREVIEW&&ADMIN){try{ADM=await api('/v1/admin/ai');}catch(e){ADM=null;}}
