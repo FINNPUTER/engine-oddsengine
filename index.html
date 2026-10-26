@@ -988,6 +988,42 @@ html.pwa footer.wrap{display:none}
 @keyframes mbIc{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-2px) scale(1.03)}}
 @media (prefers-reduced-motion:reduce){.mb-ic-img img{animation:none}}
 
+
+/* 2.58: what Your Engine takes off your plate */
+.ye-do{margin-top:6px}
+.ye-dohead{margin:0 0 14px}
+.ye-dohead h2{font-family:var(--disp,inherit);font-size:clamp(24px,3.4vw,36px);margin:8px 0 4px;letter-spacing:-.01em}
+.ye-dohead p{color:var(--dim);margin:0}
+.ye-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:860px){.ye-grid{grid-template-columns:1fr}}
+.ye-c{display:flex;flex-direction:column;gap:10px;padding:14px}
+.ye-media{position:relative;border-radius:14px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.ye-media video,.ye-media img{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain;background:#000}
+.ye-play{position:absolute;right:10px;bottom:10px;border:0;border-radius:999px;padding:8px 13px;font:600 12.5px/1 var(--mono,monospace);
+  background:rgba(4,10,7,.72);color:var(--tx);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;border:1px solid rgba(34,240,138,.35)}
+.ye-play:hover{border-color:var(--g)}
+.ye-c h3{margin:4px 2px 0}
+.ye-bn{display:grid;gap:6px;margin:0 2px}
+.ye-bn p{margin:0;font-size:14.5px;line-height:1.45;color:var(--tx)}
+.ye-bn span{display:inline-block;min-width:58px;font:600 11px/1 var(--mono,monospace);letter-spacing:.12em;text-transform:uppercase;color:var(--dim2)}
+.ye-bn .now span{color:var(--g)}
+.ye-bn .was{color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(255,93,108,.55)}
+.ye-act{display:flex;gap:8px;flex-wrap:wrap;margin:4px 2px 2px}
+.ye-soon{position:absolute;left:10px;top:10px;font:600 11px/1 var(--mono,monospace);letter-spacing:.1em;text-transform:uppercase;padding:6px 9px;border-radius:999px;background:rgba(4,10,7,.72);color:var(--g2)}
+@media (max-width:700px){
+  .ye-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;margin:0 -16px;padding:2px 16px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .ye-grid::-webkit-scrollbar{display:none}
+  .ye-c{flex:0 0 84%;scroll-snap-align:center}
+  .ye-media video,.ye-media img{max-height:46vh;width:100%;object-fit:cover}
+  .ye-bn p{font-size:14px}
+  .ye-swipe{display:flex!important}
+}
+.ye-swipe{display:none;align-items:center;justify-content:center;gap:6px;margin-top:6px}
+.ye-swipe i{width:6px;height:6px;border-radius:50%;background:var(--dim2);transition:all .25s}
+.ye-swipe i.on{width:18px;border-radius:4px;background:var(--g)}
+.ye-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;padding:16px}
+.ye-modal video{max-width:min(1100px,100%);max-height:88vh;border-radius:16px;background:#000}
+.ye-modal button{position:absolute;top:14px;right:16px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(8,14,11,.8);color:var(--tx);font-size:22px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1036,7 +1072,7 @@ const DEMO=/[?&]demo=1/.test(location.search);
 let TOKEN='';try{TOKEN=localStorage.getItem('oe_engine')||'';}catch(e){}
 /* 2.50.7: im Telegram-Mini-App automatisch einloggen (initData), wenn Telegram mit einem Wallet verknuepft ist */
 let TG_INIT='';try{TG_INIT=(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)||'';if(!TG_INIT){const m=(location.hash||'').match(/tgWebAppData=([^&]*)/);if(m)TG_INIT=decodeURIComponent(m[1]);}if(TG_INIT)sessionStorage.setItem('oe_tginit',TG_INIT);else TG_INIT=sessionStorage.getItem('oe_tginit')||'';}catch(e){}
-let TG_HINT='';
+let TG_HINT='';let YE_BOT='OddsEnginePublicBot';
 function hdr(){const h={'Content-Type':'application/json'};if(ADMIN)h['X-OddsEngine-Admin']=ADMIN;if(TOKEN)h['X-OddsEngine-Key']=TOKEN;return h;}
 async function api(p,opt){const r=await fetch(API+p,Object.assign({headers:hdr()},opt||{}));let j=null;try{j=await r.json();}catch(e){}
   if(!r.ok){const m=(j&&(j.detail||(j.error&&j.error.message)))||('error '+r.status);const er=new Error(m);er.status=r.status;er.body=j;throw er;}return j;}
@@ -2205,6 +2241,7 @@ engineView=function(){
     </div>
     ${face('idle')}
   </section>
+  ${yeDo()}
   ${L.wallet&&L.telegram&&b.usd?'':`<section class="rv"><div class="card"><h3>Three steps and it is yours</h3><p class="sub">Takes about a minute. Your Engine only ever sees public addresses.</p>
     <div class="steps">
       <div class="step ${L.wallet?'done':''}"><div class="n">${L.wallet?'✓':'1'}</div><div><b>Connect your wallet</b><span>Sign one message. No transaction, no fee.</span>${L.wallet?'':'<div><button class="btn btn-g btn-sm" data-act="connect">Connect</button></div>'}</div></div>
@@ -3202,7 +3239,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);if(d.admin)PREVIEW=true;}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);if(d.admin)PREVIEW=true;}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
@@ -3219,6 +3256,52 @@ async function load(){
 load();
 setInterval(async()=>{if(document.hidden||!TOKEN||DEMO)return;try{const m=await api('/v1/engine/me');const before=ME&&ME.balance&&ME.balance.usd;ME=m;if(m.balance&&before!=null&&m.balance.usd>before+0.0001){toast('Top up arrived: +'+usd(m.balance.usd-before));render();}}catch(e){}},45000);
 
+
+/* 2.58: what Your Engine takes off your plate, with the feature videos */
+const YE_DO=[
+ {k:'protect',t:'Protect your wallet',was:'Finding out about a drain when it is too late.',now:'Wallet Guard flags risky approvals before they get used. If a wallet still gets drained, a drain report shows where the money went, with proof and what to do now.',v:'protect'},
+ {k:'check',t:'Check any coin',was:'Ten tabs, three explorers, and still guessing.',now:'Paste a coin and get bundles, snipers, the dev wallet and the top holders in one card, plus a live report with chart and holder map.',v:'check'},
+ {k:'check',t:'Follow the money',was:'Clicking through a block explorer for hours.',now:'Paste a wallet and ask where the money went: swaps, bridges, exchanges, every step with the transaction as proof.',v:'trace'},
+ {k:'feed',t:'One feed, zero noise',was:'Thirty channels pinging you all day.',now:'Follow Telegram channels, X accounts and YouTube in one place, only with your keywords. New videos come summarized.',v:'feed'},
+ {k:'tax',t:'Taxes in one message',was:'Days of copy and paste for your tax advisor.',now:'One message, one Excel file: every buy, sell and swap on five chains, with the value at the time, gain or loss and holding period.',img:'tax'}
+];
+const yeMob=()=>innerWidth<700;
+function yeDo(){
+  const card=x=>{
+    const f=yeMob()?'m':'w';
+    const media=x.v?`<video class="ye-v" muted loop playsinline preload="none" poster="v/${x.v}-${f}.jpg" data-v="${x.v}"></video><button class="ye-play" data-yev="${x.v}" aria-label="Watch with sound">▶ Watch with sound</button>`
+      :`<img src="v/${x.img}-${f}.jpg" alt="" loading="lazy"><span class="ye-soon">Video soon</span>`;
+    return `<div class="card ye-c rv"><div class="ye-media">${media}</div><h3>${E(x.t)}</h3>
+      <div class="ye-bn"><p class="was"><span>Before</span> ${E(x.was)}</p><p class="now"><span>Now</span> ${E(x.now)}</p></div>
+      <div class="ye-act"><a class="btn btn-g btn-sm" href="https://t.me/${E(YE_BOT)}?start=m_${x.k}" target="_blank" rel="noopener">Try it in Telegram</a></div></div>`;};
+  return `<section class="ye-do"><div class="ye-dohead rv"><span class="eyebrow"><b>●</b> What it takes off your plate</span>
+    <h2><span class="shiny">Stop doing it by hand.</span></h2><p>Safer and simpler in crypto. Watch what it does, or try it right away in Telegram.</p></div>
+    <div class="ye-grid" id="yeGrid">${YE_DO.map(card).join('')}</div>
+    <div class="ye-swipe" id="yeDots">${YE_DO.map((x,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div></section>`;
+}
+let YE_IO=null;
+function yeVids(){
+  const vs=[...document.querySelectorAll('video.ye-v')];if(!vs.length)return;
+  if(YE_IO)YE_IO.disconnect();
+  YE_IO=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;
+    if(e.isIntersecting){if(!v.src){v.src=`v/${v.dataset.v}-${yeMob()?'m':'w'}.mp4`;}const p=v.play();if(p&&p.catch)p.catch(()=>{});}
+    else if(!v.paused)v.pause();}),{threshold:.35});
+  vs.forEach(v=>YE_IO.observe(v));
+  const g=document.getElementById('yeGrid'),d=document.getElementById('yeDots');
+  if(g&&d&&!g.dataset.b){g.dataset.b=1;g.addEventListener('scroll',()=>{const c=[...g.children];const mitte=g.scrollLeft+g.clientWidth/2;
+    let best=0,bd=1e9;c.forEach((el,i)=>{const m=el.offsetLeft+el.offsetWidth/2;if(Math.abs(m-mitte)<bd){bd=Math.abs(m-mitte);best=i;}});
+    [...d.children].forEach((x,i)=>x.classList.toggle('on',i===best));},{passive:true});}
+}
+document.addEventListener('click',ev=>{
+  const b=ev.target.closest&&ev.target.closest('[data-yev]');
+  if(b){ev.preventDefault();const m=document.createElement('div');m.className='ye-modal';m.setAttribute('role','dialog');
+    m.innerHTML=`<video controls autoplay playsinline src="v/${b.dataset.yev}-${yeMob()?'m':'w'}.mp4"></video><button aria-label="Close">×</button>`;
+    const zu=()=>{const v=m.querySelector('video');if(v)v.pause();m.remove();};
+    m.addEventListener('click',e=>{if(e.target===m||e.target.tagName==='BUTTON')zu();});
+    document.addEventListener('keydown',function k(e){if(e.key==='Escape'){zu();document.removeEventListener('keydown',k);}});
+    document.body.appendChild(m);return;}
+});
+{const _yeRender=render;render=function(){_yeRender.apply(this,arguments);try{yeVids();}catch(e){}};}
 </script>
 </body>
 </html>
