@@ -725,6 +725,7 @@ body.rp-open{overflow:hidden}
 .rp-chart{padding:0;overflow:hidden;min-height:560px;align-self:stretch;display:flex}
 .rp-chart iframe{flex:1;min-height:560px}
 .rp-chart iframe{width:100%;height:100%;border:0;display:block}
+.rp-cl{display:block;padding:8px 2px 0;font-size:12px;color:var(--dim);text-decoration:none}.rp-cl:hover{text-decoration:underline}
 .rp-chart .note{padding:16px}
 .rp-verdict{border-width:1px;position:relative;overflow:hidden}
 .rp-verdict::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--vc)}
@@ -2632,7 +2633,7 @@ function rpDraw(keep){
   const exp=r.explorer_base||'';const ap=r.addr_path||'/address/';
   const links=Object.entries(m.links||{}).slice(0,4).map(([k,u])=>`<a href="${E(u)}" target="_blank" rel="noopener">${E(k==='twitter'?'X':k[0].toUpperCase()+k.slice(1))}</a>`).join('');
   const el=rpEl();
-  el.innerHTML=`<div class="rp-in">
+  const html=`<div class="rp-in">
   <div class="rp-top">${rpHead(true)}
     <div class="rp-id">${r.image?`<img class="rp-logo" src="${E(r.image)}" alt="" onerror="this.remove()">`:''}<div><h1>$${E(r.symbol||rpShort(r.address))}${r.name&&String(r.name).toLowerCase()!==String(r.symbol||'').toLowerCase()?` <span>${E(r.name)}</span>`:''}</h1>
       <p>${[r.chain_name,r.venue,r.age?r.age+' old':''].filter(Boolean).map(E).join(' · ')}</p></div></div>
@@ -2644,7 +2645,7 @@ function rpDraw(keep){
     <div class="rp-card rp-verdict ${lv[1]}" style="grid-area:v"><div class="rp-vh"><i></i><h2>${E(v.title||lv[0])}</h2>${r.risk_score!=null?`<span class="mono">Score ${E(r.risk_score)}/100</span>`:''}</div><p>${E(v.reason||'')}</p>
       ${(v.bad||[]).length||(v.good||[]).length?`<div class="rp-gb">${(v.bad||[]).slice(0,5).map(x=>`<div class="b">${E(x)}</div>`).join('')}${(v.good||[]).slice(0,4).map(x=>`<div class="g">${E(x)}</div>`).join('')}</div>`:''}
       ${(r.deep||{}).state==='running'?'<p class="note">Deep scan running, bundles and early buyers arrive in about a minute.</p>':''}</div>
-    <div class="rp-card rp-chart" style="grid-area:c">${r.embed?`<iframe src="${E(r.embed)}" title="Chart" loading="lazy" allow="clipboard-write"></iframe>`:'<p class="note">No chart for this coin yet.</p>'}</div>
+    <div class="rp-card rp-chart" style="grid-area:c">${r.embed?`<iframe src="${E(r.embed)}" title="Chart" allow="clipboard-write"></iframe><a class="rp-cl" href="${E(String(r.embed).split('?')[0])}" target="_blank" rel="noopener">Chart not loading? Open it full size</a>`:'<p class="note">No chart for this coin yet.</p>'}</div>
     <div style="grid-area:t" id="rpTB">${rpTradeBox()}</div>
     ${rpBubbles()?`<div class="rp-card rp-map" style="grid-area:m"><div class="rp-mh"><h3>Holder map</h3><span class="note">Who holds it, and who is connected</span></div>${rpBubbles()}</div>`:''}
     <div class="rp-card" style="grid-area:s"><h3>Safety</h3><div class="rp-chips">${rpChips()}</div></div>
@@ -2661,8 +2662,23 @@ function rpDraw(keep){
   <div class="rp-foot"><span class="mono">${E(r.address)}</span><button class="btn btn-sm" data-rp="copy">Copy</button>${r.links&&r.links.explorer?`<a href="${E(r.links.explorer)}" target="_blank" rel="noopener">Explorer</a>`:''}${r.links&&r.links.chart?`<a href="${E(r.links.chart)}" target="_blank" rel="noopener">DexScreener</a>`:''}${links}${(r.also_on||[]).length?`<span class="note">Also on ${E(r.also_on.join(', '))}</span>`:''}</div>
   <p class="note rp-nfa">Read from public chain data, it can be late or wrong. Not financial advice.</p>
   </div>`;
+  rpSetzen(el,html,r.embed);
   el.classList.add('show');document.body.classList.add('rp-open');if(keep)el.scrollTop=scroll;rpBind();
   const gh=$('#gxHost');if(gh&&typeof gxMount==='function')gxMount(gh,r);
+}
+/* 2.56: the chart stays put. A redraw (live refresh while the deep scan runs) used to rebuild the chart iframe every
+   12 s, so the GeckoTerminal chart started loading again and again and often never showed. Now everything around the
+   chart is replaced and the chart iframe is never touched while its address stays the same. */
+function rpSetzen(el,html,embed){
+  const alt=el.querySelector('.rp-chart iframe');const altIn=el.querySelector('.rp-in');
+  if(!alt||!altIn||!embed||alt.getAttribute('src')!==embed){el.innerHTML=html;return;}
+  const tmp=document.createElement('div');tmp.innerHTML=html;const neuIn=tmp.querySelector('.rp-in');
+  const ag=altIn.querySelector('.rp-grid'),ng=neuIn&&neuIn.querySelector('.rp-grid');
+  if(!ng||!ag){el.innerHTML=html;return;}
+  [...ag.children].forEach(c=>{if(!c.classList.contains('rp-chart'))c.remove();});
+  [...ng.children].forEach(c=>{if(!c.classList.contains('rp-chart'))ag.appendChild(c);});
+  [...altIn.children].forEach(c=>{if(c!==ag)c.remove();});
+  let vor=true;[...neuIn.children].forEach(c=>{if(c===ng){vor=false;return;}if(vor)altIn.insertBefore(c,ag);else altIn.appendChild(c);});
 }
 /* 2.46: token forwards, tokens sent wallet to wallet without a sale */
 function rpFwd(r){const f=r.forwards;if(!f||!f.checked)return '';const exp=r.explorer_base||'';const ap=r.addr_path||'/address/';
