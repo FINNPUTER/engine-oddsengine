@@ -2490,6 +2490,16 @@ function trBox(msg){
     <p class="note">Your wallet signs one small transaction that sets this permission to zero. Afterwards the ${t.chain==='solana'?'delegate':'spender'} can no longer move your tokens. Your Engine never holds your keys.</p>
     <div class="msg" id="trMsg">${E(msg||'')}</div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-g" data-act="trgo">${t.chain==='solana'?'Connect and revoke':'Revoke in wallet'}</button><button class="btn" data-act="closesheet">Cancel</button></div></div>`;
+  if(t.kind==='video')return head.replace(/<h3([^>]*)>[^<]*<\/h3>/,'<h3$1>Make a promo video</h3>')+`<div class="mo-tr">
+    <div class="row"><div class="l"><b>Video for</b></div><span>${E(t.video_for||'')}</span></div>
+    <div class="row"><div class="l"><b>Format</b></div><span>${E(t.format||'16:9')} · made by loudscene</span></div>
+    <div class="row"><div class="l"><b>Price</b></div><span>$${(+t.price_usd).toFixed(2)}</span></div>
+    <div class="row"><div class="l"><b>You pay</b></div><span>${E(t.you_pay)}</span></div>
+    <div class="row"><div class="l"><b>Where it goes</b></div><span>$${(+t.loud_usd).toFixed(2)} buys $LOUD for loudscene · $${(+t.burn_usd).toFixed(2)} buys $ODDS and burns it</span></div>
+    <div class="row"><div class="l"><b>From wallet</b></div><span class="mono">${E(trShort(t.wallet))}</span></div>
+    <p class="note">Your wallet signs two swaps on Robinhood Chain. The tokens go straight to loudscene and to the burn address, Your Engine never holds your money. Once it is on chain, the video starts and arrives in Telegram in a few minutes.</p>
+    <div class="msg" id="trMsg">${E(msg||'')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-g" data-act="trgo">Pay in wallet</button><button class="btn" data-act="closesheet">Cancel</button></div></div>`;
   const imp=t.impact_pct!=null?Math.abs(+t.impact_pct):null;
   if(t.chain==='solana')return head+`<div class="mo-tr">
     <div class="row"><div class="l"><b>Chain</b></div><span>Solana</span></div>
@@ -2545,7 +2555,7 @@ async function trGo(){
       else throw e;}
     for(let i=0;i<t.txs.length;i++){
       const x=t.txs[i];
-      say(t.kind==='revoke'?(t.txs.length>1?`Revoke ${i+1} of ${t.txs.length}: confirm in your wallet.`:'Confirm the revoke in your wallet.'):t.txs.length>1?(i===0?'Step 1 of 2: approve in your wallet.':'Step 2 of 2: confirm the swap in your wallet.'):'Confirm in your wallet.');
+      say(t.kind==='video'?(i===0?'Step 1 of 2: pay loudscene in $LOUD, confirm in your wallet.':'Step 2 of 2: buy and burn $ODDS, confirm in your wallet.'):t.kind==='revoke'?(t.txs.length>1?`Revoke ${i+1} of ${t.txs.length}: confirm in your wallet.`:'Confirm the revoke in your wallet.'):t.txs.length>1?(i===0?'Step 1 of 2: approve in your wallet.':'Step 2 of 2: confirm the swap in your wallet.'):'Confirm in your wallet.');
       const p={from,to:x.to,data:x.data,value:x.value||'0x0'};if(x.gas)p.gas=x.gas;
       const h=await eth.request({method:'eth_sendTransaction',params:[p]});
       hashes.push(h);
@@ -2556,6 +2566,7 @@ async function trGo(){
     }
     await api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes,ok:true})}).catch(()=>{});
     const last=hashes[hashes.length-1];
+    if(t.kind==='video'){say('Paid. Your video is being made and arrives in Telegram in a few minutes. '+(t.explorer?`<a href="${E(t.explorer)}/tx/${E(last)}" target="_blank" rel="noopener">View transaction</a>`:''));const bv=document.querySelector('[data-act="trgo"]');if(bv)bv.remove();return;}
     if(t.kind==='revoke'){say('Revoked. '+(t.explorer?`<a href="${E(t.explorer)}/tx/${E(last)}" target="_blank" rel="noopener">View transaction</a>`:''));const b0=document.querySelector('[data-act="trgo"]');if(b0)b0.remove();return;}
     say('Done. '+(t.explorer?`<a href="${E(t.explorer)}/tx/${E(last)}" target="_blank" rel="noopener">View transaction</a>`:'')+' Your Engine confirms it in Telegram too.');
     const b=document.querySelector('[data-act="trgo"]');if(b)b.remove();
