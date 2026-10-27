@@ -2474,6 +2474,14 @@ function trBox(msg){
   const head=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h3 style="margin:0;font-family:var(--disp)">${t&&t.ok?(t.side==='buy'?'Buy':'Sell')+' $'+E(t.symbol):'Trade'}</h3><button class="x" data-act="closesheet" aria-label="Close">×</button></div>`;
   if(!t)return head+`<p class="sub" style="margin-top:12px">Loading the trade…</p>`;
   if(!t.ok)return head+`<p class="sub" style="margin-top:12px">${E(t.error||'This trade is not available.')}</p>${t.hashes&&t.hashes.length&&t.explorer?`<p><a href="${E(t.explorer)}/tx/${E(t.hashes[t.hashes.length-1])}" target="_blank" rel="noopener">View transaction</a></p>`:''}`;
+  if(t.kind==='clean')return head.replace(/<h3([^>]*)>[^<]*<\/h3>/,'<h3$1>Clean my wallet</h3>')+`<div class="mo-tr">
+    <div class="row"><div class="l"><b>Chain</b></div><span>Solana</span></div>
+    <div class="row"><div class="l"><b>What happens</b></div><span id="trPay">${E(t.you_pay)}</span></div>
+    <div class="row"><div class="l"><b>Back to you</b></div><span id="trGet">${E(t.you_get||'')}</span></div>
+    <div class="row"><div class="l"><b>Wallet</b></div><span class="mono" id="trWal">${E(trShort(t.known_wallet))}</span></div>
+    <p class="note">Your wallet signs ${t.count>20?'a few small transactions':'one small transaction'}. Empty token accounts are closed and their rent comes back to you. Tokens with value stay untouched. Your Engine never holds your keys.</p>
+    <div class="msg" id="trMsg">${E(msg||'')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-g" data-act="trgo">Connect and clean</button><button class="btn" data-act="closesheet">Cancel</button></div></div>`;
   if(t.kind==='revoke')return head.replace(/<h3([^>]*)>[^<]*<\/h3>/,'<h3$1>Revoke approval</h3>')+`<div class="mo-tr">
     <div class="row"><div class="l"><b>Chain</b></div><span>${E(t.chain_name||t.chain)}</span></div>
     <div class="row"><div class="l"><b>Token</b></div><span>${E(t.symbol||trShort(t.token))}</span></div>
@@ -2761,30 +2769,35 @@ async function solGo(id){
   const say=t=>{const m=$('#trMsg');if(m)m.innerHTML=t;};
   const p=solProv();
   if(!p){const u=location.href;say(`This needs a Solana wallet. <a href="https://phantom.app/ul/browse/${encodeURIComponent(u)}?ref=${encodeURIComponent(location.origin)}">Open in Phantom</a> · <a href="https://solflare.com/ul/v1/browse/${encodeURIComponent(u)}?ref=${encodeURIComponent(location.origin)}">Open in Solflare</a>`);return;}
-  let sig=null;
+  let sig=null,sigs=[];
   try{
     say('Connecting your wallet…');
     const c=await p.connect();const pk=String((c&&c.publicKey)||p.publicKey);
-    say('Getting a fresh price…');
+    say(TR&&TR.kind==='clean'?'Preparing the clean…':'Getting a fresh price…');
     let b;try{b=await api('/v1/engine/trade/'+id+'/build',{method:'POST',body:JSON.stringify({pubkey:pk})});}catch(e){say(E(e.message));return;}
     const pay=$('#trPay'),get=$('#trGet'),imp=$('#trImp'),wal=$('#trWal');
     if(pay)pay.textContent=b.you_pay;if(get)get.textContent=b.you_get+(b.you_get_usd?' · $'+(+b.you_get_usd).toFixed(2):'');if(imp&&b.impact_pct!=null)imp.textContent=(+b.impact_pct).toFixed(2)+'%';if(wal)wal.textContent=rpShort(pk);
     const W=await loadWeb3();
-    const tx=W.VersionedTransaction.deserialize(Uint8Array.from(atob(b.tx),c=>c.charCodeAt(0)));
-    say('Confirm in your wallet.');
-    const res=await p.signAndSendTransaction(tx);
-    sig=typeof res==='string'?res:(res&&(res.signature||res.txid));
-    if(sig&&typeof sig!=='string'&&W.bs58)sig=W.bs58.encode(sig);
-    if(!sig)throw new Error('The wallet did not return a signature');
+    const liste=(b.txs&&b.txs.length?b.txs:[b.tx]);sigs=[];
+    for(let n=0;n<liste.length;n++){
+      const tx=W.VersionedTransaction.deserialize(Uint8Array.from(atob(liste[n]),c=>c.charCodeAt(0)));
+      say(liste.length>1?`Confirm ${n+1} of ${liste.length} in your wallet.`:'Confirm in your wallet.');
+      const res=await p.signAndSendTransaction(tx);
+      let s1=typeof res==='string'?res:(res&&(res.signature||res.txid));
+      if(s1&&typeof s1!=='string'&&W.bs58)s1=W.bs58.encode(s1);
+      if(!s1)throw new Error('The wallet did not return a signature');
+      sigs.push(s1);sig=s1;
+    }
     say('Sent. Waiting for it to land…');
     let st='pending';for(let i=0;i<45&&st==='pending';i++){await new Promise(r=>setTimeout(r,2000));try{st=(await api('/v1/engine/trade/'+id+'/status?sig='+encodeURIComponent(sig))).state;}catch(e){}}
     const link=`<a href="https://solscan.io/tx/${E(sig)}" target="_blank" rel="noopener">View transaction</a>`;
-    if(st==='failed'){await api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes:[sig],ok:false,error:'failed on chain'})}).catch(()=>{});say('The transaction failed on chain, often because the price moved too fast. Nothing was bought or sold. '+link);return;}
-    await api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes:[sig],ok:true})}).catch(()=>{});
+    if(st==='failed'){await api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes:sigs,ok:false,error:'failed on chain'})}).catch(()=>{});say((TR&&TR.kind==='clean')?'The transaction failed on chain. Nothing was changed. '+link:'The transaction failed on chain, often because the price moved too fast. Nothing was bought or sold. '+link);return;}
+    await api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes:sigs,ok:true})}).catch(()=>{});
     say((st==='confirmed'?'Done. ':'Sent, still confirming. ')+link+' Your Engine confirms it in Telegram too.');
     const g=document.querySelector('[data-act="trgo"]');if(g)g.remove();
   }catch(e){
-    if(e&&(e.code===4001||/reject|cancel/i.test(e.message||'')))say('You cancelled in the wallet. Nothing was sent.');
+    if(sigs.length){api('/v1/engine/trade/'+id+'/sent',{method:'POST',body:JSON.stringify({hashes:sigs,ok:true})}).catch(()=>{});say(`${sigs.length} part${sigs.length>1?'s were':' was'} sent, the rest was not. Ask Your Engine to clean again for the rest. <a href="https://solscan.io/tx/${E(sigs[sigs.length-1])}" target="_blank" rel="noopener">View transaction</a>`);}
+    else if(e&&(e.code===4001||/reject|cancel/i.test(e.message||'')))say('You cancelled in the wallet. Nothing was sent.');
     else say('Could not send: '+E((e&&e.message)||e));
   }
 }
