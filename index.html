@@ -1073,6 +1073,8 @@ let TOKEN='';try{TOKEN=localStorage.getItem('oe_engine')||'';}catch(e){}
 /* 2.50.7: im Telegram-Mini-App automatisch einloggen (initData), wenn Telegram mit einem Wallet verknuepft ist */
 let TG_INIT='';try{TG_INIT=(window.Telegram&&Telegram.WebApp&&Telegram.WebApp.initData)||'';if(!TG_INIT){const m=(location.hash||'').match(/tgWebAppData=([^&]*)/);if(m)TG_INIT=decodeURIComponent(m[1]);}if(TG_INIT)sessionStorage.setItem('oe_tginit',TG_INIT);else TG_INIT=sessionStorage.getItem('oe_tginit')||'';}catch(e){}
 let TG_HINT='';let YE_BOT='OddsEnginePublicBot';
+/* 2.62: Link aus dem Bot (#tgc=<code>): nach Connect wallet verknuepft die Seite dieses Telegram-Konto von selbst */
+let TGC='';try{const m=(location.hash||'').match(/tgc=([0-9a-f]{16})/);if(m){TGC=m[1];localStorage.setItem('oe_tgc',TGC);}else TGC=localStorage.getItem('oe_tgc')||'';}catch(e){}
 function hdr(){const h={'Content-Type':'application/json'};if(ADMIN)h['X-OddsEngine-Admin']=ADMIN;if(TOKEN)h['X-OddsEngine-Key']=TOKEN;return h;}
 async function api(p,opt){const r=await fetch(API+p,Object.assign({headers:hdr()},opt||{}));let j=null;try{j=await r.json();}catch(e){}
   if(!r.ok){const m=(j&&(j.detail||(j.error&&j.error.message)))||('error '+r.status);const er=new Error(m);er.status=r.status;er.body=j;throw er;}return j;}
@@ -1092,7 +1094,7 @@ const DEMO_ME={address:'0x9c87b4cfa21266d1638f437c96dbe1012cb81111',short:'0x9c8
   memory:{paused:false,cats:{wallets:true,notes:true,markets:true},items:[{id:1,cat:'markets',text:'Follows Seoul and Madrid weather calls'},{id:2,cat:'notes',text:'Prefers short answers in the morning'}]},
   wallets:[{chain:'EVM',address:'0x9c87b4cfa21266d1638f437c96dbe1012cb81111',main:true}],
   keys:[{id:'k1',prefix:'oe_live_7f3a',name:'my bot',created:'Oct 20',used:'$3.12',requests:212}],ai:{live:true,markup:.08}};
-let ME=null, MODELS=[], MARKUP=.08, TAB=(location.hash==='#ai')?'ai':(location.hash==='#chat')?'chat':(location.hash==='#models')?'models':'engine', FEAT={engine:false,ai:false}, PREVIEW=false, ADM=null;
+let ME=null, MODELS=[], MARKUP=.08, TAB=(location.hash==='#ai'||/tgc=/.test(location.hash))?'ai':(location.hash==='#chat')?'chat':(location.hash==='#models')?'models':'engine', FEAT={engine:false,ai:false}, PREVIEW=false, ADM=null;
 const PAGE=()=>innerWidth<700?8:24;
 let MF={q:'',chip:'all',sort:'popular',n:PAGE()}, CMP=[], CHAT=[], QT='curl', LINK=null;
 
@@ -3276,7 +3278,20 @@ async function load(){
   if(DEMO||PREVIEW)adminBar();
   render();
   if(LINK)pollLink();
+  if(TOKEN&&ME&&!DEMO){if(TGC)tgcClaim();else tgPrompt();}
 }
+/* 2.62: Telegram ohne zweiten Schritt. Mit Code aus dem Bot sofort verknuepfen, sonst einmal je Sitzung fragen. */
+async function tgcClaim(){const c=TGC;TGC='';try{localStorage.removeItem('oe_tgc');}catch(e){}
+  if(/tgc=/.test(location.hash))history.replaceState(null,'',location.pathname+'#ai');
+  try{const r=await api('/v1/engine/telegram/claim',{method:'POST',body:JSON.stringify({code:c})});
+    if(r.ok){try{ME=await api('/v1/engine/me');}catch(e){}render();
+      mbSheet(`<h3>You're all set</h3><p>Your wallet and your Telegram are linked now. Go back to the bot and just write, by text or voice note.</p><a class="btn btn-g" href="https://t.me/${E(YE_BOT)}">Back to Telegram</a><button class="btn" data-mb="close" style="margin-top:8px">Stay here</button>`);return;}
+    toast(r.detail||'That link expired');}catch(e){toast(e.message||'Could not link Telegram');}
+  tgPrompt(true);}
+function tgPrompt(force){if(DEMO||!ME||!FEAT.engine)return;const L=ME.linked||{};if(L.telegram)return;
+  try{if(!force&&sessionStorage.getItem('oe_tgprompt'))return;sessionStorage.setItem('oe_tgprompt','1');}catch(e){}
+  mbSheet(`<h3>One last step</h3><p>Your wallet is connected. Now link Telegram, that is where Your Engine talks to you: chat, alerts, briefings, voice notes. One tap opens the bot, then you are done.</p><button class="btn btn-g" data-tgl="1">Link Telegram</button><button class="btn" data-mb="close" style="margin-top:8px">Later</button>`);
+  const b=document.querySelector('#mbSheet [data-tgl]');if(b)b.onclick=()=>act('tg');}
 load();
 setInterval(async()=>{if(document.hidden||!TOKEN||DEMO)return;try{const m=await api('/v1/engine/me');const before=ME&&ME.balance&&ME.balance.usd;ME=m;if(m.balance&&before!=null&&m.balance.usd>before+0.0001){toast('Top up arrived: +'+usd(m.balance.usd-before));render();}}catch(e){}},45000);
 
