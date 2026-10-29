@@ -22,6 +22,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script>window.ODDSENGINE_API = "https://web-production-6b61c.up.railway.app";</script>
 <style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :root{
   --bg:#030605;--card:rgba(255,255,255,.04);--card2:rgba(255,255,255,.07);--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.16);
   --tx:#ecf5ef;--dim:#9fb2a7;--dim2:#62756a;--g:#22f08a;--g2:#7dffbd;--red:#ff5d6c;--amber:#ffb547;
@@ -696,7 +697,7 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 body.rp-open{overflow:hidden}
 @keyframes rpIn{from{opacity:0;transform:translateY(8px)}}
 .rp-in{max-width:1320px;margin:0 auto;padding:16px 16px calc(28px + env(safe-area-inset-bottom))}
-.rp-top{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:14px;padding:12px 0 14px;background:linear-gradient(var(--bg) 78%,transparent)}
+.rp-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:12px 16px 14px;margin:0 -16px 14px;background:var(--bg);border-bottom:1px solid var(--line);box-shadow:0 10px 24px -14px rgba(0,0,0,.9)}
 .rp-face{position:relative;width:52px;height:52px;flex:none;border-radius:16px;overflow:hidden;background:#000;border:1px solid var(--line)}
 .rp-face img{width:100%;height:100%;object-fit:cover;display:block}
 .rp-eye{position:absolute;left:51%;top:37.8%;width:30%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:2px solid var(--g);box-shadow:0 0 10px rgba(34,240,138,.7),inset 0 0 6px rgba(34,240,138,.5);opacity:.85}
@@ -784,7 +785,10 @@ body.rp-open{overflow:hidden}
 .rp-gb div{font-size:13.5px;padding:7px 10px 7px 26px;border-radius:10px;position:relative;background:rgba(255,255,255,.03)}
 .rp-gb div::before{position:absolute;left:9px;top:7px;font-weight:700}
 .rp-gb .b::before{content:"!";color:var(--red)}.rp-gb .g::before{content:"✓";color:var(--g)}
-.rp-trade{display:grid;gap:10px}
+.rp-trade{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-width:0;max-width:100%;overflow:hidden}
+.rp-trade>*{min-width:0;max-width:100%}
+.rp-grid>*,.rp-card{min-width:0;max-width:100%}
+.rp-amt .oesel{flex:0 1 auto;min-width:0;max-width:42%}.rp-amt .oesel-b{padding:0 10px 0 12px;gap:8px}
 .rp-seg{display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:12px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
 .rp-seg button{border:0;background:none;color:var(--dim);padding:9px;border-radius:9px;font:600 14px var(--body);cursor:pointer}
 .rp-seg button.on{background:rgba(34,240,138,.16);color:var(--tx)}
@@ -794,7 +798,7 @@ body.rp-open{overflow:hidden}
 .rp-amt input:focus{border-color:rgba(34,240,138,.6)}
 .rp-amt select{height:46px;border-radius:12px;border:1px solid var(--line2);background:rgba(0,0,0,.35);color:inherit;padding:0 10px;max-width:46%}
 .rp-quick{display:flex;gap:6px;flex-wrap:wrap}
-.rp-quick button{flex:1;min-width:56px;border:1px solid var(--line2);background:rgba(255,255,255,.03);color:inherit;border-radius:999px;padding:7px 10px;font:500 13px var(--mono);cursor:pointer}
+.rp-quick button{flex:1 1 0;min-width:0;border:1px solid var(--line2);background:rgba(255,255,255,.03);color:inherit;border-radius:999px;padding:7px 10px;font:500 13px var(--mono);cursor:pointer}
 .rp-quick button:hover{border-color:rgba(34,240,138,.5)}
 .rp-go{width:100%;height:48px;font-size:15px}
 .rp-trade .note{margin:0;font-size:12px}
@@ -854,10 +858,11 @@ body.rp-open{overflow:hidden}
 }
 @media (max-width:600px){
   .rp-in{padding:10px 12px calc(24px + env(safe-area-inset-bottom))}
-  .rp-top{flex-wrap:wrap;gap:10px}
+  .rp-top{flex-wrap:wrap;gap:6px 10px;padding:10px 12px 10px;margin:0 -12px 12px}
   .rp-face{width:42px;height:42px;border-radius:12px}
   .rp-id{order:1;flex:1 1 0;min-width:0}
   .rp-id h1{font-size:18px}
+  .rp-id>div{min-width:0}.rp-id p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
   .rp-logo{width:32px;height:32px}
   .rp-act{order:2}
   .rp-px{order:3;width:100%;flex-direction:row;align-items:baseline;justify-content:flex-start;gap:10px;text-align:left}
