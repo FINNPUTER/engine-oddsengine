@@ -718,11 +718,56 @@ body.rp-open{overflow:hidden}
 .rp-stats div{padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
 .rp-stats span{display:block;color:var(--dim);font-size:12px;margin-bottom:4px}
 .rp-stats b{font-family:var(--mono);font-size:16px}
-.rp-grid{display:grid;gap:14px;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);grid-template-areas:"c v" "c t" "m m" "l s" "l h" "l d" "l r";align-items:start}
+.rp-grid{display:grid;gap:14px;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);grid-template-areas:"c t" "m m" "L R";align-items:start}
+.rp-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+/* 2.63: richer report, everything from the Telegram card and more */
+.rp-pulse{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.rp-pulse div{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.rp-pulse span{display:block;font-size:11px;color:var(--dim);letter-spacing:.04em;text-transform:uppercase}
+.rp-pulse b{font-family:var(--mono);font-size:17px}
+.rp-pulse .up{color:var(--g)}.rp-pulse .dn{color:var(--red)}
+.rp-bs{margin-top:12px}
+.rp-bs .row{display:flex;justify-content:space-between;font-size:12.5px;color:var(--dim);margin-bottom:5px}
+.rp-bs .t{display:flex;height:10px;border-radius:99px;overflow:hidden;background:rgba(255,93,108,.55)}
+.rp-bs .t i{display:block;height:100%;background:linear-gradient(90deg,var(--g),var(--g2))}
+.rp-wh{position:relative;overflow:hidden}
+.rp-wh::after{content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(34,240,138,.16),transparent 70%);pointer-events:none}
+.rp-big{display:flex;align-items:baseline;gap:10px;margin:2px 0 12px}
+.rp-big b{font-family:var(--disp);font-size:34px;line-height:1;background:linear-gradient(90deg,var(--g),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.rp-big span{color:var(--dim);font-size:13px;line-height:1.4}
+.rp-coins{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+.rp-coin{display:inline-flex;align-items:center;gap:6px;font:600 12.5px var(--mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line2);background:rgba(255,255,255,.03)}
+.rp-coin i{font-style:normal;font-size:11px;padding:1px 7px;border-radius:99px;background:rgba(34,240,138,.14);color:var(--g2)}
+.rp-coin.dead{border-color:rgba(255,93,108,.45)}.rp-coin.dead i{background:rgba(255,93,108,.16);color:#ff9aa4}
+.rp-coin.ran{border-color:rgba(34,240,138,.5)}
+.rp-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.rp-kpi div{padding:10px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--line);text-align:center}
+.rp-kpi b{display:block;font-family:var(--mono);font-size:18px}.rp-kpi span{font-size:11.5px;color:var(--dim)}
+.rp-kpi .bad b{color:#ff9aa4}.rp-kpi .good b{color:var(--g2)}
+.rp-group{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,181,71,.4);background:rgba(255,181,71,.07);font-size:13px;margin-bottom:10px}
+.rp-group b{color:var(--amber)}
+.rp-ls{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.rp-ls li{font-size:13px;line-height:1.45;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.025)}
+.rp-chain{display:flex;align-items:center;flex-wrap:wrap;gap:5px;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.025);margin-bottom:7px;font-size:12px}
+.rp-chain a{font-family:var(--mono);padding:3px 8px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.rp-chain a.src{border-color:rgba(255,181,71,.5);color:var(--amber)}
+.rp-chain a.end{border-color:rgba(34,240,138,.5)}
+.rp-chain em{font-style:normal;color:var(--dim2)}
+.rp-chain .hold{margin-left:auto;font-family:var(--mono);color:var(--g2)}
+.rp-tw{display:grid;gap:8px}
+.rp-tw div{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45}
+.rp-tw i{font-style:normal;flex:none;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(255,255,255,.05)}
 .rp-card{padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--line)}
 .rp-card h3{margin:0 0 10px;font-family:var(--disp);font-size:14px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
 .rp-empty{text-align:center;padding:40px 18px;color:var(--dim)}
 .rp-chart{padding:0;overflow:hidden;min-height:560px;align-self:stretch;display:flex;flex-direction:column}
+.rp-ctool{display:flex;justify-content:space-between;gap:8px;padding:10px 12px 0;flex-wrap:wrap}
+.rp-tf{display:flex;gap:4px;padding:3px;border-radius:10px;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+.rp-tf button{border:0;background:none;color:var(--dim);font:600 12px var(--mono);padding:6px 9px;border-radius:7px;cursor:pointer;min-width:34px}
+.rp-tf button.on{background:rgba(34,240,138,.16);color:var(--tx)}
+.rp-ck{flex:1;min-height:500px;position:relative;margin:6px 4px 0}
+.rp-ck iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.rp-ckload{position:absolute;inset:0;display:grid;place-items:center;margin:0}
 .rp-chart iframe{flex:1;min-height:560px}
 .rp-chart iframe{width:100%;height:100%;border:0;display:block}
 .rp-cl{display:block;padding:8px 12px 10px;font-size:12px;color:var(--dim)}.rp-cl a{color:var(--dim)}.rp-cl button{background:none;border:0;padding:0;font:inherit;color:var(--dim);cursor:pointer}.rp-cl button.on{color:var(--g,#3ef08c);font-weight:600}.rp-cl a:hover,.rp-cl button:hover{text-decoration:underline}
@@ -797,8 +842,14 @@ body.rp-open{overflow:hidden}
 .rp-foot a{color:var(--g2)}
 .rp-nfa{text-align:center;margin-top:12px;font-size:12px}
 @media (max-width:980px){
-  .rp-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"v" "c" "t" "m" "s" "h" "d" "r" "l"}
+  .rp-grid{display:flex;flex-direction:column;align-items:stretch}
+  .rp-grid>*{min-width:0}
+  .rp-col{display:contents}
+  .o1{order:1}.o2{order:2}.o3{order:3}.o4{order:4}.o5{order:5}.o6{order:6}.o7{order:7}.o8{order:8}.o9{order:9}.o10{order:10}.o11{order:11}.o12{order:12}.o13{order:13}
+  #rpTB:empty{display:none}
+  .rp-pulse{grid-template-columns:repeat(2,1fr)}
   .rp-chart,.rp-chart iframe{min-height:420px}
+  .rp-ck{min-height:360px}
   .rp-stats{grid-template-columns:repeat(3,1fr)}
 }
 @media (max-width:600px){
@@ -814,8 +865,10 @@ body.rp-open{overflow:hidden}
   .rp-stats{grid-template-columns:repeat(2,1fr);gap:8px}
   .rp-stats div:last-child{grid-column:1/-1}
   .rp-chart,.rp-chart iframe{min-height:380px}
+  .rp-ck{min-height:320px}
+  .rp-ctool{padding:8px 8px 0}.rp-tf button{padding:6px 7px;min-width:30px;font-size:11.5px}
   .rp-trr{grid-template-columns:30px 34px 62px minmax(0,1fr) 20px;font-size:12.5px}
-  .rp-trr .tag{display:none}
+  .rp-trr .tag,.rp-trr>i{display:none}
 }
 /* report card inside the chat */
 .mo-card{align-self:flex-start;max-width:min(560px,94%);border-radius:16px;border:1px solid rgba(34,240,138,.28);background:rgba(34,240,138,.05);overflow:hidden;animation:moIn .35s ease both}
@@ -2595,7 +2648,7 @@ function rpAgo(ts){const s=Math.max(0,(Date.now()-Date.parse(ts))/1000);return s
 function rpEl(){let el=$('#rp');if(!el){el=document.createElement('div');el.id='rp';el.className='rp';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');document.body.appendChild(el);}return el;}
 function rpHead(live){return `<div class="rp-face ${live?'live':''}" aria-hidden="true"><img src="robot-ring.webp" alt=""><i class="rp-eye"></i></div>`;}
 function rpPing(){const f=document.querySelector('.rp-face');if(!f)return;f.classList.remove('ping');void f.offsetWidth;f.classList.add('ping');}
-function rpClose(){if(typeof gxStop==='function')gxStop();const el=$('#rp');if(el)el.classList.remove('show');document.body.classList.remove('rp-open');clearInterval(RP_T);clearTimeout(RP_FULL);RP_T=RP_FULL=null;RP=null;
+function rpClose(){if(typeof gxStop==='function')gxStop();clearInterval(RPC.t);if(RPC.chart){try{RPC.chart.remove();}catch(e){}RPC.chart=null;RPC.key=null;}const el=$('#rp');if(el)el.classList.remove('show');document.body.classList.remove('rp-open');clearInterval(RP_T);clearTimeout(RP_FULL);RP_T=RP_FULL=null;RP=null;
   if(/token=/.test(location.hash))history.replaceState(null,'',location.pathname+(TAB&&TAB!=='engine'?'#'+TAB:''));}
 function rpMsg(t,btn){const el=rpEl();el.innerHTML=`<div class="rp-in"><div class="rp-top">${rpHead(false)}<div class="rp-id"><h1>Live report</h1><p>${E(RP_Q.split(':').pop())}</p></div><div class="rp-act"><button class="x" data-rp="close" aria-label="Close">×</button></div></div><div class="rp-card rp-empty"><p>${t}</p>${btn||''}</div></div>`;el.classList.add('show');document.body.classList.add('rp-open');rpBind();}
 async function rpOpen(q){
@@ -2661,6 +2714,34 @@ function rpResearch(d){
   L.push('</ul>');if(d.cost_usd)L.push(`<p class="note">Research cost $${(+d.cost_usd).toFixed(3)}</p>`);
   return L.join('');
 }
+function rpPulse(r){const m=r.market||{},ch=m.change||{},tx=m.txns||{},lp=r.lp||{},tt=r.torch;
+  const z=[['5m',ch.m5],['1h',ch.h1],['6h',ch.h6],['24h',ch.h24]].filter(x=>x[1]!=null);
+  const h1=tx.h1||{},h24=tx.h24||{};const b=+h1.buys||0,se=+h1.sells||0;const anteil=b+se?Math.round(b/(b+se)*100):null;
+  if(!z.length&&anteil==null&&lp.supply_pct==null)return '';
+  return `<div class="rp-card o4"><h3>Market pulse</h3>${z.length?`<div class="rp-pulse">${z.map(([k,v])=>`<div><span>${k}</span><b class="${(+v||0)>=0?'up':'dn'}">${rpPct(v)}</b></div>`).join('')}</div>`:''}
+  ${anteil!=null?`<div class="rp-bs"><div class="row"><span><b style="color:var(--g2)">${b}</b> buys</span><span>last hour</span><span><b style="color:#ff9aa4">${se}</b> sells</span></div><div class="t"><i style="width:${anteil}%"></i></div>${h24.buys!=null?`<p class="note" style="margin:8px 0 0">24h: ${h24.buys} buys / ${h24.sells} sells · volume ${rpUsd((m.vol||{}).h24)}</p>`:''}</div>`:''}
+  ${lp.supply_pct!=null?`<p class="rp-mini" style="margin-top:12px">💧 Pool holds <b>${rpN(lp.supply_pct)}%</b> of supply (${E({v2:'Uniswap V2',v3:'V3 pool',v4:'Uniswap V4'}[lp.kind]||'pool')})${lp.burned_pct!=null?` · <b>${rpN(lp.burned_pct)}%</b> of LP burned`:(lp.kind==='v3'||lp.kind==='v4')?' · positions are NFTs, no LP token':''}</p>`:''}
+  ${tt?`<p class="rp-mini">🎓 Torch: ${tt.graduated?'graduated':E(tt.progress_to_graduation_pct)+'% to graduation'}</p>`:''}</div>`;}
+function rpHist(r){const h=r.seen_before;if(!h||!h.known)return '';
+  const coins=(h.top||[]).map(c=>`<span class="rp-coin ${c.dead?'dead':c.ran?'ran':''}">${E(c.coin)}<i>${c.wallets} wallet${c.wallets==1?'':'s'}</i></span>`).join('');
+  const g=h.group;const st=(h.standouts||[]).map(x=>{const rolle=(x.here||[]).includes('dev')?'Dev':(x.here||[]).includes('top_holder')?'Top holder':'Got tokens from the dev';
+    return `<li><b>${rolle}</b> <span class="mono">${E(rpShort(x.wallet))}</span> was in <b>${x.coins}</b> other coins (${E((x.examples||[]).join(', '))})${x.dead_after?`, <span style="color:#ff9aa4">${x.dead_after} now under 20% of peak</span>`:''}</li>`;}).join('');
+  return `<div class="rp-card rp-wh o5"><h3>🧬 Wallet history</h3>
+  <div class="rp-big"><b>${h.known}</b><span>of this coin's wallets were already in<br><b style="color:var(--tx)">${h.coins}</b> other coin${h.coins==1?'':'s'} we checked</span></div>
+  <div class="rp-coins">${coins}</div>
+  <div class="rp-kpi"><div class="${h.sold_out_there?'bad':''}"><b>${h.sold_out_there||0}</b><span>sold everything there</span></div><div class="${h.coins_dead?'bad':''}"><b>${h.coins_dead||0}</b><span>coins now under 20% of peak</span></div><div class="${h.coins_ran?'good':''}"><b>${h.coins_ran||0}</b><span>coins ran 3x or more</span></div></div>
+  ${h.hold_median_h!=null?`<p class="rp-mini" style="margin:0 0 10px">⏱ When they sold out in those coins: after a median of <b>${h.hold_median_h<1?Math.round(h.hold_median_h*60)+' min':h.hold_median_h<48?rpN(h.hold_median_h)+' h':rpN(h.hold_median_h/24)+' days'}</b> <span class="note">(${h.hold_samples} exits)</span></p>`:''}
+  ${g?`<div class="rp-group">👥 Same group: <b>${g.wallets} wallets</b> were in ${E((g.coins||[]).join(', '))} together too</div>`:''}
+  ${st?`<ul class="rp-ls">${st}</ul>`:''}</div>`;}
+function rpKette(r){const f=r.forwards||{};const ch=f.chains||[];if(!ch.length)return '';const exp=r.explorer_base||'';const ap=r.addr_path||'/address/';
+  const lk=(a,c)=>`<a class="${c||''}" href="${E(exp+ap+a)}" target="_blank" rel="noopener">${E(rpShort(a))}</a>`;
+  return `<div class="rp-card o7"><h3>Token trails</h3><p class="note" style="margin:-4px 0 10px">Tokens passed wallet to wallet without a sale, followed up to ${f.max_hops||ch[0].hops} stations. Hidden supply still held at the end: <b style="color:var(--tx)">${rpN(f.hidden_held_pct||0)}%</b></p>
+  ${ch.slice(0,5).map(c=>`<div class="rp-chain">${c.path.map((a,i)=>lk(a,i==0?'src':i==c.path.length-1?'end':'')).join('<em>→</em>')}<span class="note">${E(c.src)} · ${c.hops} hops</span><span class="hold">${rpN(c.end_holds_pct)}%</span></div>`).join('')}</div>`;}
+function rpName(r){const tw=r.twins||{},nv=r.narrative,z=[];
+  if(tw.count)z.push(`<div><i>🪞</i><span>${tw.likely_copy?`<b style="color:#ff9aa4">Copycat:</b> ${tw.count} other $${E(r.symbol||'')}, ${tw.older} older and bigger`:`Same name: ${tw.count} other $${E(r.symbol||'')}${tw.same_chain?`, ${tw.same_chain} on this chain`:''}${!tw.older?'. This one is the oldest':''}`}</span></div>`);
+  if(nv)z.push(`<div><i>📣</i><span>Narrative <b>${E(nv.word)}</b>: ${nv.new} new coins in 3 days, ${nv.ran} running${nv.hot?' · <b style="color:var(--g2)">hot</b>':''}</span></div>`);
+  if(r.renamed)z.push(`<div><i>⚠️</i><span>Name on chain is "${E(r.renamed.onchain)}", listed as "${E(r.renamed.listed)}"</span></div>`);
+  return z.length?`<div class="rp-card o11"><h3>Name and narrative</h3><div class="rp-tw">${z.join('')}</div></div>`:'';}
 function rpFlags(r){const d=['top 10','largest wallet','fresh wallet','multiple minor','low mcap','price dropped','price rose'];return (r.notes||[]).filter(n=>!d.some(x=>n.toLowerCase().includes(x))).slice(0,5);}
 function rpBar(lbl,v,warn){if(v==null)return '';const p=Math.max(0,Math.min(100,+v));return `<div class="rp-bar ${p>=warn?'hot':''}"><div class="l"><span>${lbl}</span><b>${rpN(v)}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`;}
 function rpChips(){
@@ -2700,35 +2781,71 @@ function rpDraw(keep){
   </div>
   <div class="rp-stats"><div><span>Market cap</span><b id="rpMc">${rpUsd(m.mcap)}</b></div><div><span>Liquidity</span><b id="rpLq">${rpUsd(m.liq)}</b></div><div><span>Volume 1h</span><b>${rpUsd(vol)}</b><small class="rp-sub">24h ${rpUsd(((m.vol||{}).h24))}</small></div><div><span>Buys / sells 1h</span><b>${tx.buys!=null?tx.buys+' / '+tx.sells:'n/a'}</b><small class="rp-sub">24h ${(((m.txns||{}).h24)||{}).buys!=null?m.txns.h24.buys+' / '+m.txns.h24.sells:'n/a'}</small></div><div><span>Holders</span><b>${sp.holders?(+sp.holders).toLocaleString('en-US'):'n/a'}</b></div></div>
   <div class="rp-grid">
-    <div class="rp-card rp-verdict ${lv[1]}" style="grid-area:v"><div class="rp-vh"><i></i><h2>${E(v.title||lv[0])}</h2>${r.risk_score!=null?`<span class="mono">Score ${E(r.risk_score)}/100</span>`:''}</div><p>${E(v.reason||'')}</p>
+    <div class="rp-card rp-chart o2" style="grid-area:c" data-ck="${E(rpCk(r))}">${rpCk(r)?`<div class="rp-ctool"><div class="rp-tf">${['1m','5m','15m','1h','4h','1d'].map(t=>`<button type="button" data-tf="${t}" class="${t===RPC.tf?'on':''}">${t}</button>`).join('')}</div><div class="rp-tf"><button type="button" data-cm="px" class="${RPC.mode==='px'?'on':''}">Price</button><button type="button" data-cm="mc" class="${RPC.mode==='mc'?'on':''}">MCap</button></div></div><div class="rp-ck" id="rpCk"><p class="note rp-ckload">Loading chart…</p></div><div class="rp-cl">${r.embed?`<a href="${E(String(r.embed).split('?')[0])}" target="_blank" rel="noopener">GeckoTerminal ↗</a> · `:''}${(r.market||{}).url?`<a href="${E(r.market.url)}" target="_blank" rel="noopener">DexScreener ↗</a>`:''}<span class="rp-cks" id="rpCks"></span></div>`:'<p class="note">No chart for this coin yet.</p>'}</div>
+    <div style="grid-area:t" class="rp-col"><div class="rp-card rp-verdict o1 ${lv[1]}"><div class="rp-vh"><i></i><h2>${E(v.title||lv[0])}</h2>${r.risk_score!=null?`<span class="mono">Score ${E(r.risk_score)}/100</span>`:''}</div><p>${E(v.reason||'')}</p>
       ${(v.bad||[]).length||(v.good||[]).length?`<div class="rp-gb">${(v.bad||[]).slice(0,5).map(x=>`<div class="b">${E(x)}</div>`).join('')}${(v.good||[]).slice(0,4).map(x=>`<div class="g">${E(x)}</div>`).join('')}</div>`:''}
-      ${(r.deep||{}).state==='running'?'<p class="note">Deep scan running, bundles and early buyers arrive in about a minute.</p>':''}</div>
-    <div class="rp-card rp-chart" style="grid-area:c">${rpChartSrc(r)?`<iframe src="${E(rpChartSrc(r))}" title="Chart" allow="clipboard-write"></iframe><div class="rp-cl">${r.embed&&r.embed_alt?`Chart: <button type="button" data-rpc="gt" class="${rpChartSrc(r)===r.embed?'on':''}">GeckoTerminal</button> · <button type="button" data-rpc="ds" class="${rpChartSrc(r)===r.embed_alt?'on':''}">DexScreener</button> · `:''}<a href="${E(String(rpChartSrc(r)).split('?')[0])}" target="_blank" rel="noopener">Open full size</a></div>`:'<p class="note">No chart for this coin yet.</p>'}</div>
-    <div style="grid-area:t" id="rpTB">${rpTradeBox()}</div>
-    ${rpBubbles()?`<div class="rp-card rp-map" style="grid-area:m"><div class="rp-mh"><h3>Holder map</h3><span class="note">Who holds it, and who is connected</span></div>${rpBubbles()}</div>`:''}
-    <div class="rp-card" style="grid-area:s"><h3>Safety</h3><div class="rp-chips">${rpChips()}</div></div>
-    <div class="rp-card" style="grid-area:h"><h3>Supply</h3>${rpBar('Top 10 wallets',sp.top10_pct,40)}${rpBar('Bundled',sp.bundled_pct,10)}${rpBar('Fresh wallets',sp.fresh_pct,30)}${(sp.prepared&&sp.prepared.count>=3)?rpBar('Prepared wallets',sp.prepared.pct_of_buyers,25):''}
+      ${(r.deep||{}).state==='running'?'<p class="note">Deep scan running, bundles and early buyers arrive in about a minute.</p>':''}</div><div id="rpTB" class="o3">${rpTradeBox()}</div>${rpPulse(r)}</div>
+    ${rpBubbles()?`<div class="rp-card rp-map o10" style="grid-area:m"><div class="rp-mh"><h3>Holder map</h3><span class="note">Who holds it, and who is connected</span></div>${rpBubbles()}</div>`:''}
+    <div class="rp-col" style="grid-area:L">${rpHist(r)}${rpKette(r)}${rpName(r)}
+    <div class="rp-card o13"><h3>Live trades <span class="rp-dot" aria-hidden="true"></span></h3><div id="rpTr">${rpTrades()}</div></div></div>
+    <div class="rp-col" style="grid-area:R">
+    <div class="rp-card o9"><h3>Safety</h3><div class="rp-chips">${rpChips()}</div></div>
+    <div class="rp-card o6"><h3>Supply</h3>${rpBar('Top 10 wallets',sp.top10_pct,40)}${rpBar((sp.bundled_fwd_pct||0)>=0.1?'Bundled, incl. passed on':'Bundled',(sp.bundled_total_pct!=null?sp.bundled_total_pct:sp.bundled_pct),10)}${(sp.bundled_fwd_pct||0)>=0.1?`<p class="note" style="margin:-4px 0 10px">${rpN(sp.bundled_pct)}% still in the bundle wallets, ${rpN(sp.bundled_fwd_pct)}% passed on through up to ${sp.fwd_hops||1} wallets</p>`:''}${rpBar('Early buyers still holding',sp.early_holding_pct,101)}${rpBar('Fresh wallets',sp.fresh_pct,30)}${(sp.prepared&&sp.prepared.count>=3)?rpBar('Prepared wallets',sp.prepared.pct_of_buyers,25):''}
       ${sp.clusters!=null||sp.same_funder!=null?`<p class="rp-mini">Clusters <b>${sp.clusters||0}</b> · same funder <b>${sp.same_funder||0}</b> · snipers <b>${sp.snipers||0}</b>${sp.largest_pct!=null?` · largest <b>${rpN(sp.largest_pct)}%</b>`:''}</p>`:''}
       ${sp.top_note?`<p class="note">${E(sp.top_note)}</p>`:''}${rpFwd(r)}</div>
-    <div class="rp-card" style="grid-area:d"><h3>Dev</h3>${dv.address?`<p class="rp-dev"><a class="mono" href="${E(dv.explorer||exp+ap+dv.address)}" target="_blank" rel="noopener">${E(rpShort(dv.address))}</a>${dv.holds_pct!=null?` holds <b>${rpN(dv.holds_pct)}%</b>`:''}</p>
+    <div class="rp-card o8"><h3>Dev</h3>${dv.address?`<p class="rp-dev"><a class="mono" href="${E(dv.explorer||exp+ap+dv.address)}" target="_blank" rel="noopener">${E(rpShort(dv.address))}</a>${dv.holds_pct!=null?` holds <b>${rpN(dv.holds_pct)}%</b>`:''}</p>
       ${dv.launches_seen?`<p class="rp-mini">Launched ${dv.launches_seen} other coin${dv.launches_seen==1?'':'s'} we saw${dv.launches_ran?`, <b>${dv.launches_ran}</b> ran`:dv.launches_ran===0?', none ran':''}</p>`:'<p class="rp-mini">No earlier launches we know of.</p>'}`:'<p class="note">Dev wallet not known for this coin.</p>'}
+      ${(r.deep||{}).state==='ready'&&(dv.address||sp.bundled_pct)?`<div id="rpCrew"><button class="btn btn-g btn-sm" data-rp="crew" style="margin-top:10px">👁 Track dev, bundles and side wallets</button><p class="note" style="margin:6px 0 0">Every move arrives in Telegram with a name: dev, bundle 1, dev side 1, trail 1.</p></div>`:''}
       ${sm.checked?`<h3 style="margin-top:14px">Smart wallets</h3><p class="rp-mini"><b>${sm.found}</b> of the first ${sm.checked} buyers are wallets we score${sm.best?` · best score ${E(sm.best)}`:''}</p>`:''}
       ${rpFlags(r).length?`<h3 style="margin-top:14px">Flags</h3><ul class="rp-fl">${rpFlags(r).map(n=>`<li>${E(n)}</li>`).join('')}</ul>`:''}</div>
-    <div class="rp-card rp-res" style="grid-area:r" id="rpRes"><h3>Project research</h3><p class="note">Website and docs against the chain, X account and who is talking on X right now, Telegram, GitHub, paid visibility. Takes up to a minute, costs a little from your balance.</p><button class="btn btn-g" data-rp="research">Run research</button></div>
-    <div class="rp-card" style="grid-area:l"><h3>Live trades <span class="rp-dot" aria-hidden="true"></span></h3><div id="rpTr">${rpTrades()}</div></div>
+    <div class="rp-card rp-res o12" id="rpRes"><h3>Project research</h3><p class="note">Website and docs against the chain, X account and who is talking on X right now, Telegram, GitHub, paid visibility. Takes up to a minute, costs a little from your balance.</p><button class="btn btn-g" data-rp="research">Run research</button></div></div>
   </div>
   <div class="rp-foot"><span class="mono">${E(r.address)}</span><button class="btn btn-sm" data-rp="copy">Copy</button>${r.links&&r.links.explorer?`<a href="${E(r.links.explorer)}" target="_blank" rel="noopener">Explorer</a>`:''}${r.links&&r.links.chart?`<a href="${E(r.links.chart)}" target="_blank" rel="noopener">DexScreener</a>`:''}${links}${(r.also_on||[]).length?`<span class="note">Also on ${E(r.also_on.join(', '))}</span>`:''}</div>
   <p class="note rp-nfa">Read from public chain data, it can be late or wrong. Not financial advice.</p>
   </div>`;
-  rpSetzen(el,html,rpChartSrc(r));
+  rpSetzen(el,html,rpCk(r));
   el.classList.add('show');document.body.classList.add('rp-open');if(keep)el.scrollTop=scroll;rpBind();
   const gh=$('#gxHost');if(gh&&typeof gxMount==='function')gxMount(gh,r);
+  rpChartStart(r);
 }
 /* 2.56: the chart stays put. A redraw (live refresh while the deep scan runs) used to rebuild the chart iframe every
    12 s, so the GeckoTerminal chart started loading again and again and often never showed. Now everything around the
    chart is replaced and the chart iframe is never touched while its address stays the same. */
 /* 2.62.7: chart source switch. GeckoTerminal sometimes answers with an empty chart (502 on its side), DexScreener as the
    second source. The choice is remembered per viewer. */
+/* 2.63: own chart. Candles come from our API (GeckoTerminal OHLCV with retries, trades as fallback), drawn with
+   Lightweight Charts. No third-party iframe that can stay blank. If there are no candles at all, the DexScreener
+   embed is the last fallback. */
+const RPC={tf:(()=>{try{return localStorage.getItem('oe_tf')||'5m'}catch(e){return '5m'}})(),mode:(()=>{try{return localStorage.getItem('oe_cm')||'mc'}catch(e){return 'mc'}})(),chart:null,key:null,t:null,cs:null,vs:null};
+function rpCk(r){const m=r.market||{};return m.pair?r.chain+':'+m.pair:'';}
+function rpLib(){return new Promise((ok,no)=>{if(window.LightweightCharts)return ok(window.LightweightCharts);const s=document.createElement('script');s.src='https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js';s.onload=()=>ok(window.LightweightCharts);s.onerror=()=>no(new Error('chart library'));document.head.appendChild(s);});}
+function rpFak(){const m=(RP&&RP.market)||{};return RPC.mode==='mc'&&m.mcap&&m.price?m.mcap/m.price:1;}
+async function rpKerzen(r){const m=r.market||{};return api(`/v1/engine/scan/candles?chain=${encodeURIComponent(r.chain)}&pair=${encodeURIComponent(m.pair)}&tf=${RPC.tf}&token=${encodeURIComponent(r.address||'')}`);}
+function rpFallback(r){const box=$('#rpCk');const src=r.embed_alt||r.embed;if(!box)return;box.innerHTML=src?`<iframe src="${E(src)}" title="Chart" allow="clipboard-write"></iframe>`:'<p class="note rp-ckload">No trades to chart yet.</p>';}
+async function rpChartStart(r,neu){const box=$('#rpCk');if(!box||!rpCk(r))return;const key=rpCk(r)+'|'+RPC.tf+'|'+RPC.mode;
+  if(RPC.chart&&RPC.key===key&&!neu)return;
+  clearInterval(RPC.t);
+  let d;try{[,d]=await Promise.all([rpLib(),rpKerzen(r)]);}catch(e){d=null;}
+  if(!$('#rpCk'))return;
+  if(!d||!(d.candles||[]).length||!window.LightweightCharts){if(RPC.chart){try{RPC.chart.remove();}catch(e){}RPC.chart=null;}rpFallback(r);return;}
+  const LC=window.LightweightCharts;const b=$('#rpCk');b.innerHTML='';if(RPC.chart){try{RPC.chart.remove();}catch(e){}}
+  const ch=LC.createChart(b,{autoSize:true,layout:{background:{type:'solid',color:'transparent'},textColor:'#9fb2a7',fontFamily:'JetBrains Mono, monospace',fontSize:11},
+    grid:{vertLines:{color:'rgba(255,255,255,.04)'},horzLines:{color:'rgba(255,255,255,.04)'}},rightPriceScale:{borderColor:'rgba(255,255,255,.1)',scaleMargins:{top:.08,bottom:.24}},
+    timeScale:{borderColor:'rgba(255,255,255,.1)',timeVisible:true,secondsVisible:false,rightOffset:4},crosshair:{mode:0},handleScale:{axisPressedMouseMove:{time:true,price:false}}});
+  const fmt=v=>RPC.mode==='mc'?rpUsd(v):rpPx(v);
+  const cs=ch.addCandlestickSeries({upColor:'#22f08a',downColor:'#ff5d6c',borderVisible:false,wickUpColor:'#22f08a',wickDownColor:'#ff5d6c',priceFormat:{type:'custom',formatter:fmt,minMove:1e-12}});
+  const vs=ch.addHistogramSeries({priceScaleId:'v',priceFormat:{type:'volume'},color:'rgba(34,240,138,.35)'});
+  ch.priceScale('v').applyOptions({scaleMargins:{top:.8,bottom:0}});
+  RPC.chart=ch;RPC.cs=cs;RPC.vs=vs;RPC.key=key;rpSetDaten(d);ch.timeScale().fitContent();
+  RPC.t=setInterval(async()=>{if(document.hidden||!RP||!$('#rpCk'))return;try{const d2=await rpKerzen(RP);if((d2.candles||[]).length)rpSetDaten(d2);}catch(e){}},30000);}
+function rpSetDaten(d){const f=rpFak();const c=d.candles||[];
+  RPC.cs.setData(c.map(x=>({time:x[0],open:x[1]*f,high:x[2]*f,low:x[3]*f,close:x[4]*f})));
+  RPC.vs.setData(c.map(x=>({time:x[0],value:x[5],color:x[4]>=x[1]?'rgba(34,240,138,.35)':'rgba(255,93,108,.35)'})));
+  const s=$('#rpCks');if(s)s.textContent=d.source==='trades'?' · from recent trades':'';}
+document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-tf],[data-cm]');if(!b||!RP)return;
+  if(b.dataset.tf){RPC.tf=b.dataset.tf;try{localStorage.setItem('oe_tf',RPC.tf);}catch(e){}}
+  if(b.dataset.cm){RPC.mode=b.dataset.cm;try{localStorage.setItem('oe_cm',RPC.mode);}catch(e){}}
+  b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));rpChartStart(RP,true);});
 function rpChartSrc(r){let w='';try{w=localStorage.getItem('oe_chart')||'';}catch(e){}
   if(w==='ds'&&r.embed_alt)return r.embed_alt;return r.embed||r.embed_alt||'';}
 document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.closest('[data-rpc]');if(!b)return;
@@ -2736,9 +2853,9 @@ document.addEventListener('click',ev=>{const b=ev.target.closest&&ev.target.clos
   const card=b.closest('.rp-chart');const f=card&&card.querySelector('iframe');const r=(typeof RP!=="undefined")?RP:null;
   if(f&&r){const src=rpChartSrc(r);f.setAttribute('src',src);card.querySelectorAll('[data-rpc]').forEach(x=>x.classList.toggle('on',x===b));
     const a=card.querySelector('.rp-cl a');if(a)a.href=String(src).split('?')[0];}});
-function rpSetzen(el,html,embed){
-  const alt=el.querySelector('.rp-chart iframe');const altIn=el.querySelector('.rp-in');
-  if(!alt||!altIn||!embed||alt.getAttribute('src')!==embed){el.innerHTML=html;return;}
+function rpSetzen(el,html,key){
+  const alt=el.querySelector('.rp-chart');const altIn=el.querySelector('.rp-in');
+  if(!alt||!altIn||!key||alt.dataset.ck!==key||!RPC.chart){RPC.chart=null;RPC.key=null;el.innerHTML=html;return;}
   const tmp=document.createElement('div');tmp.innerHTML=html;const neuIn=tmp.querySelector('.rp-in');
   const ag=altIn.querySelector('.rp-grid'),ng=neuIn&&neuIn.querySelector('.rp-grid');
   if(!ng||!ag){el.innerHTML=html;return;}
@@ -2762,6 +2879,8 @@ function rpBind(){
     if(a==='copy'){try{await navigator.clipboard.writeText(RP.address);toast('Address copied');}catch(e){}return;}
     if(a.startsWith('side:')){RP_SIDE=a.slice(5);const tb=$('#rpTB');if(tb){tb.innerHTML=rpTradeBox();rpBind();}return;}
     if(a.startsWith('q:')){const v=a.slice(2);$('#rpAmt').value=v;$('#rpUnit').value=RP_SIDE==='buy'?'usd':'percent';return;}
+    if(a==='crew'){b.disabled=true;try{const d=await api('/v1/engine/scan/crew',{method:'POST',body:JSON.stringify({q:RP.chain+':'+RP.address})});$('#rpCrew').innerHTML=`<p class="note" style="margin-top:10px">${E(d.text||'Done.')}</p>`;}
+      catch(e){b.disabled=false;toast(e.status===401?'Connect your wallet first':(e.message||'Could not set that up'));}return;}
     if(a==='fwdwatch'){b.disabled=true;try{const d=await api('/v1/engine/scan/watchfwd',{method:'POST',body:JSON.stringify({q:RP.chain+':'+RP.address})});$('#rpFwW').innerHTML=`<p class="note" style="margin-top:10px">${E(d.text||'Done.')}</p>`;}
       catch(e){b.disabled=false;if(e.status===401){$('#rpFwW').innerHTML=`<p class="note" style="margin-top:10px">Alerts go to your Telegram. ${TG_HINT?E(TG_HINT):'Connect your wallet on engine.oddsengine.live and link Telegram once, then it works right here.'}</p><a class="btn btn-sm" href="https://engine.oddsengine.live/#ai" target="_blank" rel="noopener" style="margin-top:8px">Connect wallet</a>`;}else toast(e.message||'Could not set that up');}return;}
     if(a==='research'){const box=$('#rpRes');b.disabled=true;b.innerHTML='<span class="typing"><i></i><i></i><i></i></span> Reading the site, X, Telegram, GitHub…';
