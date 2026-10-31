@@ -592,6 +592,17 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 @keyframes moIn{from{opacity:0;transform:translateY(6px)}}
 .mo-hi{color:var(--dim);font-size:14.5px;margin:auto 0}
 .mo-sug{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.mo-sug button b{font-weight:600;margin-right:2px}
+.mo-quick{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 10px;margin:0 0 2px;max-width:100%;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent)}
+.mo-quick::-webkit-scrollbar{display:none}
+.mo-quick button{flex:0 0 auto;border:1px solid var(--line2);background:rgba(255,255,255,.03);color:inherit;border-radius:999px;padding:7px 12px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.mo-quick button:hover{border-color:rgba(46,240,140,.5)}
+.mo-steps{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.mo-steps>div{display:flex;align-items:center;gap:8px;opacity:.55}
+.mo-steps>div.on{opacity:1}
+.mo-steps>div>span{display:inline-flex;width:22px;justify-content:center;color:var(--g)}
+.mo-steps .typing{padding:0}
+.mo-steps .typing i{width:4px;height:4px}
 .mo-sug button{border:1px solid var(--line2);background:rgba(255,255,255,.03);color:inherit;border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;text-align:left}
 .mo-sug button:hover{border-color:rgba(46,240,140,.5)}
 .mo-in{display:flex;gap:8px;margin-top:10px;align-items:flex-end}
@@ -2347,12 +2358,38 @@ setRing=function(s){RING.state=s;};
 
 const HRS=[...Array(24).keys()];
 function moTime(h){return (h%12||12)+(h<12?' am':' pm');}
+/* 2.69.0: klickbare Beispiele, zeigen in Sekunden, was geht. Ein Tippen fuellt das Feld, man kann noch anpassen. */
+function moSugs(){
+  const a=[['🔎 Scan a coin','Scan this coin: 0x…'],
+    ['🎙️ Trade by text or voice','Buy $5 of ODDS'],
+    ['📡 GTA radar','Tell me when new GTA coins launch'],
+    ['🗓️ Your own brief','Every Monday at 9:00 send me a brief: my holdings vs BTC, unlocks in the next 14 days and big holder changes'],
+    ['🎯 Take profit','Alert me when my ODDS bag hits 3x'],
+    ['🧭 Follow the money','Where did the money of this wallet come from: 0x…'],
+    ['🛡️ Wallet check','Check my wallet for risky approvals'],
+    ['🎬 AI video','Make a 5 second video of a neon robot walking through a rainy city at night'],
+    ['🔥 Burns','How much $ODDS and $TORCH is burned?'],
+    ['🖼️ Image','Make me an image of a neon robot reading a price chart'],
+    ['⏰ Reminder','Remind me tomorrow 9:00 to check the calls'],
+    ['👀 Watch a page','Watch this page for changes: https://…']];
+  if(typeof FEAT!=='undefined'&&FEAT.deals)a.splice(6,0,['🏷️ Deals','What are today\'s deals on watches at Marc Gebauer?']);
+  return a;}
+function moQuick(){const h=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]);if(!h.length||!moReady())return '';
+  return `<div class="mo-quick" role="list">${moSugs().slice(0,7).map(([l,t])=>`<button type="button" role="listitem" data-sug="${E(t)}">${E(l)}</button>`).join('')}</div>`;}
+/* 2.69.0: sichtbare Arbeitsschritte, live von /v1/engine/progress */
+let MO_STEPS=null,MO_POLL=null;
+function moStepsHtml(){if(!MO_STEPS||!MO_STEPS.steps)return '';
+  const st=MO_STEPS.steps.slice(-5);
+  return `<div class="mo-steps">${st.map((x,i)=>`<div class="${i===st.length-1&&MO_STEPS.active?'on':'ok'}"><span>${i===st.length-1&&MO_STEPS.active?'<span class="typing"><i></i><i></i><i></i></span>':'✓'}</span>${E(x.l)}${i===st.length-1&&MO_STEPS.active?'…':''}</div>`).join('')}</div>`;}
+function moStepsDraw(){const b=document.querySelector('#moLog .mo-busy');if(b)b.innerHTML=MO_STEPS&&MO_STEPS.steps&&MO_STEPS.steps.length?moStepsHtml():'<span class="typing"><i></i><i></i><i></i></span>';}
+function moPollStart(){MO_STEPS=null;clearInterval(MO_POLL);MO_POLL=setInterval(async()=>{try{const p=await api('/v1/engine/progress');if(MO_BUSY){MO_STEPS=p;moStepsDraw();}}catch(e){}},700);}
+function moPollStop(){clearInterval(MO_POLL);MO_POLL=null;}
 function moMsgs(){
   const h=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]);
   if(!h.length)return `<div class="mo-hi">Ask me anything about the markets, a wallet, a token or the news. Try:
-    <div class="mo-sug">${['How much $ODDS and $TORCH is burned?','What was the last launch on Torch?','What just graduated on Torch?','What does this wallet hold: 0x…','Make me an image of a neon robot reading a price chart','Ask GPT what it thinks about this: …','Remind me tomorrow 9:00 to check the calls','Alert me when ETH is above 3000','I drive to the gym every weekday at 5:00, warn me about traffic','Send me Watcher Guru headlines about BTC and the Fed','How many Torch rewards can I claim? My Torch name is …','Watch this page for changes: https://…'].map(s=>`<button type="button" data-sug="${E(s)}">${E(s)}</button>`).join('')}</div></div>`;
+    <div class="mo-sug">${moSugs().map(([l,t])=>`<button type="button" data-sug="${E(t)}"><b>${E(l)}</b> ${E(t)}</button>`).join('')}</div></div>`;
   const sw_=MO&&MO.switches||{};
-  return h.map((m,i)=>`${m.role!=='user'?moCards(m.cards):''}<div class="mo-m ${m.role==='user'?'u':'a'}">${m.role==='user'?E(m.content):(typeof md==='function'?md(m.content||''):E(m.content||''))}${moImgs(m.images)}${moData(m.data)}${m.role!=='user'&&sw_.voice&&m.content?`<button type="button" class="mo-say" data-say="${i}">▶ Listen</button>`:''}${m.cost!=null?`<small>${m.cost>0?usd(m.cost,m.cost<0.01?4:3):'free'}${m.tools&&m.tools.length?' · '+E(m.tools.join(', ')):''}</small>`:''}</div>`).join('')+(MO_BUSY?'<div class="mo-m a"><span class="typing"><i></i><i></i><i></i></span></div>':'');
+  return h.map((m,i)=>`${m.role!=='user'?moCards(m.cards):''}<div class="mo-m ${m.role==='user'?'u':'a'}">${m.role==='user'?E(m.content):(typeof md==='function'?md(m.content||''):E(m.content||''))}${moImgs(m.images)}${moData(m.data)}${m.role!=='user'&&sw_.voice&&m.content?`<button type="button" class="mo-say" data-say="${i}">▶ Listen</button>`:''}${m.cost!=null||m.secs?`<small>${m.secs?'Done in '+m.secs+' s'+(m.cost!=null?' · ':''):''}${m.cost!=null?(m.cost>0?usd(m.cost,m.cost<0.01?4:3):'free'):''}${m.tools&&m.tools.length?' · '+E(m.tools.join(', ')):''}</small>`:''}</div>`).join('')+(MO_BUSY?`<div class="mo-m a mo-busy">${MO_STEPS&&MO_STEPS.steps&&MO_STEPS.steps.length?moStepsHtml():'<span class="typing"><i></i><i></i><i></i></span>'}</div>`:'');
 }
 function moCards(cs){if(!cs||!cs.length)return '';return cs.map(c=>{const bs=[].concat(...(c.buttons||[]).map(r=>Array.isArray(r[0])?r:[r]));
   return `<div class="mo-card"><pre>${E(c.text)}</pre><div class="mo-cb">${bs.map(([t,u])=>{u=String(u||'');
@@ -2424,6 +2461,7 @@ engineView=function(){
     <div class="mo-head"><h3>Talk to it</h3><span class="note">${moBrain()?'Thinking: '+E(moBrain().label)+' · about '+moC(moBrain().usd_per_answer.typical)+' per answer, from your balance.':'Every answer comes off your balance: model cost plus the OddsEngine fee.'}</span>${(MO&&MO.history&&MO.history.length)||MO_LOG.length?'<button class="btn btn-sm" data-act="moclear">New chat</button>':''}</div>
     <div class="mo-log" id="moLog">${moMsgs()}</div>
     ${moBeta()?moNote():''}
+    <div id="moQuick">${moQuick()}</div>
     <div class="mo-att" id="moAtt"></div><form class="mo-in" id="moForm"><label class="mo-clip ${moReady()?'':'off'}" title="Add a photo or screenshot" aria-label="Add a photo"><input type="file" id="moFile" accept="image/*" multiple hidden ${moReady()?'':'disabled'}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2"/><path d="m21 16-5-5-7 7"/></svg></label><textarea id="moIn" rows="1" ${moReady()?'':'disabled'} placeholder="${moReady()?'Ask about a wallet, a token, burns, launches, the calls…':moWhy()}" aria-label="Message"></textarea><button class="btn btn-g" type="submit" ${MO_BUSY||!moReady()?'disabled':''}>Send</button></form>
   </div></section>
   <section><div class="grid2">
@@ -2503,8 +2541,10 @@ async function moSend(t){
   if(!MO_LOG.length&&MO&&MO.history)MO_LOG=MO.history.slice();
   const imgs=MO_IMG.slice();MO_IMG=[];moAttDraw();
   MO_LOG.push({role:'user',content:t,data:imgs});MO_BUSY=true;setRing('thinking');$('#moLog').innerHTML=moMsgs();moScroll();
+  const t0=performance.now();moPollStart();
   try{const r=await api('/v1/engine/ask',{method:'POST',body:JSON.stringify({text:t,images:imgs})});
-    MO_LOG.push({role:'assistant',content:r.text,cost:r.trial?null:r.cost_usd,tools:r.tools,images:r.images||[],data:r.image_data||[],cards:r.cards||[]});
+    moPollStop();
+    MO_LOG.push({role:'assistant',content:r.text,cost:r.trial?null:r.cost_usd,tools:r.tools,images:r.images||[],data:r.image_data||[],cards:r.cards||[],secs:Math.max(1,Math.round((performance.now()-t0)/100)/10)});
     if(r.trial&&MO&&MO.access){MO.access.trial_left=r.trial_left;}
     if(r.open_report&&innerWidth>700)setTimeout(()=>{location.hash='#token='+r.open_report;},350);
     if(r.open_report&&r.deep_running)moDeepWait(r.open_report);
@@ -2512,7 +2552,8 @@ async function moSend(t){
     const ag=await api('/v1/engine/agent').catch(()=>null);if(ag){const h=MO_LOG;MO=ag;MO_LOG=h;const l=$('#moList');if(l){l.innerHTML=moList();moBindList();}}
     const me=await api('/v1/engine/me').catch(()=>null);if(me&&ME){ME.memory=me.memory;}
   }catch(e){MO_LOG.push({role:'assistant',content:(e&&e.message)||'Something went wrong.'});}
-  MO_BUSY=false;setRing('idle');const l=$('#moLog');if(l){l.innerHTML=moMsgs();moScroll();}
+  moPollStop();MO_STEPS=null;MO_BUSY=false;setRing('idle');const l=$('#moLog');if(l){l.innerHTML=moMsgs();moScroll();}
+  const q=$('#moQuick');if(q){q.innerHTML=moQuick();q.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{const ta=$('#moIn');if(!ta)return;ta.value=b.dataset.sug;ta.focus();});}
 }
 /* 2.44: the deep scan lands in the web chat too, with a button straight into the full report and holder map */
 const MO_DEEP={};
