@@ -1082,6 +1082,37 @@ html.pwa footer.wrap{display:none}
 .ye-modal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.86);display:flex;align-items:center;justify-content:center;padding:16px}
 .ye-modal video{max-width:min(1100px,100%);max-height:88vh;border-radius:16px;background:#000}
 .ye-modal button{position:absolute;top:14px;right:16px;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:rgba(8,14,11,.8);color:var(--tx);font-size:22px;cursor:pointer}
+
+/* 2.65: Video */
+.vd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin:4px 0 16px}
+.vd-m{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--card);transition:border-color .2s,box-shadow .2s,transform .15s}
+.vd-m:hover{transform:translateY(-1px);border-color:var(--line2)}
+.vd-m.on{border-color:var(--g);box-shadow:0 0 0 1px var(--g),0 0 26px rgba(34,240,138,.18)}
+.vd-m b{font-family:var(--disp);font-size:14px;color:var(--tx)}
+.vd-pr{font-style:normal;font-size:12.5px;color:var(--dim);margin-top:4px;padding-top:6px;border-top:1px solid var(--line)}.vd-pr b{font-family:var(--disp);font-size:13px;color:var(--g)}.vd-m span{font-size:12.5px;color:var(--dim)}.vd-m em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--g)}
+.vd-ta{width:100%;min-height:96px;resize:vertical;box-sizing:border-box;border-radius:16px;border:1px solid var(--line2);background:rgba(0,0,0,.25);color:var(--tx);padding:12px 14px;font:inherit;font-size:15px}
+.vd-ta:focus{outline:none;border-color:var(--g)}
+.vd-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.vd-row label.k{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim2);min-width:84px}
+.vd-chip{all:unset;cursor:pointer;padding:8px 13px;border-radius:999px;border:1px solid var(--line2);font-size:13px;color:var(--dim)}
+.vd-chip.on{border-color:var(--g);color:var(--tx);background:rgba(34,240,138,.1)}
+.vd-sec{display:flex;align-items:center;gap:10px;flex:1;min-width:200px}.vd-sec input{flex:1;accent-color:var(--g)}.vd-sec b{font-family:var(--mono);min-width:42px;text-align:right}
+.vd-photo{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.vd-photo img{width:96px;height:64px;object-fit:cover;border-radius:10px;border:1px solid var(--line2)}
+.vd-up{position:relative;overflow:hidden}.vd-up input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.vd-q{margin-top:16px;padding:16px;border-radius:16px;border:1px solid var(--g);background:rgba(34,240,138,.06)}
+.vd-q .p{font-family:var(--disp);font-size:26px;color:var(--tx)}.vd-q .s{color:var(--dim);font-size:13.5px;margin:4px 0 12px}
+.vd-q .a{display:flex;gap:8px;flex-wrap:wrap}
+.vd-jobs{display:grid;gap:14px}
+.vd-j{border-radius:16px;border:1px solid var(--line);padding:12px;background:rgba(0,0,0,.2)}
+.vd-j video{width:100%;max-height:70vh;border-radius:12px;background:#000;display:block}
+.vd-j .h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--dim);margin-bottom:8px}
+.vd-j .h b{color:var(--tx);font-family:var(--disp);font-size:13px}
+.vd-j .pr{font-size:13px;color:var(--dim2);margin:8px 0 0;overflow-wrap:anywhere}
+.vd-wait{display:flex;align-items:center;gap:10px;padding:26px 12px;justify-content:center;color:var(--dim);font-size:14px}
+.vd-spin{width:18px;height:18px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--g);animation:vdsp 1s linear infinite}
+@keyframes vdsp{to{transform:rotate(360deg)}}
+@media (max-width:480px){.vd-grid{grid-template-columns:1fr 1fr}.vd-m{padding:12px}.vd-row label.k{min-width:100%}}
 </style>
 </head>
 <body>
@@ -1094,6 +1125,7 @@ html.pwa footer.wrap{display:none}
     <button role="tab" data-tab="engine" class="on"><span class="lg">Your </span>Engine</button>
     <button role="tab" data-tab="chat">Chat</button>
     <button role="tab" data-tab="models">Models</button>
+    <button role="tab" data-tab="video">Video</button>
     <button role="tab" data-tab="ai">Account</button>
   </nav>
   <button class="btn btn-g btn-sm" id="walletBtn">Connect</button>
@@ -1795,7 +1827,8 @@ const MEDIA={intro:['media/intro.mp4',CDN+'e4d1c8ed-f6d5-4a5b-8e83-9bfcc2667380.
   loop:[CDN+'ff77fd8f-ea64-400a-8d50-17ffb91c37d9.mp4',CDN+'e87f643f-8bb2-4cf3-8541-65f2b2e58bf7.mp4'],loopM:[CDN+'377a9364-9c36-4197-90da-f1c8c1e98187.mp4',CDN+'46d7e78b-c317-4cd4-8543-848dd2f31534.mp4']};
 function setSrc(v,list){v.innerHTML=list.map(u=>`<source src="${u}" type="video/mp4">`).join('');v.load();}
 if(location.hash==='#models')TAB='models';
-const AI_TABS=['chat','models','ai'];
+if(location.hash==='#video')TAB='video';
+const AI_TABS=['chat','models','video','ai'];
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SMALL=()=>innerWidth<760;
 let QUOTE=null, QT_TIMER=null;
@@ -1854,7 +1887,7 @@ function introMaybe(){
 }
 
 /* ---------- tabs that exist for the public ---------- */
-function tabOpen(t){if(t==='engine')return !!FEAT.engine||DEMO;if(DEMO||PREVIEW)return true;return FEAT.ai;}
+function tabOpen(t){if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
 function soon(){
   return `<section class="soon">${face('idle')}
   <span class="eyebrow rv d1"><b>●</b> OddsEngine AI</span>
@@ -1877,10 +1910,11 @@ function render(){
   document.body.classList.toggle('aimode',open&&AI_TABS.includes(TAB));
   if(!chat){CH.drawer=false;document.body.classList.remove('cdr');}
   const keep=chat&&$('#cIn')?$('#cIn').value:null;
-  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='chat'?chatView():engineView()):soon();
+  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='chat'?chatView():engineView()):soon();
   if(open&&AI_TABS.includes(TAB)){bgInit();bgShow(true);introMaybe();}else bgShow(false);
   if(open&&TAB==='models'){renderModels();cmpBar();countUp();}
   if(open&&TAB==='ai'&&QUOTE)quoteTick();
+  if(open&&TAB==='video')vdBind();
   if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();fitChat();}
   bind(); reveal(); spot();
   $('#walletBtn').textContent=connected()?(innerWidth<440?ME.address.slice(0,4)+'…'+ME.address.slice(-3):(ME.short||short(ME.address))):'Connect';
@@ -1926,6 +1960,77 @@ function filtered(){
   return l.slice().sort(k);
 }
 function cheapest(){const v=MODELS.filter(m=>m.picked&&m.per_msg&&m.kind!=='image').map(m=>m.per_msg);return v.length?Math.min(...v):null;}
+/* ---------- 2.65: Video (Higgsfield) ---------- */
+const VID={ok:false,models:[],jobs:[],bal:null,sel:null,prompt:'',img:null,sec:null,asp:'16:9',res:'1080p',snd:true,q:null,busy:false,t:null};
+async function vdLoad(){try{const d=await api('/v1/ai/video');VID.ok=!!d.available;VID.models=d.models||[];VID.jobs=d.jobs||[];VID.bal=d.balance_usd;
+  if(!VID.sel){const k=VID.models.find(m=>m.id==='kling-4')||VID.models.find(m=>m.default_model)||VID.models[0];if(k)VID.sel=k.id;}}catch(e){VID.ok=false;}}
+function vdM(){return VID.models.find(m=>m.id===VID.sel)||VID.models[0]||null;}
+function vdSecs(m){if(!m)return 5;let v=VID.sec==null?m.default:VID.sec;if(m.fixed)v=m.fixed.reduce((a,b)=>Math.abs(b-v)<Math.abs(a-v)?b:a);return Math.max(m.min,Math.min(m.max,v));}
+function vdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'Video')}</b><span>${j.seconds?j.seconds+' s':''}${j.price_usd!=null?' · '+usd(j.price_usd):''}</span></div>`;
+  const pr=j.prompt?`<p class="pr">${E(j.prompt)}</p>`:'';
+  if(st==='completed'&&j.url)return `<div class="vd-j">${head}<video src="${E(j.url)}" controls playsinline preload="metadata"></video><div class="vd-row"><a class="btn btn-sm" href="${E(j.url)}" target="_blank" rel="noopener" download>Download</a><span class="note">Link works for 7 days, save it if you want to keep it.</span></div>${pr}</div>`;
+  if(st==='rendering')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Rendering, usually 1 to 5 minutes</div>${pr}</div>`;
+  return `<div class="vd-j">${head}<p class="note">That one did not work${j.reason?': '+E(j.reason):''}. Nothing was charged.</p>${pr}</div>`;}
+function vdJobsHtml(){return VID.jobs.length?VID.jobs.map(vdJob).join(''):'<p class="note">Your videos show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
+function videoView(){const m=vdM();const s=vdSecs(m);const foto=!!VID.img;
+  const asp=m&&m.aspects.length&&!(foto&&/^(kling|seedance)/.test(m.id))?m.aspects:[];
+  return `<section class="mhero">
+    <span class="eyebrow rv"><b>●</b> OddsEngine AI · Video</span>
+    <h1 class="rv d1"><span class="shiny">Every top video model.<br>One prompt.</span></h1>
+    <p class="lead rv d2">${VID.models.length} video models in one place${VID.models.length?': '+E(VID.models.map(x=>x.name).join(', ')):''}. Type what you want to see or start from a photo. You see the price on every model and the exact price before anything starts.</p>
+    <div class="payline rv d2"><span><i>✓</i>Price first</span><span><i>✓</i>No subscription</span><span><i>✓</i>Failed videos cost nothing</span></div>
+  </section>
+  <section class="rv"><div class="card">
+    <span class="eyebrow">1 · Model</span>
+    <div class="vd-grid" style="margin-top:10px">${VID.models.map(x=>`<button class="vd-m ${x.id===VID.sel?'on':''}" data-vm="${x.id}"><b>${E(x.name)}</b><span>${E(x.about)}</span><em>${x.fixed?x.fixed.join(' or '):x.min+' to '+x.max} s${x.sound?' · sound':''}</em>${x.price_usd?`<i class="vd-pr"><b>${usd(x.price_usd)}</b> for ${x.price_seconds} s${x.price_res?' '+E(x.price_res):''}${x.per_second_usd?` · ${usd(x.per_second_usd,3)}/s`:''}</i>`:`<i class="vd-pr">price shown before start</i>`}</button>`).join('')}</div>
+    <span class="eyebrow">2 · Your video</span>
+    <textarea class="vd-ta" id="vdP" style="margin-top:10px" maxlength="2400" placeholder="${foto?'How should the photo move? e.g. slow camera push in, the lights flicker on, he turns toward us':'Describe the scene, e.g. a black robot with a green ring visor walks through a rainy neon street at night, slow tracking shot'}">${E(VID.prompt)}</textarea>
+    <div class="vd-photo">${foto?`<img src="${VID.img}" alt="Start frame"><button class="btn btn-sm" data-vact="nophoto">Remove photo</button><span class="note">The photo is the first frame.</span>`:`<span class="btn btn-sm vd-up">Start from a photo<input type="file" id="vdF" accept="image/*"></span><span class="note">Optional. The photo becomes the first frame.</span>`}</div>
+    ${m?`<div class="vd-row"><label class="k">Length</label>${m.fixed?m.fixed.map(v=>`<button class="vd-chip ${v===s?'on':''}" data-vs="${v}">${v} s</button>`).join(''):`<div class="vd-sec"><input type="range" id="vdS" min="${m.min}" max="${m.max}" step="1" value="${s}" aria-label="Seconds"><b id="vdSv">${s} s</b></div>`}</div>`:''}
+    ${asp.length?`<div class="vd-row"><label class="k">Format</label>${asp.map(a=>`<button class="vd-chip ${a===VID.asp?'on':''}" data-va="${a}">${a}</button>`).join('')}</div>`:''}
+    ${m&&m.resolutions.length?`<div class="vd-row"><label class="k">Quality</label>${m.resolutions.map(r=>`<button class="vd-chip ${r===VID.res?'on':''}" data-vr="${r}">${r}</button>`).join('')}</div>`:''}
+    ${m&&m.sound?`<div class="vd-row"><label class="k">Sound</label><button class="vd-chip ${VID.snd?'on':''}" data-vsnd="1">On</button><button class="vd-chip ${VID.snd?'':'on'}" data-vsnd="0">Off</button></div>`:''}
+    ${m&&m.per_second_usd?`<p class="note" id="vdEst" style="margin-top:12px">About ${usd(m.per_second_usd*s)} for ${s} s with ${E(m.name)}. The exact price comes with Get price.</p>`:''}
+    <div class="vd-row" style="margin-top:16px">${connected()?`<button class="btn btn-g" data-vact="quote" ${VID.busy?'disabled':''}>${VID.busy?'Getting the price…':'Get price'}</button>${VID.bal!=null?`<span class="note">Balance ${usd(VID.bal)}</span>`:''}`:`<button class="btn btn-g" data-vact="connect">Connect wallet</button><span class="note">Videos are paid from your Your Engine balance.</span>`}</div>
+    <div id="vdQ">${VID.q?vdQuoteHtml():''}</div>
+  </div></section>
+  <section style="margin-top:16px"><div class="card"><span class="eyebrow">Your videos</span><div class="vd-jobs" id="vdJ" style="margin-top:12px">${vdJobsHtml()}</div></div></section>`;}
+function vdQuoteHtml(){const q=VID.q;if(q.error)return `<div class="vd-q" style="border-color:var(--amber)"><p class="s" style="margin:0;color:var(--tx)">${E(q.error)}</p></div>`;
+  const low=VID.bal!=null&&VID.bal<q.price_usd;
+  return `<div class="vd-q"><div class="p">${usd(q.price_usd)}</div><div class="s">${E(q.model)} · ${q.seconds} s${q.resolution?' · '+E(q.resolution):''}${q.from_photo?' · from your photo':q.aspect?' · '+E(q.aspect):''}${q.sound!=null&&q.sound!==false?' · sound':''}. Paid from your balance only if it works.</div>
+    <div class="a">${low?`<button class="btn btn-g" data-go="ai">Top up first</button>`:`<button class="btn btn-g" data-vact="start">Start video</button>`}<button class="btn" data-vact="change">Change</button></div></div>`;}
+function vdSync(){const p=$('#vdP');if(p)VID.prompt=p.value;}
+function vdDraw(){vdSync();$('#view').innerHTML=videoView();vdBind();bind();reveal();}
+function vdPoll(){clearTimeout(VID.t);if(TAB!=='video'||!VID.jobs.some(j=>j.status==='rendering'))return;
+  VID.t=setTimeout(async()=>{try{const d=await api('/v1/ai/video');VID.jobs=d.jobs||[];VID.bal=d.balance_usd;const el=$('#vdJ');if(el)el.innerHTML=vdJobsHtml();}catch(e){}vdPoll();},6000);}
+function vdFoto(f){if(!f||!/^image\//.test(f.type)){toast('Pick a picture');return;}const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1920/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);VID.img=c.toDataURL('image/jpeg',.9);VID.q=null;vdDraw();};im.onerror=()=>toast('Could not read that picture');im.src=rd.result;};rd.readAsDataURL(f);}
+function vdBind(){
+  document.querySelectorAll('[data-vm]').forEach(b=>b.onclick=()=>{VID.sel=b.dataset.vm;VID.sec=null;VID.q=null;const m=vdM();if(m&&m.resolutions.length&&!m.resolutions.includes(VID.res))VID.res=m.resolutions.includes('1080p')?'1080p':m.resolutions[m.resolutions.length-1];if(m&&m.aspects.length&&!m.aspects.includes(VID.asp))VID.asp=m.aspects[0];vdDraw();});
+  const p=$('#vdP');if(p)p.oninput=()=>{VID.prompt=p.value;if(VID.q){VID.q=null;$('#vdQ').innerHTML='';}};
+  const r=$('#vdS');if(r)r.oninput=()=>{VID.sec=+r.value;$('#vdSv').textContent=r.value+' s';const m_=vdM(),es=$('#vdEst');if(es&&m_&&m_.per_second_usd)es.textContent=`About ${usd(m_.per_second_usd*VID.sec)} for ${VID.sec} s with ${m_.name}. The exact price comes with Get price.`;if(VID.q){VID.q=null;$('#vdQ').innerHTML='';}};
+  document.querySelectorAll('[data-vs]').forEach(b=>b.onclick=()=>{VID.sec=+b.dataset.vs;VID.q=null;vdDraw();});
+  document.querySelectorAll('[data-va]').forEach(b=>b.onclick=()=>{VID.asp=b.dataset.va;VID.q=null;vdDraw();});
+  document.querySelectorAll('[data-vr]').forEach(b=>b.onclick=()=>{VID.res=b.dataset.vr;VID.q=null;vdDraw();});
+  document.querySelectorAll('[data-vsnd]').forEach(b=>b.onclick=()=>{VID.snd=b.dataset.vsnd==='1';VID.q=null;vdDraw();});
+  const f=$('#vdF');if(f)f.onchange=()=>vdFoto(f.files&&f.files[0]);
+  document.querySelectorAll('[data-vact]').forEach(b=>b.onclick=async()=>{const a=b.dataset.vact;
+    if(a==='connect'){connect();return;}
+    if(a==='nophoto'){VID.img=null;VID.q=null;vdDraw();return;}
+    if(a==='change'){VID.q=null;$('#vdQ').innerHTML='';const t=$('#vdP');if(t)t.focus();return;}
+    if(a==='quote'){vdSync();const m=vdM();if(!VID.prompt.trim()&&!VID.img){toast('Describe the video first');return;}
+      VID.busy=true;VID.q=null;vdDraw();
+      try{VID.q=await api('/v1/ai/video/quote',{method:'POST',body:JSON.stringify({prompt:VID.prompt,model:VID.sel,seconds:vdSecs(m),aspect:VID.asp,resolution:VID.res,sound:VID.snd,image:VID.img||undefined})});}
+      catch(e){VID.q={error:e.status===401?'Connect your wallet again, the session ran out.':(e.message||'Could not get a price')};}
+      VID.busy=false;vdDraw();return;}
+    if(a==='start'){b.disabled=true;b.textContent='Starting…';
+      try{const r=await api('/v1/ai/video/start',{method:'POST',body:'{}'});if(r.error){toast(r.error);b.disabled=false;b.textContent='Start video';return;}
+        VID.q=null;toast('Rendering. It shows up below.');const d=await api('/v1/ai/video');VID.jobs=d.jobs||[];VID.bal=d.balance_usd;vdDraw();vdPoll();
+        const el=$('#vdJ');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+      catch(e){toast(e.message||'Could not start');b.disabled=false;b.textContent='Start video';}}
+  });
+  vdPoll();
+}
+
 function modelsView(){
   const n=MODELS.filter(x=>x.id!=='oddsengine/auto').length;const c=cheapest();const nw=MODELS.filter(m=>m.new).length;
   return `<section class="mhero">
@@ -3271,8 +3376,11 @@ let MB_CT=null;
 function mbActive(){return ['chat','models','ai'].includes(TAB)?'wallet':TAB;}
 function mbBar(){
   let b=$('#mbBar');
-  if(!b){b=document.createElement('nav');b.id='mbBar';b.className='mb-bar';b.setAttribute('aria-label','App');
-    b.innerHTML=MB_BAR.map(([k,l,d])=>`<button data-mbtab="${k}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg><span>${l}</span></button>`).join('');
+  /* 2.65: Video im Handy-Menue, sobald es fuer den Nutzer offen ist */
+  const items=MB_BAR.slice();if(typeof tabOpen==='function'&&tabOpen('video'))items.splice(4,0,['video','Video','M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1M16 10.5l5-3v9l-5-3']);
+  if(b&&+b.dataset.n!==items.length){b.remove();b=null;}
+  if(!b){b=document.createElement('nav');b.id='mbBar';b.className='mb-bar';b.setAttribute('aria-label','App');b.dataset.n=items.length;b.style.gridTemplateColumns=`repeat(${items.length},1fr)`;
+    b.innerHTML=items.map(([k,l,d])=>`<button data-mbtab="${k}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg><span>${l}</span></button>`).join('');
     document.body.appendChild(b);b.querySelectorAll('[data-mbtab]').forEach(x=>x.onclick=()=>{if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}if(typeof rpClose==='function'&&$('#rp.show'))rpClose();go(x.dataset.mbtab);});}
   document.body.classList.toggle('has-ab',!!$('.admin-bar'));
   const a=mbActive();b.querySelectorAll('[data-mbtab]').forEach(x=>{x.classList.toggle('on',x.dataset.mbtab===a);x.setAttribute('aria-current',x.dataset.mbtab===a?'page':'false');});
@@ -3406,6 +3514,7 @@ async function load(){
   if(PREVIEW&&ADMIN){try{ADM=await api('/v1/admin/ai');}catch(e){ADM=null;}}
   if(ME&&ME.ai&&ME.ai.markup!=null)MARKUP=ME.ai.markup;
   if(pm)await pm;
+  await vdLoad();
   if(!location.hash&&!FEAT.engine&&FEAT.ai&&TAB==='engine')TAB='models';
   if(ME&&!DEMO){await chatLoadList();}
   if(DEMO||PREVIEW)adminBar();
