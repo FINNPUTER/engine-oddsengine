@@ -1089,6 +1089,11 @@ html.pwa footer.wrap{display:none}
 .vd-m:hover{transform:translateY(-1px);border-color:var(--line2)}
 .vd-m.on{border-color:var(--g);box-shadow:0 0 0 1px var(--g),0 0 26px rgba(34,240,138,.18)}
 .vd-m b{font-family:var(--disp);font-size:14px;color:var(--tx)}
+.hubseg{display:none}
+@media (max-width:820px){.hubseg{display:flex;gap:6px;margin:6px auto 0;max-width:420px;padding:5px;border-radius:999px;border:1px solid var(--line2);background:rgba(8,14,11,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:76px;z-index:20}
+.hubseg button{all:unset;flex:1;text-align:center;padding:9px 0;border-radius:999px;font-family:var(--disp);font-size:12px;letter-spacing:.04em;color:var(--dim);cursor:pointer}
+.hubseg button.on{background:var(--g);color:#03130a}
+.hubseg.hubchat{position:static;margin:6px auto 8px}}
 .vd-pr{font-style:normal;font-size:12.5px;color:var(--dim);margin-top:4px;padding-top:6px;border-top:1px solid var(--line)}.vd-pr b{font-family:var(--disp);font-size:13px;color:var(--g)}.vd-m span{font-size:12.5px;color:var(--dim)}.vd-m em{font-style:normal;font-family:var(--mono);font-size:11px;color:var(--g)}
 .vd-ta{width:100%;min-height:96px;resize:vertical;box-sizing:border-box;border-radius:16px;border:1px solid var(--line2);background:rgba(0,0,0,.25);color:var(--tx);padding:12px 14px;font:inherit;font-size:15px}
 .vd-ta:focus{outline:none;border-color:var(--g)}
@@ -1630,7 +1635,7 @@ function msgHtml(m){
 
 function chatView(){
   const m=chatModel();const b=(ME&&ME.balance)||{};const low=connected()&&(b.usd||0)<0.01&&!b.team&&!m.free;
-  return `<div class="chat ${CH.drawer?'dopen':''}">
+  return `${hubSeg().replace('class="hubseg"','class="hubseg hubchat"')}<div class="chat ${CH.drawer?'dopen':''}">
    <aside class="cside" id="cSide">
      <button class="btn btn-g cnew" data-cact="new">+ New chat</button>
      <div class="clist" id="cList">${connected()?(CH.list.length?CH.list.map(c=>`<div class="ci ${CH.cur===c.id?'on':''}" data-open="${E(c.id)}"><span class="ct">${E(String(c.title||"New chat").replace(/[*_`#]/g,""))}</span><span class="cw">${ago(c.updated)}</span><button class="cdel" data-cdel="${E(c.id)}" aria-label="Delete chat">×</button></div>`).join(''):'<div class="note" style="padding:10px">Your chats show up here.</div>'):'<div class="note" style="padding:10px">Connect your wallet to save chats.</div>'}</div>
@@ -1972,9 +1977,11 @@ function vdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'
   if(st==='rendering')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Rendering, usually 1 to 5 minutes</div>${pr}</div>`;
   return `<div class="vd-j">${head}<p class="note">That one did not work${j.reason?': '+E(j.reason):''}. Nothing was charged.</p>${pr}</div>`;}
 function vdJobsHtml(){return VID.jobs.length?VID.jobs.map(vdJob).join(''):'<p class="note">Your videos show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
+function hubSeg(){const t=[['models','Models'],['video','Video'],['chat','Chat']].filter(([k])=>tabOpen(k));if(t.length<2)return '';
+  return `<nav class="hubseg" aria-label="AI">${t.map(([k,l])=>`<button data-go="${k}" class="${TAB===k?'on':''}">${l}</button>`).join('')}</nav>`;}
 function videoView(){const m=vdM();const s=vdSecs(m);const foto=!!VID.img;
   const asp=m&&m.aspects.length&&!(foto&&/^(kling|seedance)/.test(m.id))?m.aspects:[];
-  return `<section class="mhero">
+  return `${hubSeg()}<section class="mhero">
     <span class="eyebrow rv"><b>●</b> OddsEngine AI · Video</span>
     <h1 class="rv d1"><span class="shiny">Every top video model.<br>One prompt.</span></h1>
     <p class="lead rv d2">${VID.models.length} video models in one place${VID.models.length?': '+E(VID.models.map(x=>x.name).join(', ')):''}. Type what you want to see or start from a photo. You see the price on every model and the exact price before anything starts.</p>
@@ -2033,7 +2040,7 @@ function vdBind(){
 
 function modelsView(){
   const n=MODELS.filter(x=>x.id!=='oddsengine/auto').length;const c=cheapest();const nw=MODELS.filter(m=>m.new).length;
-  return `<section class="mhero">
+  return `${hubSeg()}<section class="mhero">
     <span class="eyebrow rv"><b>●</b> OddsEngine AI</span>
     <h1 class="rv d1"><span class="shiny">Every model.<br>One chat.</span></h1>
     <p class="lead rv d2">Claude, GPT, Gemini, Grok, DeepSeek and every other model worth using. Pick one with a tap, switch whenever you like.</p>
@@ -3373,15 +3380,17 @@ async function mbLoadC(){try{MB_C=await api('/v1/crypto');}catch(e){MB_C={err:e.
 let MB_CT=null;
 
 /* ---------- bottom bar ---------- */
-function mbActive(){return ['chat','models','ai'].includes(TAB)?'wallet':TAB;}
+let MB_HUB='models';
+function mbActive(){if(['chat','models','video'].includes(TAB)){MB_HUB=TAB;return 'hub';}return TAB==='ai'?'wallet':TAB;}
 function mbBar(){
   let b=$('#mbBar');
   /* 2.65: Video im Handy-Menue, sobald es fuer den Nutzer offen ist */
-  const items=MB_BAR.slice();if(typeof tabOpen==='function'&&tabOpen('video'))items.splice(4,0,['video','Video','M4 6h10a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1M16 10.5l5-3v9l-5-3']);
+  /* 2.65.4: ein Punkt "AI" fuer Models, Video und Chat (oben umschaltbar) */
+  const items=MB_BAR.slice();if(typeof tabOpen==='function'&&tabOpen('models'))items.splice(4,0,['hub','AI','M12 3l1.8 4.6L18.5 9l-4.7 1.6L12 15l-1.8-4.4L5.5 9l4.7-1.4zM18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z']);
   if(b&&+b.dataset.n!==items.length){b.remove();b=null;}
   if(!b){b=document.createElement('nav');b.id='mbBar';b.className='mb-bar';b.setAttribute('aria-label','App');b.dataset.n=items.length;b.style.gridTemplateColumns=`repeat(${items.length},1fr)`;
     b.innerHTML=items.map(([k,l,d])=>`<button data-mbtab="${k}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg><span>${l}</span></button>`).join('');
-    document.body.appendChild(b);b.querySelectorAll('[data-mbtab]').forEach(x=>x.onclick=()=>{if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}if(typeof rpClose==='function'&&$('#rp.show'))rpClose();go(x.dataset.mbtab);});}
+    document.body.appendChild(b);b.querySelectorAll('[data-mbtab]').forEach(x=>x.onclick=()=>{if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}if(typeof rpClose==='function'&&$('#rp.show'))rpClose();const t=x.dataset.mbtab;go(t==='hub'?(['chat','models','video'].includes(TAB)?TAB:(tabOpen(MB_HUB)?MB_HUB:'models')):t);});}
   document.body.classList.toggle('has-ab',!!$('.admin-bar'));
   const a=mbActive();b.querySelectorAll('[data-mbtab]').forEach(x=>{x.classList.toggle('on',x.dataset.mbtab===a);x.setAttribute('aria-current',x.dataset.mbtab===a?'page':'false');});
 }
