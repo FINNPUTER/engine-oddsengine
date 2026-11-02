@@ -45,6 +45,6 @@ $("d").onclick=async()=>{try{
  const c=await f.deploy(odds,tre,fe,fo);const tx=c.deploymentTransaction();
  m("Waiting for the chain… <a href=\""+EXP+"/tx/"+tx.hash+"\" target=\"_blank\">transaction</a>");
  await c.waitForDeployment();const ad=await c.getAddress();
- m("Done. Locker address:<br><b>"+ad+"</b><br><br>Next: in Railway set <code>ODDS_LOCKER="+ad+"</code> on all services, then send the address to Claude for the Blockscout verification.<br><a href=\""+EXP+"/address/"+ad+"\" target=\"_blank\">Open on Blockscout</a>","ok");
+ m("Done. Locker address:<br><b>"+ad+"</b><br><br>Next: copy this address into your admin page, section Locker, press Save address, then turn on the switch Locker.<br><a href=\""+EXP+"/address/"+ad+"\" target=\"_blank\">Open on Blockscout</a>","ok");
 }catch(e){m(e.shortMessage||e.message,"err");$("d").disabled=false;}};
 </script></body></html>
