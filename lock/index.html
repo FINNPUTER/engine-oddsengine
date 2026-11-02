@@ -61,7 +61,7 @@ h1{font-family:var(--disp);font-weight:800;font-size:clamp(32px,7.5vw,64px);line
 .card{position:relative;border:1px solid var(--line);background:var(--card);border-radius:22px;padding:20px;overflow:hidden}
 .card::before{content:"";position:absolute;inset:0;background:radial-gradient(500px circle at var(--mx,50%) var(--my,0%),rgba(34,240,138,.08),transparent 45%);pointer-events:none}
 label{display:block;font-size:12.5px;color:var(--dim);margin:14px 0 6px}
-input[type=text],input[type=number],input[type=datetime-local]{width:100%;min-height:46px;padding:11px 14px;border-radius:14px;border:1px solid var(--line2);background:rgba(0,0,0,.35);color:var(--tx);font-family:var(--mono);font-size:14px;outline:none}
+input[type=text],input[type=number],input[type=date]{width:100%;min-height:46px;padding:11px 14px;border-radius:14px;border:1px solid var(--line2);background:rgba(0,0,0,.35);color:var(--tx);font-family:var(--mono);font-size:14px;outline:none}
 input:focus{border-color:var(--g)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .chip{border:1px solid var(--line2);background:transparent;color:var(--tx);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer;font-family:var(--body)}
@@ -130,8 +130,8 @@ h2{font-family:var(--disp);font-size:20px;margin:44px 0 14px}
 .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));z-index:60;transform:translate(-50%,-20px);opacity:0;padding:12px 16px;border-radius:14px;border:1px solid var(--line2);background:rgba(16,14,26,.96);color:var(--tx);font-size:14px;max-width:calc(100vw - 32px);transition:all .25s;pointer-events:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .toast.err{border-color:rgba(255,93,108,.5)}
-input[type=text],input[type=number],input[type=datetime-local]{font-size:16px}
-input[type=datetime-local]{color-scheme:dark}
+input[type=text],input[type=number],input[type=date]{font-size:16px}
+input[type=date]{color-scheme:dark}
 input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(80deg) saturate(4);cursor:pointer}
 @media (max-width:620px){
   .mdl{align-items:flex-end;padding:0}
@@ -192,8 +192,8 @@ input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(8
     </div>
 
     <div class="two">
-      <div><label for="dStart" id="lStart">Unlock date</label><input type="datetime-local" id="dStart"></div>
-      <div id="endBox" class="hidden"><label for="dEnd">Fully unlocked on</label><input type="datetime-local" id="dEnd"></div>
+      <div><label for="dStart" id="lStart">Unlock date</label><input type="date" id="dStart"></div>
+      <div id="endBox" class="hidden"><label for="dEnd">Fully unlocked on</label><input type="date" id="dEnd"></div>
     </div>
     <div class="row" style="margin-top:8px" id="quick">
       <button class="chip" data-d="30">30 days</button><button class="chip" data-d="90">90 days</button><button class="chip" data-d="180">6 months</button><button class="chip" data-d="365">1 year</button>
@@ -259,9 +259,10 @@ let kind='lock', payOdds=false;
 
 const short=a=>a?a.slice(0,6)+'…'+a.slice(-4):'';
 const fmt=(v,d)=>{const n=Number(ethers.formatUnits(v,d));return n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toLocaleString('en',{maximumFractionDigits:4});};
-const day=ts=>new Date(Number(ts)*1000).toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-const toLocal=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,16);};
-const ts=v=>v?Math.floor(new Date(v).getTime()/1000):0;
+const day=ts=>new Date(Number(ts)*1000).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+// Seit 2.70.5 nur Tage: Locks enden um 00:00 UTC des gewaehlten Tages, angezeigt wird nie eine Uhrzeit.
+const toLocal=d=>d.toISOString().slice(0,10);
+const ts=v=>v?Math.floor(Date.parse(String(v).slice(0,10)+'T00:00:00Z')/1000):0;
 const msg=(id,t,c)=>{const m=$(id);m.className='msg'+(c?' '+c:'');m.innerHTML=t;};
 const txl=h=>'<a href="'+EXP+'/tx/'+h+'" target="_blank" rel="noopener">view transaction</a>';
 const errText=e=>{const s=(e&&(e.shortMessage||e.reason||e.message))||String(e);return s.includes('user rejected')||s.includes('denied')?'You cancelled it in your wallet.':s.slice(0,180);};
@@ -296,7 +297,8 @@ function pickWallet(){
     }
     if(window.ethereum)return res(window.ethereum);
     const u=location.href, h=location.host+location.pathname+location.search;
-    const fav=d=>'<img src="https://www.google.com/s2/favicons?domain='+d+'&sz=64" alt="" onerror="this.remove()">';
+    const LOGO={"metamask.io": "https://metamask.io/favicons/default/apple-touch-icon.png", "phantom.app": "https://phantom.com/_web_platform_assets/apple-touch-icon.png", "coinbase.com": "https://wallet.coinbase.com/static-open-graph/v1/favicon.png", "rabby.io": "https://raw.githubusercontent.com/RabbyHub/Rabby/develop/_raw/images/icon-128.png"};
+    const fav=d=>'<img src="'+(LOGO[d]||'')+'" alt="" onerror="this.onerror=null;this.src=\'https://www.google.com/s2/favicons?domain='+d+'&sz=64\'">';
     openM('<h3 id="mdlT">'+(isMob()?'Open this page in your wallet':'No wallet found')+'</h3><p>'+(isMob()?'Your browser has no wallet inside. Open the locker in your wallet app, then tap Connect again.':'Install a wallet extension, then reload this page.')+'</p><div class="acts">'+
       (isMob()?'<a class="wl" href="https://metamask.app.link/dapp/'+E(h)+'">'+fav('metamask.io')+'MetaMask<i>→</i></a>'+
         '<a class="wl" href="https://phantom.app/ul/browse/'+encodeURIComponent(u)+'?ref='+encodeURIComponent(location.origin)+'">'+fav('phantom.app')+'Phantom<i>→</i></a>'+
@@ -433,7 +435,7 @@ async function runLock(p){
       '<div class="linkbox"><input type="text" readonly value="'+E(link)+'" id="sLink"><button class="btn" id="sCopy">Copy</button></div>'+
       '<div class="acts"><a class="btn btn-g" target="_blank" rel="noopener" href="https://x.com/intent/post?text='+encodeURIComponent(xt)+'">Share on X</a><a class="btn" target="_blank" rel="noopener" href="'+EXP+'/tx/'+tx.hash+'">View transaction</a><button class="btn" data-close>Done</button></div>');
     $('sCopy').onclick=()=>copy(link);
-    $('amt').value='';msg('mLock','');loadToken();mine();
+    $('amt').value='';msg('mLock','');loadToken();mine();try{countUp($('sLocks'),Number(await L.totalLocks()));}catch(e){}
   }catch(e){
     st.forEach((x,k)=>{x[1]=k<i?'ok':k===i?'err':'';});
     openM('<h3 id="mdlT">Not locked</h3>'+steps(st)+'<p>'+E(errText(e))+'</p><div class="acts"><button class="btn btn-g" id="rTry">Try again</button><button class="btn" data-close>Close</button></div>');
@@ -523,7 +525,7 @@ document.addEventListener('click',async ev=>{
       else txFlow('Withdraw','Withdraw '+w.dataset.amt+' $'+w.dataset.sym,()=>c.withdraw(id),'Withdrawn');};}
   if(x){const id=x.dataset.x,s=+x.dataset.s,e=+x.dataset.e;
     openM('<h3 id="mdlT">Extend lock #'+E(id)+'</h3><p>Right now: '+(s===e?'unlocks '+day(e):'unlocks from '+day(s)+' to '+day(e))+'. The new date can only be later.</p>'+
-      '<label for="xD" style="display:block;font-size:12.5px;color:var(--dim);margin:12px 0 6px">New '+(s===e?'unlock date':'end date')+'</label><input type="datetime-local" id="xD" value="'+toLocal(new Date((e+30*86400)*1000))+'">'+
+      '<label for="xD" style="display:block;font-size:12.5px;color:var(--dim);margin:12px 0 6px">New '+(s===e?'unlock date':'end date')+'</label><input type="date" id="xD" value="'+toLocal(new Date((e+30*86400)*1000))+'">'+
       '<div class="row" style="margin-top:8px"><button class="chip" data-q="30">+30 days</button><button class="chip" data-q="90">+90 days</button><button class="chip" data-q="365">+1 year</button></div>'+
       '<div class="acts"><button class="btn btn-g" id="xGo">Extend</button><button class="btn" data-close>Cancel</button></div>');
     $('xD').dataset.base=e;
