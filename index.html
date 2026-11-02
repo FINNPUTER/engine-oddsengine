@@ -1135,6 +1135,7 @@ html.pwa footer.wrap{display:none}
 @keyframes gtaP{50%{opacity:.25}}
 .gta-pill{display:none;align-items:center;padding:6px 11px;border-radius:999px;font:800 10.5px/1 Unbounded,sans-serif;letter-spacing:.04em;text-decoration:none;color:#fff;background:linear-gradient(100deg,#ff4fa3,#26e0d0);box-shadow:0 0 16px rgba(255,79,163,.35);white-space:nowrap}
 @media (max-width:820px),(pointer:coarse) and (max-height:600px){.gta-pill{display:inline-flex;margin-left:auto;margin-right:8px}}
+.lock-tab{background:linear-gradient(100deg,#22f08a,#26e0d0)!important;-webkit-background-clip:text!important;background-clip:text!important}.lock-tab::after{background:#22f08a!important;box-shadow:0 0 8px #22f08a!important}
 </style>
 </head>
 <body>
@@ -1150,6 +1151,7 @@ html.pwa footer.wrap{display:none}
     <button role="tab" data-tab="video">Video</button>
     <button role="tab" data-tab="ai">Account</button>
     <a class="gta-tab" href="/gta/">GTA VI</a>
+    <a class="gta-tab lock-tab" href="/lock/" id="lockTab" style="display:none">Locker</a>
   </nav>
   <a class="gta-pill" href="/gta/" aria-label="GTA VI Tracker">GTA VI</a>
   <button class="btn btn-g btn-sm" id="walletBtn">Connect</button>
@@ -3564,7 +3566,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);if(d.admin)PREVIEW=true;}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
@@ -3619,8 +3621,8 @@ function yeDo(){
       <div class="ye-act">${x.href?`<a class="btn btn-g btn-sm" href="${E(x.href)}">${E(x.cta||'Open')}</a>`:`<a class="btn btn-g btn-sm" href="https://t.me/${E(YE_BOT)}?start=m_${x.k}" target="_blank" rel="noopener">Try it in Telegram</a>`}</div></div>`;};
   return `<section class="ye-do"><div class="ye-dohead rv"><span class="eyebrow"><b>●</b> What it takes off your plate</span>
     <h2><span class="shiny">Stop doing it by hand.</span></h2><p>Safer and simpler in crypto. Watch what it does, or try it right away in Telegram.</p></div>
-    <div class="ye-grid" id="yeGrid">${YE_DO.filter(x=>!x.feat||FEAT[x.feat]).map(card).join('')}</div>
-    <div class="ye-swipe" id="yeDots">${YE_DO.filter(x=>!x.feat||FEAT[x.feat]).map((x,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div></section>`;
+    <div class="ye-grid" id="yeGrid">${YE_DO.filter(x=>!x.feat||FEAT[x.feat]||(x.feat==='locker'&&PREVIEW&&ADMIN)).map(card).join('')}</div>
+    <div class="ye-swipe" id="yeDots">${YE_DO.filter(x=>!x.feat||FEAT[x.feat]||(x.feat==='locker'&&PREVIEW&&ADMIN)).map((x,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div></section>`;
 }
 let YE_IO=null;
 function yeVids(){

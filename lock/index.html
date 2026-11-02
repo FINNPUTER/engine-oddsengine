@@ -90,6 +90,57 @@ h2{font-family:var(--disp);font-size:20px;margin:44px 0 14px}
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .6s,transform .6s}
 .reveal.in{opacity:1;transform:none}
 @media (max-width:620px){.two{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}.stat span{font-size:11px}}
+
+/* Fenster im eigenen Design: unten als Sheet am Handy, mittig am Desktop */
+.mdl{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.mdl.on{opacity:1;pointer-events:auto}
+.mdl-bg{position:absolute;inset:0;background:rgba(3,2,8,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.mdl-box{position:relative;width:100%;max-width:440px;max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--line2);border-radius:24px;padding:22px 20px 20px;background:linear-gradient(180deg,rgba(22,20,34,.97),rgba(10,9,18,.97));box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(34,240,138,.06) inset;transform:translateY(14px) scale(.98);transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.mdl.on .mdl-box{transform:none}
+.mdl-box::before{content:"";position:absolute;inset:-1px;border-radius:24px;padding:1px;background:linear-gradient(135deg,rgba(34,240,138,.5),transparent 40%,rgba(38,224,208,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.mdl-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line2);background:var(--card);color:var(--tx);font-size:18px;cursor:pointer;line-height:1}
+.mdl h3{font-family:var(--disp);font-size:17px;margin:2px 44px 6px 0;line-height:1.25}
+.mdl p{color:var(--dim);font-size:14.5px;line-height:1.55;margin:8px 0}
+.mdl .acts{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.mdl .acts .btn{width:100%}
+.wl{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;padding:10px 14px;border-radius:16px;border:1px solid var(--line2);background:var(--card);color:var(--tx);font-family:var(--body);font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:border-color .2s,transform .15s}
+.wl:hover{border-color:var(--g);transform:translateY(-1px)}
+.wl img{width:30px;height:30px;border-radius:8px}
+.wl i{margin-left:auto;font-style:normal;color:var(--dim)}
+.sumlist{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:8px}
+.sumlist li{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid var(--line)}
+.sumlist li span{color:var(--dim)}
+.sumlist li b{text-align:right;overflow-wrap:anywhere}
+.warn{margin-top:12px;padding:12px;border-radius:14px;border:1px solid rgba(255,181,71,.35);background:rgba(255,181,71,.08);color:#ffd9a0;font-size:13.5px;line-height:1.5}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:14px;color:var(--tx);cursor:pointer}
+.chk input{appearance:none;-webkit-appearance:none;width:22px;height:22px;flex:none;margin:0;border-radius:7px;border:1.5px solid var(--line2);background:rgba(0,0,0,.35);display:grid;place-items:center;cursor:pointer;transition:all .15s}
+.chk input:checked{background:var(--g);border-color:var(--g);box-shadow:0 0 14px rgba(34,240,138,.4)}
+.chk input:checked::after{content:'';width:6px;height:11px;border:solid #02130a;border-width:0 2.5px 2.5px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.steps{display:grid;gap:10px;margin-top:14px}
+.step{display:flex;align-items:center;gap:12px;font-size:14.5px;color:var(--dim)}
+.step i{width:26px;height:26px;border-radius:50%;border:2px solid var(--line2);flex:none;display:grid;place-items:center;font-style:normal;font-size:13px}
+.step.run{color:var(--tx)}.step.run i{border-color:var(--g);border-top-color:transparent;animation:spin .8s linear infinite}
+.step.ok{color:var(--tx)}.step.ok i{background:var(--g);border-color:var(--g);color:#02130a}
+.step.err i{border-color:var(--red);color:var(--red)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.big-ok{width:72px;height:72px;margin:6px auto 10px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(34,240,138,.35),rgba(34,240,138,.05) 70%);box-shadow:0 0 40px rgba(34,240,138,.35)}
+.big-ok b{width:46px;height:46px;border-radius:50%;background:var(--g);color:#02130a;display:grid;place-items:center;font-size:24px}
+.linkbox{display:flex;gap:8px;margin-top:12px}
+.linkbox input{flex:1;min-width:0;font-size:13px!important}
+.toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));z-index:60;transform:translate(-50%,-20px);opacity:0;padding:12px 16px;border-radius:14px;border:1px solid var(--line2);background:rgba(16,14,26,.96);color:var(--tx);font-size:14px;max-width:calc(100vw - 32px);transition:all .25s;pointer-events:none;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.err{border-color:rgba(255,93,108,.5)}
+input[type=text],input[type=number],input[type=datetime-local]{font-size:16px}
+input[type=datetime-local]{color-scheme:dark}
+input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(80deg) saturate(4);cursor:pointer}
+@media (max-width:620px){
+  .mdl{align-items:flex-end;padding:0}
+  .mdl-box{max-width:none;border-radius:24px 24px 0 0;padding:22px 16px calc(18px + env(safe-area-inset-bottom));max-height:88vh;transform:translateY(40px)}
+  .mdl-box::before{border-radius:24px 24px 0 0}
+  .row .btn{flex:1}
+  .nav .btn{min-height:38px;padding:8px 12px;font-size:10.5px}
+  .brand{font-size:10.5px}
+}
 </style>
 </head>
 <body>
@@ -159,8 +210,8 @@ h2{font-family:var(--disp);font-size:20px;margin:44px 0 14px}
 
     <div class="sum" id="sum">Enter a token to see the summary.</div>
     <div class="row" style="margin-top:14px">
-      <button class="btn" id="bApprove" disabled>1. Approve</button>
-      <button class="btn btn-g" id="bLock" disabled>2. Lock</button>
+      <button class="btn btn-g" id="bLock" disabled style="flex:1">Review and lock</button>
+      <button class="btn hidden" id="bApprove" disabled>Approve</button>
     </div>
     <div class="msg" id="mLock"></div>
   </section>
@@ -187,14 +238,16 @@ h2{font-family:var(--disp);font-size:20px;margin:44px 0 14px}
   <p class="note">The only thing the admin can change is the fee for new locks, with a hard cap in the contract. Do not lock tokens whose balances change by themselves (rebasing tokens). Tokens sent to the contract without using this page are not recorded and cannot be recovered by anyone. <span id="cLink"></span></p>
 </div>
 
+<div class="mdl" id="mdl" aria-hidden="true"><div class="mdl-bg" data-close></div><div class="mdl-box" role="dialog" aria-modal="true" aria-labelledby="mdlT"><button class="mdl-x" data-close aria-label="Close">×</button><div id="mdlIn"></div></div></div>
+<div class="toast" id="toast" role="status"></div>
 <script>
 const API='https://api.oddsengine.live';
 const RPC='https://rpc.mainnet.chain.robinhood.com', EXP='https://robinhoodchain.blockscout.com', CID=4663;
-const ABI=['function lock(address,uint256,uint64,uint64,address,bool) payable returns (uint256)','function withdraw(uint256)','function extend(uint256,uint64,uint64)',
+const ABI=['function lock(address,uint256,uint64,uint64,address,bool,uint256) payable returns (uint256)','function withdraw(uint256)','function withdrawAmount(uint256,uint256)','function extend(uint256,uint64,uint64)',
  'function feeEth() view returns (uint256)','function feeOdds() view returns (uint256)','function ODDS() view returns (address)','function totalLocks() view returns (uint256)',
  'function getLock(uint256) view returns (tuple(address owner,uint64 unlockStart,uint64 unlockEnd,address token,uint256 amount,uint256 claimed))',
  'function claimable(uint256) view returns (uint256)','function stillLocked(uint256) view returns (uint256)',
- 'function locksByToken(address) view returns (uint256[])','function locksByOwner(address) view returns (uint256[])',
+ 'function transferLock(uint256,address)','function locksByToken(address,uint256,uint256) view returns (uint256[])','function locksByOwner(address,uint256,uint256) view returns (uint256[])','function tokenLockCount(address) view returns (uint256)','function ownerLockCount(address) view returns (uint256)',
  'event Locked(uint256 indexed id,address indexed token,address indexed owner,uint256 amount,uint64 unlockStart,uint64 unlockEnd,bool feeInOdds)'];
 const ERC=['function symbol() view returns (string)','function name() view returns (string)','function decimals() view returns (uint8)','function balanceOf(address) view returns (uint256)','function allowance(address,address) view returns (uint256)','function approve(address,uint256) returns (bool)','function totalSupply() view returns (uint256)'];
 const $=id=>document.getElementById(id);
@@ -213,14 +266,56 @@ const msg=(id,t,c)=>{const m=$(id);m.className='msg'+(c?' '+c:'');m.innerHTML=t;
 const txl=h=>'<a href="'+EXP+'/tx/'+h+'" target="_blank" rel="noopener">view transaction</a>';
 const errText=e=>{const s=(e&&(e.shortMessage||e.reason||e.message))||String(e);return s.includes('user rejected')||s.includes('denied')?'You cancelled it in your wallet.':s.slice(0,180);};
 
+
+// ── Fenster und Hinweise im eigenen Design ──
+let MDL_CB=null;
+function openM(html,onClose){$('mdlIn').innerHTML=html;MDL_CB=onClose||null;const m=$('mdl');m.classList.add('on');m.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>{const f=m.querySelector('.mdl-box button:not(.mdl-x),.mdl-box a,.mdl-box input');if(f)f.focus({preventScroll:true});},60);}
+function closeM(){const m=$('mdl');if(!m.classList.contains('on'))return;m.classList.remove('on');m.setAttribute('aria-hidden','true');document.body.style.overflow='';const cb=MDL_CB;MDL_CB=null;if(cb)cb();}
+document.addEventListener('click',e=>{if(e.target.closest('[data-close]'))closeM();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+let TT=null;function toast(t,err){const x=$('toast');x.textContent=t;x.className='toast on'+(err?' err':'');clearTimeout(TT);TT=setTimeout(()=>x.className='toast',3200);}
+function steps(list){return '<div class="steps">'+list.map(([t,st])=>'<div class="step '+(st||'')+'"><i>'+(st==='ok'?'✓':st==='err'?'!':'')+'</i>'+E(t)+'</div>').join('')+'</div>';}
+function progress(title,list,note){openM('<h3 id="mdlT">'+E(title)+'</h3>'+steps(list)+'<p id="pNote">'+(note||'Confirm in your wallet. This window updates by itself.')+'</p>');}
+async function copy(t){try{await navigator.clipboard.writeText(t);toast('Copied');}catch(e){toast('Copy failed, select it by hand',true);}}
+
+// ── Wallets (EIP-6963) ──
+const WAL=[];
+addEventListener('eip6963:announceProvider',e=>{const d=e.detail;if(d&&d.info&&d.provider&&!WAL.some(w=>w.info.uuid===d.info.uuid))WAL.push(d);});
+try{dispatchEvent(new Event('eip6963:requestProvider'));}catch(e){}
+let EP=null;
+const isMob=()=>/iPhone|iPad|Android/i.test(navigator.userAgent);
+function pickWallet(){
+  return new Promise(res=>{
+    if(EP)return res(EP);
+    if(WAL.length===1)return res(WAL[0].provider);
+    if(WAL.length>1){
+      openM('<h3 id="mdlT">Choose your wallet</h3><p>Pick the one that holds the tokens you want to lock.</p><div class="acts">'+
+        WAL.map((w,i)=>'<button class="wl" data-wi="'+i+'"><img src="'+E(w.info.icon)+'" alt="">'+E(w.info.name)+'<i>→</i></button>').join('')+'</div>',()=>res(null));
+      document.querySelectorAll('[data-wi]').forEach(b=>b.onclick=()=>{const p=WAL[+b.dataset.wi].provider;MDL_CB=null;closeM();res(p);});
+      return;
+    }
+    if(window.ethereum)return res(window.ethereum);
+    const u=location.href, h=location.host+location.pathname+location.search;
+    const fav=d=>'<img src="https://www.google.com/s2/favicons?domain='+d+'&sz=64" alt="" onerror="this.remove()">';
+    openM('<h3 id="mdlT">'+(isMob()?'Open this page in your wallet':'No wallet found')+'</h3><p>'+(isMob()?'Your browser has no wallet inside. Open the locker in your wallet app, then tap Connect again.':'Install a wallet extension, then reload this page.')+'</p><div class="acts">'+
+      (isMob()?'<a class="wl" href="https://metamask.app.link/dapp/'+E(h)+'">'+fav('metamask.io')+'MetaMask<i>→</i></a>'+
+        '<a class="wl" href="https://phantom.app/ul/browse/'+encodeURIComponent(u)+'?ref='+encodeURIComponent(location.origin)+'">'+fav('phantom.app')+'Phantom<i>→</i></a>'+
+        '<a class="wl" href="https://go.cb-w.com/dapp?cb_url='+encodeURIComponent(u)+'">'+fav('coinbase.com')+'Coinbase Wallet<i>→</i></a>'
+      :'<a class="wl" href="https://rabby.io" target="_blank" rel="noopener">'+fav('rabby.io')+'Rabby<i>→</i></a><a class="wl" href="https://metamask.io/download" target="_blank" rel="noopener">'+fav('metamask.io')+'MetaMask<i>→</i></a>')+
+      '</div>',()=>res(null));
+  });
+}
+
 function countUp(el,to){const t0=performance.now();const f=t=>{const p=Math.min(1,(t-t0)/900);el.textContent=Math.round(to*(1-Math.pow(1-p,3))).toLocaleString('en');if(p<1)requestAnimationFrame(f);};requestAnimationFrame(f);}
 
 async function init(){
-  try{const r=await fetch(API+'/v1/locker');const d=await r.json();LOCKER=d.address;}catch(e){}
+  let ADM='';try{ADM=localStorage.getItem('oe_admin')||'';}catch(e){}
+  let PRV=false;try{const r=await fetch(API+'/v1/locker',{headers:ADM?{'X-OddsEngine-Admin':ADM}:{}});const d=await r.json();LOCKER=d.address;PRV=!!d.preview;}catch(e){}
   const q=new URLSearchParams(location.search);
-  if(!LOCKER&&q.get('locker'))LOCKER=q.get('locker');
+  // Seit 2.70.4 keine Adresse aus dem Link mehr: ein fremder Link koennte sonst auf einen falschen Vertrag zeigen.
   if(!LOCKER||!ethers.isAddress(LOCKER)){$('notLive').classList.remove('hidden');['bApprove','bLock','bFind'].forEach(i=>$(i).disabled=true);$('sEth').textContent='soon';$('sOdds').textContent='soon';return;}
   L=new ethers.Contract(LOCKER,ABI,ro);
+  if(PRV){const b=document.createElement('div');b.className='card';b.style.cssText='margin:14px 0;border-color:var(--amber);text-align:center';b.innerHTML='<b style="font-family:var(--disp);color:var(--amber)">Admin preview</b><p class="meta" style="margin:6px 0 0">Only you see the locker working. Everyone else sees "goes live shortly" until you turn on the switch Locker.</p>';document.querySelector('.tabs').before(b);}
   $('cLink').innerHTML='Contract: <a class="mono" href="'+EXP+'/address/'+LOCKER+'" target="_blank" rel="noopener">'+short(LOCKER)+'</a>';
   try{
     [feeE,feeO,ODDS]=await Promise.all([L.feeEth(),L.feeOdds(),L.ODDS()]);
@@ -235,19 +330,20 @@ async function init(){
 }
 
 async function connect(){
-  if(!window.ethereum){msg('mLock','No wallet found. Open this page in the browser of your wallet app, or install a wallet like MetaMask or Rabby.','err');showTab('lock');return;}
+  if(me){openM('<h3 id="mdlT">Connected</h3><p class="mono">'+E(me)+'</p><div class="acts"><button class="btn" id="mSwitch">Use another wallet</button><button class="btn" data-close>Close</button></div>');$('mSwitch').onclick=()=>{EP=null;me=null;signer=null;$('connect').textContent='Connect wallet';closeM();connect();};return;}
+  const p=await pickWallet();if(!p)return;
   try{
-    await window.ethereum.request({method:'eth_requestAccounts'});
-    try{await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x'+CID.toString(16)}]});}
-    catch(e){if(e.code===4902||String(e.message).includes('Unrecognized')){await window.ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:'0x'+CID.toString(16),chainName:'Robinhood Chain',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:[RPC],blockExplorerUrls:[EXP]}]});}else throw e;}
-    const bp=new ethers.BrowserProvider(window.ethereum);signer=await bp.getSigner();me=await signer.getAddress();
-    $('connect').textContent=short(me);$('own').placeholder=me;
-    if(T)await loadToken();
+    await p.request({method:'eth_requestAccounts'});
+    try{await p.request({method:'wallet_switchEthereumChain',params:[{chainId:'0x'+CID.toString(16)}]});}
+    catch(e){if(e.code===4902||e.code===-32603||String(e.message).match(/Unrecognized|not added|unknown chain/i)){await p.request({method:'wallet_addEthereumChain',params:[{chainId:'0x'+CID.toString(16),chainName:'Robinhood Chain',nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:[RPC],blockExplorerUrls:[EXP]}]});}else if(e.code===4001)throw e;}
+    EP=p;
+    const bp=new ethers.BrowserProvider(p);signer=await bp.getSigner();me=await signer.getAddress();
+    $('connect').textContent=short(me);$('own').placeholder=me;toast('Wallet connected');
+    if(p.on&&!p._oeHook){p._oeHook=1;p.on('accountsChanged',()=>{me=null;signer=null;connect();});}
+    if(T)await loadToken();else summary();
     mine();
-  }catch(e){msg('mLock',errText(e),'err');}
+  }catch(e){toast(errText(e),true);}
 }
-if(window.ethereum&&window.ethereum.on){window.ethereum.on('accountsChanged',()=>{if(me)connect();});window.ethereum.on('chainChanged',()=>{if(me)connect();});}
-
 async function loadToken(){
   const a=$('tAddr').value.trim();T=null;$('tInfo').style.display='none';
   if(!ethers.isAddress(a)){summary();return;}
@@ -287,41 +383,63 @@ async function summary(){
     (kind==='lock'?'All of it unlocks on <b>'+day(p.s)+'</b>.':'Nothing unlocks before <b>'+day(p.s)+'</b>, then it unlocks bit by bit until <b>'+day(p.e)+'</b>.')+
     ' Only <b class="mono">'+short(p.own)+'</b> can withdraw. Fee: <b>'+(payOdds?fmt(feeO,18)+' $ODDS, burned':ethers.formatEther(feeE)+' ETH')+'</b>.';
   try{
-    const need=[[T.addr,p.amt]];if(payOdds&&feeO>0n){if(T.addr.toLowerCase()===String(ODDS).toLowerCase())need[0][1]+=feeO;else need.push([ODDS,feeO]);}
-    let ok=true;for(const [a,v] of need){const al=await new ethers.Contract(a,ERC,ro).allowance(me,LOCKER);if(al<v)ok=false;}
     if(payOdds){const ob=await new ethers.Contract(ODDS,ERC,ro).balanceOf(me);const tot=T.addr.toLowerCase()===String(ODDS).toLowerCase()?feeO+p.amt:feeO;if(ob<tot){sum.innerHTML+=' <span style="color:var(--red)">Not enough $ODDS for the fee.</span>';return;}}
-    $('bApprove').disabled=ok;$('bLock').disabled=!ok;
-    $('bApprove').textContent=ok?'1. Approved':'1. Approve';
+    $('bLock').disabled=false;
   }catch(e){}
 }
 
-async function approve(){
+function needList(p){const need=[[T.addr,p.amt,'$'+T.sym]];if(payOdds&&feeO>0n){if(T.addr.toLowerCase()===String(ODDS).toLowerCase())need[0][1]+=feeO;else need.push([ODDS,feeO,'$ODDS fee']);}return need;}
+async function approve(){return confirmLock();}
+async function doLock(){return confirmLock();}
+
+function confirmLock(){
   const p=params();if(!p)return;
-  try{
-    $('bApprove').disabled=true;
-    const need=[[T.addr,p.amt]];if(payOdds&&feeO>0n){if(T.addr.toLowerCase()===String(ODDS).toLowerCase())need[0][1]+=feeO;else need.push([ODDS,feeO]);}
-    for(const [a,v] of need){
-      const c=new ethers.Contract(a,ERC,signer);const al=await c.allowance(me,LOCKER);if(al>=v)continue;
-      msg('mLock','Confirm the approval in your wallet…');const tx=await c.approve(LOCKER,v);msg('mLock','Waiting for the chain… '+txl(tx.hash));await tx.wait();
-    }
-    msg('mLock','Approved. Now lock.','ok');
-  }catch(e){msg('mLock',errText(e),'err');}
-  summary();
+  const pct=T.sup>0n?Number(p.amt*1000000n/T.sup)/10000:0;
+  openM('<h3 id="mdlT">Check your lock</h3><ul class="sumlist">'+
+    '<li><span>Token</span><b>'+fmt(p.amt,T.dec)+' $'+E(T.sym)+' · '+pct.toFixed(2)+'%</b></li>'+
+    '<li><span>'+(kind==='lock'?'Unlocks':'Unlocks from')+'</span><b>'+day(p.s)+'</b></li>'+
+    (kind==='vest'?'<li><span>Fully unlocked</span><b>'+day(p.e)+'</b></li>':'')+
+    '<li><span>Who can withdraw</span><b class="mono">'+short(p.own)+(p.own.toLowerCase()===String(me).toLowerCase()?' (you)':'')+'</b></li>'+
+    '<li><span>Fee</span><b>'+(payOdds?fmt(feeO,18)+' $ODDS, burned':ethers.formatEther(feeE)+' ETH')+'</b></li></ul>'+
+    '<div class="warn">Nobody can take these tokens out before the date. Not you, not us. You can only move the date later, never earlier.</div>'+
+    '<label class="chk"><input type="checkbox" id="cOk"> I understand and want to lock.</label>'+
+    '<div class="acts"><button class="btn btn-g" id="cGo" disabled>Lock now</button><button class="btn" data-close>Back</button></div>');
+  $('cOk').onchange=()=>{$('cGo').disabled=!$('cOk').checked;};
+  $('cGo').onclick=()=>runLock(p);
 }
 
-async function doLock(){
-  const p=params();if(!p)return;
+async function runLock(p){
+  const need=needList(p);
+  const st=need.map(n=>['Approve '+n[2],'']).concat([['Lock in the contract','']]);
+  const draw=(i,state,note)=>{st.forEach((x,k)=>{x[1]=k<i?'ok':k===i?state:'';});progress('Locking',st,note);};
+  let i=0;
   try{
-    $('bLock').disabled=true;msg('mLock','Confirm the lock in your wallet…');
+    for(const [a,v] of need){
+      draw(i,'run');
+      const c=new ethers.Contract(a,ERC,signer);
+      if((await c.allowance(me,LOCKER))<v){const tx=await c.approve(LOCKER,v);draw(i,'run','Waiting for the chain… '+txl(tx.hash));await tx.wait();}
+      i++;
+    }
+    draw(i,'run');
     const c=new ethers.Contract(LOCKER,ABI,signer);
-    const tx=await c.lock(T.addr,p.amt,p.s,p.e,p.own,payOdds,{value:payOdds?0n:feeE});
-    msg('mLock','Waiting for the chain… '+txl(tx.hash));
+    const tx=await c.lock(T.addr,p.amt,p.s,p.e,p.own,payOdds,feeO,{value:payOdds?0n:feeE});
+    draw(i,'run','Waiting for the chain… '+txl(tx.hash));
     const rc=await tx.wait();
     let id=null;for(const lg of rc.logs){try{const ev=c.interface.parseLog(lg);if(ev&&ev.name==='Locked')id=ev.args.id.toString();}catch(e){}}
     const link=location.origin+'/lock/?token='+T.addr;
-    msg('mLock','Locked'+(id!==null?' (lock #'+id+')':'')+'. '+txl(tx.hash)+'. Share the proof: <a href="'+link+'">'+E(link.replace('https://',''))+'</a>','ok');
-    $('amt').value='';loadToken();mine();
-  }catch(e){msg('mLock',errText(e),'err');summary();}
+    const pct=T.sup>0n?(Number(p.amt*1000000n/T.sup)/10000).toFixed(2):'?';
+    const xt='I just locked '+pct+'% of $'+T.sym+' '+(kind==='lock'?'until '+new Date(p.s*1000).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'with vesting until '+new Date(p.e*1000).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}))+' on Robinhood Chain. Nobody can move it early, not even me.\n\nProof: '+link;
+    openM('<div class="big-ok"><b>✓</b></div><h3 id="mdlT" style="text-align:center;margin-right:0">Locked'+(id!==null?' · #'+id:'')+'</h3><p style="text-align:center">Your proof is live. Share the link, anyone can check it.</p>'+
+      '<div class="linkbox"><input type="text" readonly value="'+E(link)+'" id="sLink"><button class="btn" id="sCopy">Copy</button></div>'+
+      '<div class="acts"><a class="btn btn-g" target="_blank" rel="noopener" href="https://x.com/intent/post?text='+encodeURIComponent(xt)+'">Share on X</a><a class="btn" target="_blank" rel="noopener" href="'+EXP+'/tx/'+tx.hash+'">View transaction</a><button class="btn" data-close>Done</button></div>');
+    $('sCopy').onclick=()=>copy(link);
+    $('amt').value='';msg('mLock','');loadToken();mine();
+  }catch(e){
+    st.forEach((x,k)=>{x[1]=k<i?'ok':k===i?'err':'';});
+    openM('<h3 id="mdlT">Not locked</h3>'+steps(st)+'<p>'+E(errText(e))+'</p><div class="acts"><button class="btn btn-g" id="rTry">Try again</button><button class="btn" data-close>Close</button></div>');
+    $('rTry').onclick=()=>runLock(p);
+    summary();
+  }
 }
 
 async function lockCard(id,l,dec,sym,owner){
@@ -335,12 +453,14 @@ async function lockCard(id,l,dec,sym,owner){
     '<div class="bar"><i style="width:'+pr+'%"></i></div>'+
     '<div class="meta">'+fmt(locked,dec)+' still locked · '+(vest?'unlocks bit by bit from '+day(s)+' to '+day(e):'unlocks '+day(s))+'<br>Owner <a class="mono" href="'+EXP+'/address/'+l.owner+'" target="_blank" rel="noopener">'+short(l.owner)+'</a>'+(l.claimed>0n?' · '+fmt(l.claimed,dec)+' withdrawn':'')+'</div>';
   if(owner){
-    h+='<div class="row" style="margin-top:10px">'+(cl>0n?'<button class="btn btn-g btn-s" data-w="'+id+'">Withdraw '+fmt(cl,dec)+'</button>':'')+
-      (left>0n?'<input type="datetime-local" id="x'+id+'" style="max-width:220px;min-height:34px;font-size:12px"><button class="btn btn-s" data-x="'+id+'" data-s="'+s+'" data-e="'+e+'">Extend</button>':'')+'</div><div class="msg" id="m'+id+'"></div>';
+    h+='<div class="row" style="margin-top:10px">'+(cl>0n?'<button class="btn btn-g btn-s" data-w="'+id+'" data-amt="'+E(fmt(cl,dec))+'" data-sym="'+E(sym)+'">Withdraw '+fmt(cl,dec)+'</button>':'')+
+      (left>0n?'<button class="btn btn-s" data-x="'+id+'" data-s="'+s+'" data-e="'+e+'">Extend</button><button class="btn btn-s" data-tr="'+id+'">Hand over</button>':'')+'</div>';
   }
   return h+'</div>';
 }
 
+async function pages(countFn,pageFn,max){const n=Number(await countFn());const out=[];for(let o=0;o<Math.min(n,max);o+=200){const ids=await pageFn(o,200);ids.forEach(x=>out.push(x));}return out;}
+async function getMany(ids){const out=[];for(let i=0;i<ids.length;i+=25){const part=await Promise.all(ids.slice(i,i+25).map(x=>L.getLock(x)));part.forEach(x=>out.push(x));}return out;}
 const metaCache={};
 async function tmeta(a){if(metaCache[a])return metaCache[a];const c=new ethers.Contract(a,ERC,ro);let sym='?',dec=18;try{[sym,dec]=await Promise.all([c.symbol(),c.decimals()]);}catch(e){}return metaCache[a]={sym,dec:Number(dec)};}
 
@@ -350,15 +470,20 @@ async function find(){
   if(!ethers.isAddress(a)){out.innerHTML='<p class="meta" style="color:var(--red)">Enter a token address.</p>';return;}
   out.innerHTML='<p class="meta">Reading the chain…</p>';
   try{
-    const ids=await L.locksByToken(a);const m=await tmeta(ethers.getAddress(a));
+    const ta=ethers.getAddress(a);
+    const ids=await pages(()=>L.tokenLockCount(ta),(o,k)=>L.locksByToken(ta,o,k),1000);const m=await tmeta(ta);
     if(!ids.length){out.innerHTML='<p class="meta">No locks for this token yet.</p>';return;}
-    const ls=await Promise.all(ids.map(i=>L.getLock(i)));
-    let tot=0n;for(const l of ls)tot+=l.amount-l.claimed;
+    const ls=await getMany(ids);
+    let sup=0n;try{sup=await new ethers.Contract(ta,ERC,ro).totalSupply();}catch(e){}
+    const min=sup/10000n; // unter 0,01 % des Supply: als Kleinst-Lock zusammengefasst
+    const idx=ids.map((x,i)=>i).sort((x,y)=>(ls[y].amount-ls[y].claimed)>(ls[x].amount-ls[x].claimed)?1:-1);
+    const gross=idx.filter(i=>ls[i].amount>=min), klein=idx.length-gross.length;
     let h='<p class="meta" style="margin-top:14px">'+ids.length+' lock'+(ids.length>1?'s':'')+' for $'+E(m.sym)+' · <a href="#" id="share">copy proof link</a></p>';
-    for(let i=ids.length-1;i>=0;i--)h+=await lockCard(ids[i],ls[i],m.dec,m.sym,false);
+    for(const i of gross.slice(0,60))h+=await lockCard(ids[i],ls[i],m.dec,m.sym,false);
+    if(klein)h+='<p class="meta">'+klein+' tiny lock'+(klein>1?'s':'')+' under 0.01% of supply not shown.</p>';
     if(me&&ls.some(l=>l.owner.toLowerCase()===me.toLowerCase()))h+='<p class="meta">Some of these are yours. Withdraw or extend them under <a href="#" onclick="showTab(\'mine\');return false">My locks</a>.</p>';
     out.innerHTML=h;
-    $('share').onclick=ev=>{ev.preventDefault();const u=location.origin+'/lock/?token='+ethers.getAddress(a);navigator.clipboard&&navigator.clipboard.writeText(u);ev.target.textContent='copied';};
+    $('share').onclick=ev=>{ev.preventDefault();copy(location.origin+'/lock/?token='+ethers.getAddress(a));};
     history.replaceState(null,'','?token='+ethers.getAddress(a));
   }catch(e){out.innerHTML='<p class="meta" style="color:var(--red)">'+E(errText(e))+'</p>';}
 }
@@ -369,21 +494,48 @@ async function mine(){
   if(!L){out.innerHTML='The locker is not live yet.';return;}
   out.innerHTML='Reading the chain…';
   try{
-    const ids=await L.locksByOwner(me);
+    const ids=await pages(()=>L.ownerLockCount(me),(o,k)=>L.locksByOwner(me,o,k),2000);
     if(!ids.length){out.innerHTML='You have no locks yet.';return;}
-    const ls=await Promise.all(ids.map(i=>L.getLock(i)));
+    const ls=await getMany(ids);
     let h='';for(let i=ids.length-1;i>=0;i--){const m=await tmeta(ls[i].token);h+=await lockCard(ids[i],ls[i],m.dec,m.sym,true);}
     out.innerHTML=h;
   }catch(e){out.innerHTML='<span style="color:var(--red)">'+E(errText(e))+'</span>';}
 }
 
+async function txFlow(title,label,fn,done){
+  const st=[[label,'run']];progress(title,st);
+  try{const tx=await fn();st[0]=[label,'run'];progress(title,st,'Waiting for the chain… '+txl(tx.hash));await tx.wait();
+    openM('<div class="big-ok"><b>✓</b></div><h3 id="mdlT" style="text-align:center;margin-right:0">'+E(done)+'</h3><div class="acts"><a class="btn" target="_blank" rel="noopener" href="'+EXP+'/tx/'+tx.hash+'">View transaction</a><button class="btn btn-g" data-close>Done</button></div>');
+    setTimeout(()=>{mine();if($('fAddr').value)find();},1200);
+  }catch(e){openM('<h3 id="mdlT">'+E(title)+' failed</h3><p>'+E(errText(e))+'</p><div class="acts"><button class="btn" data-close>Close</button></div>');}
+}
 document.addEventListener('click',async ev=>{
-  const w=ev.target.closest('[data-w]'),x=ev.target.closest('[data-x]');
-  if(w){const id=w.dataset.w;try{w.disabled=true;msg('m'+id,'Confirm in your wallet…');const tx=await new ethers.Contract(LOCKER,ABI,signer).withdraw(id);msg('m'+id,'Waiting… '+txl(tx.hash));await tx.wait();msg('m'+id,'Withdrawn. '+txl(tx.hash),'ok');setTimeout(()=>{mine();if($('fAddr').value)find();},1500);}catch(e){msg('m'+id,errText(e),'err');w.disabled=false;}}
-  if(x){const id=x.dataset.x;const v=ts($('x'+id).value);const s=+x.dataset.s,e=+x.dataset.e;
-    if(!v||v<=e){msg('m'+id,'Pick a date after '+day(e)+'.','err');return;}
-    const ns=s===e?v:s+(v-e), ne=v; // plain lock: both move; vesting: shift the window
-    try{x.disabled=true;msg('m'+id,'Confirm in your wallet…');const tx=await new ethers.Contract(LOCKER,ABI,signer).extend(id,ns,ne);msg('m'+id,'Waiting… '+txl(tx.hash));await tx.wait();msg('m'+id,'Extended. '+txl(tx.hash),'ok');setTimeout(()=>{mine();if($('fAddr').value)find();},1500);}catch(e){msg('m'+id,errText(e),'err');x.disabled=false;}}
+  const w=ev.target.closest('[data-w]'),x=ev.target.closest('[data-x]'),tr=ev.target.closest('[data-tr]'),q=ev.target.closest('[data-q]');
+  if(w){const id=w.dataset.w;
+    openM('<h3 id="mdlT">Withdraw from lock #'+E(id)+'</h3><p>Unlocked and ready: <b style="color:var(--tx)">'+E(w.dataset.amt)+' $'+E(w.dataset.sym)+'</b>. The tokens go to the lock owner.</p>'+
+      '<label class="chk"><input type="checkbox" id="wPart"> Only part of it (for tokens with a max transaction size)</label><div id="wBox" class="hidden"><input type="number" id="wAmt" min="0" step="any" placeholder="Amount" style="margin-top:10px"></div>'+
+      '<div class="acts"><button class="btn btn-g" id="wGo">Withdraw</button><button class="btn" data-close>Cancel</button></div>');
+    $('wPart').onchange=()=>$('wBox').classList.toggle('hidden',!$('wPart').checked);
+    $('wGo').onclick=async()=>{const c=new ethers.Contract(LOCKER,ABI,signer);
+      if($('wPart').checked){let v;try{const l=await L.getLock(id);const m=await tmeta(l.token);v=ethers.parseUnits(String($('wAmt').value||'0'),m.dec);}catch(e){v=0n;}
+        if(v<=0n){toast('Enter an amount',true);return;}
+        txFlow('Withdraw','Withdraw part of lock #'+id,()=>c.withdrawAmount(id,v),'Withdrawn');}
+      else txFlow('Withdraw','Withdraw '+w.dataset.amt+' $'+w.dataset.sym,()=>c.withdraw(id),'Withdrawn');};}
+  if(x){const id=x.dataset.x,s=+x.dataset.s,e=+x.dataset.e;
+    openM('<h3 id="mdlT">Extend lock #'+E(id)+'</h3><p>Right now: '+(s===e?'unlocks '+day(e):'unlocks from '+day(s)+' to '+day(e))+'. The new date can only be later.</p>'+
+      '<label for="xD" style="display:block;font-size:12.5px;color:var(--dim);margin:12px 0 6px">New '+(s===e?'unlock date':'end date')+'</label><input type="datetime-local" id="xD" value="'+toLocal(new Date((e+30*86400)*1000))+'">'+
+      '<div class="row" style="margin-top:8px"><button class="chip" data-q="30">+30 days</button><button class="chip" data-q="90">+90 days</button><button class="chip" data-q="365">+1 year</button></div>'+
+      '<div class="acts"><button class="btn btn-g" id="xGo">Extend</button><button class="btn" data-close>Cancel</button></div>');
+    $('xD').dataset.base=e;
+    $('xGo').onclick=()=>{const v=ts($('xD').value);if(!v||v<=e){toast('Pick a date after '+day(e),true);return;}
+      const ns=s===e?v:s+(v-e);txFlow('Extend','Extend lock #'+id,()=>new ethers.Contract(LOCKER,ABI,signer).extend(id,ns,v),'Extended');};}
+  if(q&&$('xD')){$('xD').value=toLocal(new Date((+$('xD').dataset.base+(+q.dataset.q)*86400)*1000));}
+  if(tr){const id=tr.dataset.tr;
+    openM('<h3 id="mdlT">Hand over lock #'+E(id)+'</h3><p>The new wallet becomes the only one that can withdraw. The dates stay the same. You cannot undo this yourself.</p>'+
+      '<label for="trA" style="display:block;font-size:12.5px;color:var(--dim);margin:12px 0 6px">New owner wallet</label><input type="text" id="trA" placeholder="0x…" spellcheck="false" autocomplete="off">'+
+      '<div class="acts"><button class="btn btn-g" id="trGo">Hand over</button><button class="btn" data-close>Cancel</button></div>');
+    $('trGo').onclick=()=>{const a=$('trA').value.trim();if(!ethers.isAddress(a)){toast('That is not a wallet address',true);return;}
+      txFlow('Hand over','Hand lock #'+id+' to '+short(a),()=>new ethers.Contract(LOCKER,ABI,signer).transferLock(id,a),'Handed over');};}
 });
 
 function showTab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));['lock','find','mine'].forEach(k=>$('t-'+k).classList.toggle('hidden',k!==t));if(t==='mine')mine();}
