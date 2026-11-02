@@ -2885,10 +2885,11 @@ function rpResearch(d){
 function rpPulse(r){const m=r.market||{},ch=m.change||{},tx=m.txns||{},lp=r.lp||{},tt=r.torch;
   const z=[['5m',ch.m5],['1h',ch.h1],['6h',ch.h6],['24h',ch.h24]].filter(x=>x[1]!=null);
   const h1=tx.h1||{},h24=tx.h24||{};const b=+h1.buys||0,se=+h1.sells||0;const anteil=b+se?Math.round(b/(b+se)*100):null;
-  if(!z.length&&anteil==null&&lp.supply_pct==null)return '';
+  if(!z.length&&anteil==null&&lp.supply_pct==null&&!lp.positions_line)return '';
   return `<div class="rp-card o4"><h3>Market pulse</h3>${z.length?`<div class="rp-pulse">${z.map(([k,v])=>`<div><span>${k}</span><b class="${(+v||0)>=0?'up':'dn'}">${rpPct(v)}</b></div>`).join('')}</div>`:''}
   ${anteil!=null?`<div class="rp-bs"><div class="row"><span><b style="color:var(--g2)">${b}</b> buys</span><span>last hour</span><span><b style="color:#ff9aa4">${se}</b> sells</span></div><div class="t"><i style="width:${anteil}%"></i></div>${h24.buys!=null?`<p class="note" style="margin:8px 0 0">24h: ${h24.buys} buys / ${h24.sells} sells · volume ${rpUsd((m.vol||{}).h24)}</p>`:''}</div>`:''}
-  ${lp.supply_pct!=null?`<p class="rp-mini" style="margin-top:12px">💧 Pool holds <b>${rpN(lp.supply_pct)}%</b> of supply (${E({v2:'Uniswap V2',v3:'V3 pool',v4:'Uniswap V4'}[lp.kind]||'pool')})${lp.burned_pct!=null?` · <b>${rpN(lp.burned_pct)}%</b> of LP burned`:(lp.kind==='v3'||lp.kind==='v4')?' · positions are NFTs, no LP token':''}</p>`:''}
+  ${lp.supply_pct!=null?`<p class="rp-mini" style="margin-top:12px">💧 Pool holds <b>${rpN(lp.supply_pct)}%</b> of supply (${E({v2:'Uniswap V2',v3:'V3 pool',v4:'Uniswap V4'}[lp.kind]||'pool')})${lp.burned_pct!=null?` · <b>${rpN(lp.burned_pct)}%</b> of LP burned`:(lp.kind==='v3'||lp.kind==='v4')&&!lp.positions_line?' · positions are NFTs, no LP token':''}</p>`:''}
+  ${lp.positions_line?`<p class="rp-mini" style="margin-top:6px">🔐 ${E(lp.positions_line)}</p>`:''}
   ${tt?`<p class="rp-mini">🎓 Torch: ${tt.graduated?'graduated':E(tt.progress_to_graduation_pct)+'% to graduation'}</p>`:''}</div>`;}
 function rpHist(r){const h=r.seen_before;if(!h||!h.known)return '';
   const coins=(h.top||[]).map(c=>`<span class="rp-coin ${c.dead?'dead':c.ran?'ran':''}">${E(c.coin)}<i>${c.wallets} wallet${c.wallets==1?'':'s'}</i></span>`).join('');

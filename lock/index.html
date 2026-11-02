@@ -171,6 +171,14 @@ input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(8
 .hrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:9px 12px;border-radius:12px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
 .hrow span{color:var(--dim)}
 .cta-card{text-align:center;padding:26px 10px}
+#aList{grid-template-columns:minmax(0,1fr)}
+.arow{display:flex;min-width:0;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:16px;border:1px solid var(--line);background:rgba(0,0,0,.22);color:var(--tx);font-family:var(--body);text-align:left;cursor:pointer;transition:border-color .2s,transform .15s}
+.arow:hover{border-color:var(--g);transform:translateY(-1px)}
+.arow .an{min-width:0;flex:1}
+.arow .an b{font-family:var(--disp);font-size:14px}
+.arow .an div{font-size:12.5px;color:var(--dim);margin-top:3px;line-height:1.4}
+.arow .av{text-align:right;font-size:12.5px;color:var(--dim);flex:none}
+.arow .av b{display:block;font-family:var(--disp);font-size:14px;color:var(--g)}
 @media (max-width:620px){.dash-stats{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -200,6 +208,7 @@ input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(8
 
   <div class="tabs">
     <button class="tab on" data-t="lock">Lock tokens</button>
+    <button class="tab" data-t="all">All locks</button>
     <button class="tab" data-t="find">Find a lock</button>
     <button class="tab" data-t="mine">My dashboard</button>
   </div>
@@ -245,6 +254,25 @@ input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(8
       <button class="btn hidden" id="bApprove" disabled>Approve</button>
     </div>
     <div class="msg" id="mLock"></div>
+  </section>
+
+  <!-- All locks -->
+  <section class="card hidden" id="t-all">
+    <div class="dash-stats" id="aStats">
+      <div class="dstat"><span>Locked value</span><b id="aUsd">…</b></div>
+      <div class="dstat"><span>Active locks</span><b id="aAct">…</b></div>
+      <div class="dstat"><span>Tokens</span><b id="aTok">…</b></div>
+      <div class="dstat ok"><span>$ODDS burned by fees</span><b id="aBurn">…</b></div>
+    </div>
+    <div class="dsec">
+      <h3>Every token in the locker <small id="aUpd"></small></h3>
+      <div class="row" style="margin-bottom:6px">
+        <button class="chip on" data-as="usd">Biggest</button><button class="chip" data-as="soon">Unlocks soon</button><button class="chip" data-as="new">Newest</button><button class="chip" data-as="pct">% of supply</button>
+      </div>
+      <input type="text" id="aQ" placeholder="Filter by name, ticker or address" autocomplete="off" spellcheck="false" style="margin:6px 0 4px">
+      <div id="aList" class="hist"><p class="meta">Reading the locker…</p></div>
+    </div>
+    <p class="note">Read straight from the locker contract. Values use the current market price and change with it. Tap a token to see each lock and its proof on Blockscout.</p>
   </section>
 
   <!-- Find -->
@@ -360,6 +388,7 @@ async function init(){
   }catch(e){}
   if(q.get('token')){showTab('find');$('fAddr').value=q.get('token');find();}
   if(q.get('tab')==='mine')showTab('mine');
+  if(q.get('tab')==='all')showTab('all');
   if(q.get('lock')){$('tAddr').value=q.get('lock');loadToken();}
 }
 
@@ -688,7 +717,42 @@ document.addEventListener('click',async ev=>{
       txFlow('Hand over','Hand lock #'+id+' to '+short(a),()=>new ethers.Contract(LOCKER,ABI,signer).transferLock(id,a),'Handed over');};}
 });
 
-function showTab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));['lock','find','mine'].forEach(k=>$('t-'+k).classList.toggle('hidden',k!==t));if(t==='mine')mine();}
+function showTab(t){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));['lock','all','find','mine'].forEach(k=>$('t-'+k).classList.toggle('hidden',k!==t));if(t==='mine')mine();if(t==='all')allLocks();}
+
+// ── Seit 2.71.0: offene Uebersicht aller Tokens im Locker ──
+let ALL=null, ALL_SORT='usd';
+const relDay=ts=>{const d=Math.round((Number(ts)*1000-Date.now())/86400000);return d<=0?'today':d===1?'tomorrow':d<60?'in '+d+' days':day(ts);};
+async function allLocks(force){
+  if(!L){$('aList').innerHTML='<p class="meta">The locker is not live yet.</p>';return;}
+  if(!ALL||force){
+    let ADM='';try{ADM=localStorage.getItem('oe_admin')||'';}catch(e){}
+    try{const r=await fetch(API+'/v1/locker/overview',{headers:ADM?{'X-OddsEngine-Admin':ADM}:{}});ALL=await r.json();}catch(e){ALL=null;}
+    if(!ALL||!ALL.live){$('aList').innerHTML='<p class="meta">Could not load the overview right now. Try again in a minute.</p>';return;}
+    $('aUsd').textContent=usd(ALL.locked_usd)||'$0';
+    $('aAct').textContent=Number(ALL.active||0).toLocaleString('en');
+    $('aTok').textContent=Number(ALL.tokens||0).toLocaleString('en');
+    const b=Number(ALL.odds_burned||0);$('aBurn').textContent=b>=1e6?(b/1e6).toFixed(2)+'M':b>=1e3?(b/1e3).toFixed(1)+'K':b.toLocaleString('en',{maximumFractionDigits:0});
+    $('aUpd').textContent='live from the contract';
+  }
+  renderAll();
+}
+function renderAll(){
+  if(!ALL)return;
+  const q=$('aQ').value.trim().toLowerCase();
+  let ls=(ALL.by_token||[]).filter(t=>t.active>0);
+  if(q)ls=ls.filter(t=>[t.symbol,t.name,t.token].some(v=>String(v||'').toLowerCase().includes(q)));
+  const now=Date.now()/1000;
+  const k={usd:t=>-(t.usd||0),pct:t=>-(t.pct||0),new:t=>-(t.newest||0),soon:t=>(t.next_unlock&&t.next_unlock>now?t.next_unlock:9e12)};
+  ls.sort((a,b)=>k[ALL_SORT](a)-k[ALL_SORT](b));
+  if(!ls.length){$('aList').innerHTML='<p class="meta">'+(q?'No token matches that.':'No active locks yet. Be the first: lock your dev tokens above.')+'</p>';return;}
+  $('aList').innerHTML=ls.map(t=>{const sym=t.symbol||'?';
+    return '<button class="arow" data-at="'+E(t.token)+'">'+logoHtml(t,sym)+'<div class="an"><b>$'+E(sym)+'</b>'+(t.torch?'<span class="badge">Torch</span>':'')+
+      '<div>'+t.active+' lock'+(t.active>1?'s':'')+(t.next_unlock?' · next unlock '+relDay(t.next_unlock):'')+'</div></div>'+
+      '<div class="av"><b>'+Number(t.pct||0).toFixed(2)+'%</b>'+(usd(t.usd)||'of supply')+'</div></button>';}).join('');
+  document.querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{showTab('find');$('fAddr').value=b.dataset.at;find();scrollTo({top:$('t-find').getBoundingClientRect().top+scrollY-90,behavior:'smooth'});});
+}
+document.querySelectorAll('[data-as]').forEach(b=>b.onclick=()=>{ALL_SORT=b.dataset.as;document.querySelectorAll('[data-as]').forEach(x=>x.classList.toggle('on',x===b));renderAll();});
+$('aQ').addEventListener('input',()=>renderAll());
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.t));
 document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{kind=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('on',x===b));$('endBox').classList.toggle('hidden',kind!=='vest');$('lStart').textContent=kind==='vest'?'Starts unlocking on':'Unlock date';summary();});
 document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{payOdds=b.dataset.f==='odds';document.querySelectorAll('[data-f]').forEach(x=>x.classList.toggle('on',x===b));summary();});
