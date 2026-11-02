@@ -49,8 +49,17 @@ const CID=4663,RPC="https://rpc.mainnet.chain.robinhood.com",EXP="https://robinh
 const ABI=["constructor(address odds,address treasury_,uint256 feeEth_,uint256 feeOdds_)"];
 let signer=null;const $=i=>document.getElementById(i);const m=(t,c)=>{$("m").className="m "+(c||"");$("m").innerHTML=t;};
 const W=[];addEventListener("eip6963:announceProvider",e=>{const d=e.detail;if(d&&d.provider&&!W.some(x=>x.info.uuid===d.info.uuid))W.push(d);});try{dispatchEvent(new Event("eip6963:requestProvider"));}catch(e){}
+// Seit 2.71.0: bei mehreren Wallets (z. B. Brave Wallet und MetaMask) waehlt man selbst, MetaMask zuerst
+let WP=null;
+function waehle(){return new Promise(res=>{
+ if(WP)return res(WP);
+ const ls=W.slice().sort((a,b)=>(b.info.rdns==="io.metamask")-(a.info.rdns==="io.metamask"));
+ if(ls.length<2)return res((ls[0]&&ls[0].provider)||window.ethereum||null);
+ m("Choose the wallet you deploy with:<div style='display:grid;gap:8px;margin-top:10px'>"+ls.map((w,i)=>"<button class='btn' data-wp='"+i+"' style='display:flex;align-items:center;gap:10px;justify-content:flex-start'><img src='"+String(w.info.icon).replace(/'/g,"")+"' alt='' style='width:24px;height:24px;border-radius:6px'>"+String(w.info.name).replace(/[<>&'"]/g,"")+"</button>").join("")+"</div>");
+ document.querySelectorAll("[data-wp]").forEach(b=>b.onclick=()=>{WP=ls[+b.dataset.wp].provider;m("");res(WP);});
+});}
 $("c").onclick=async()=>{try{
- const p=(W[0]&&W[0].provider)||window.ethereum;
+ const p=await waehle();
  if(!p){m("No wallet found. Open this page in your wallet app browser.","err");return;}
  await p.request({method:"eth_requestAccounts"});
  try{await p.request({method:"wallet_switchEthereumChain",params:[{chainId:"0x"+CID.toString(16)}]});}
