@@ -3564,7 +3564,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);if(d.admin)PREVIEW=true;}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);if(d.admin)PREVIEW=true;}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
@@ -3602,6 +3602,7 @@ const YE_DO=[
  {k:'trade',t:'Trade by talking',was:'Copy the contract, open a DEX, set the slippage, hope you picked the right chain.',now:'Send a voice note: "buy 5 dollars of this". Your Engine finds the chain, gets a live quote and shows what you get. You confirm in your own wallet, it never holds your keys.',v:'voice'},
  {k:'life',t:'A promo video in one tap',was:'Paying an editor or begging the community for a video.',now:'Paste a coin and tap Promo video by loudscene. It reads the project, writes the story and drops a finished 1080p video into your chat, with live progress while it works.',v:'promo'},
  {k:'deals',feat:'deals',t:'Deals without the hunt',was:'Refreshing shop pages and price trackers to catch a drop.',now:'Your Engine watches watches, gold, silver and perfume for you. Real price drops it saw itself, gold with the premium over the metal value, and an alert when your target price hits.',img:'deals'},
+ {k:'lock',feat:'locker',t:'Lock it, prove it',was:'"Dev will never sell", and nobody can check it.',now:'Lock your tokens or set up vesting on Robinhood Chain. Nobody can move them early, not even us. Every scan of your coin shows the lock. Pay the fee in $ODDS and it gets burned.',img:'lock',href:'/lock/',cta:'Open the Locker'},
  {k:'check',t:'Check any coin',was:'Ten tabs, three explorers, and still guessing.',now:'Paste a coin and get bundles, snipers, the dev wallet and the top holders in one card, plus a live report with chart and holder map.',v:'check'},
  {k:'check',t:'Follow the money',was:'Clicking through a block explorer for hours.',now:'Paste a wallet and ask where the money went: swaps, bridges, exchanges, every step with the transaction as proof.',v:'trace'},
  {k:'feed',t:'One feed, zero noise',was:'Thirty channels pinging you all day.',now:'Follow Telegram channels, X accounts and YouTube in one place, only with your keywords. New videos come summarized.',v:'feed'},
@@ -3612,10 +3613,10 @@ function yeDo(){
   const card=x=>{
     const f=yeMob()?'m':'w';
     const media=x.v?`<video class="ye-v" muted loop playsinline preload="none" poster="v/${x.v}-${f}.jpg" data-v="${x.v}"></video><button class="ye-play" data-yev="${x.v}" aria-label="Watch with sound">▶ Watch with sound</button>`
-      :`<img src="v/${x.img}-${f}.jpg" alt="" loading="lazy"><span class="ye-soon">Video soon</span>`;
+      :`<img src="v/${x.img}-${f}.jpg" alt="" loading="lazy">${x.href?'':'<span class="ye-soon">Video soon</span>'}`;
     return `<div class="card ye-c rv"><div class="ye-media">${media}</div><h3>${E(x.t)}</h3>
       <div class="ye-bn"><p class="was"><span>Before</span> ${E(x.was)}</p><p class="now"><span>Now</span> ${E(x.now)}</p></div>
-      <div class="ye-act"><a class="btn btn-g btn-sm" href="https://t.me/${E(YE_BOT)}?start=m_${x.k}" target="_blank" rel="noopener">Try it in Telegram</a></div></div>`;};
+      <div class="ye-act">${x.href?`<a class="btn btn-g btn-sm" href="${E(x.href)}">${E(x.cta||'Open')}</a>`:`<a class="btn btn-g btn-sm" href="https://t.me/${E(YE_BOT)}?start=m_${x.k}" target="_blank" rel="noopener">Try it in Telegram</a>`}</div></div>`;};
   return `<section class="ye-do"><div class="ye-dohead rv"><span class="eyebrow"><b>●</b> What it takes off your plate</span>
     <h2><span class="shiny">Stop doing it by hand.</span></h2><p>Safer and simpler in crypto. Watch what it does, or try it right away in Telegram.</p></div>
     <div class="ye-grid" id="yeGrid">${YE_DO.filter(x=>!x.feat||FEAT[x.feat]).map(card).join('')}</div>
