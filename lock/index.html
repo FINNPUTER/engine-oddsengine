@@ -729,7 +729,7 @@ async function allLocks(force){
   if(!ALL||force){
     let ADM='';try{ADM=localStorage.getItem('oe_admin')||'';}catch(e){}
     try{const r=await fetch(API+'/v1/locker/overview',{headers:ADM?{'X-OddsEngine-Admin':ADM}:{}});ALL=await r.json();}catch(e){ALL=null;}
-    if(!ALL||!ALL.live){$('aList').innerHTML='<p class="meta">Could not load the overview right now. Try again in a minute.</p>';return;}
+    if(!ALL||!ALL.live||ALL.unavailable){ALL=null;$('aList').innerHTML='<p class="meta">Could not load the overview right now. Try again in a minute.</p>';return;}
     $('aUsd').textContent=usd(ALL.locked_usd)||'$0';
     $('aAct').textContent=Number(ALL.active||0).toLocaleString('en');
     $('aTok').textContent=Number(ALL.tokens||0).toLocaleString('en');
