@@ -304,6 +304,13 @@ input::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) hue-rotate(8
 <script>
 const API='https://api.oddsengine.live';
 const RPC='https://rpc.mainnet.chain.robinhood.com', EXP='https://robinhoodchain.blockscout.com', CID=4663;
+// Seit 2.81: Locker- und $ODDS-Adresse fest in der Seite. Die Seite vertraut nicht allein der API: zeigt die API
+// je auf einen anderen Vertrag (z. B. nach einem Einbruch beim Hosting), sperrt die Seite alle Knoepfe.
+const PIN_LOCKER='0x559c803a4f24c24b1f4dc04cba47e77f096638fa', PIN_ODDS='0x9c87b4cfa21266d1638f437c96dbe1012cb81111';
+function lockDown(msg){['bApprove','bLock','bFind'].forEach(i=>{const b=document.getElementById(i);if(b)b.disabled=true;});
+  const d=document.createElement('div');d.className='card';d.style.cssText='margin:14px 0;border-color:#ff5c5c;text-align:center';
+  d.innerHTML='<b style="font-family:var(--disp);color:#ff5c5c">Locker paused for your safety</b><p class="meta" style="margin:6px 0 0">'+msg+' Do not approve or sign anything here. Contact @OddsEngine.</p>';
+  const nl=document.getElementById('notLive');if(nl&&nl.parentNode)nl.parentNode.insertBefore(d,nl);else document.body.insertBefore(d,document.body.firstChild);}
 const ABI=['function lock(address,uint256,uint64,uint64,address,bool,uint256) payable returns (uint256)','function withdraw(uint256)','function withdrawAmount(uint256,uint256)','function extend(uint256,uint64,uint64)',
  'function feeEth() view returns (uint256)','function feeOdds() view returns (uint256)','function ODDS() view returns (address)','function totalLocks() view returns (uint256)',
  'function getLock(uint256) view returns (tuple(address owner,uint64 unlockStart,uint64 unlockEnd,address token,uint256 amount,uint256 claimed))',
@@ -376,12 +383,16 @@ async function init(){
   let PRV=false;try{const r=await fetch(API+'/v1/locker',{headers:ADM?{'X-OddsEngine-Admin':ADM}:{}});const d=await r.json();LOCKER=d.address;PRV=!!d.preview;}catch(e){}
   const q=new URLSearchParams(location.search);
   // Seit 2.70.4 keine Adresse aus dem Link mehr: ein fremder Link koennte sonst auf einen falschen Vertrag zeigen.
+  if(LOCKER&&ethers.isAddress(LOCKER)&&LOCKER.toLowerCase()!==PIN_LOCKER){lockDown('The server named a different locker contract than the one this page is built for.');return;}
   if(!LOCKER||!ethers.isAddress(LOCKER)){$('notLive').classList.remove('hidden');['bApprove','bLock','bFind'].forEach(i=>$(i).disabled=true);$('sEth').textContent='soon';$('sOdds').textContent='soon';return;}
+  LOCKER=ethers.getAddress(PIN_LOCKER);
+  try{const code=await ro.getCode(LOCKER);if(!code||code==='0x'){lockDown('The locker contract could not be found on chain.');return;}}catch(e){}
   L=new ethers.Contract(LOCKER,ABI,ro);
   if(PRV){const b=document.createElement('div');b.className='card';b.style.cssText='margin:14px 0;border-color:var(--amber);text-align:center';b.innerHTML='<b style="font-family:var(--disp);color:var(--amber)">Admin preview</b><p class="meta" style="margin:6px 0 0">Only you see the locker working. Everyone else sees "goes live shortly" until you turn on the switch Locker.</p>';document.querySelector('.tabs').before(b);}
   $('cLink').innerHTML='Contract: <a class="mono" href="'+EXP+'/address/'+LOCKER+'" target="_blank" rel="noopener">'+short(LOCKER)+'</a>';
   try{
     [feeE,feeO,ODDS]=await Promise.all([L.feeEth(),L.feeOdds(),L.ODDS()]);
+    if(String(ODDS).toLowerCase()!==PIN_ODDS){lockDown('The locker reports an unexpected $ODDS contract.');return;}
     const n=Number(await L.totalLocks());countUp($('sLocks'),n);
     $('sEth').textContent=ethers.formatEther(feeE);
     $('sOdds').textContent=fmt(feeO,18);
@@ -420,6 +431,8 @@ async function loadToken(){
   try{
     const c=new ethers.Contract(a,ERC,ro);
     const [sym,dec,sup]=await Promise.all([c.symbol(),c.decimals(),c.totalSupply()]);
+    // Seit 2.81: NFT-Positionen (z. B. Uniswap-V3-LP) und ERC1155 wuerden im Locker fuer immer festhaengen.
+    for(const iid of ['0x80ac58cd','0xd9b67a26']){try{const r=await ro.call({to:a,data:'0x01ffc9a7'+iid.slice(2).padEnd(64,'0')});if(r&&r.length>=66&&BigInt(r.slice(0,66))===1n){$('tInfo').innerHTML='<span style="color:var(--red)">This is an NFT position, not a normal token. NFTs (for example Uniswap V3 LP positions) cannot be withdrawn from this locker, so locking them is blocked.</span>';$('tInfo').style.display='block';summary();return;}}catch(e){}}
     const bal=me?await c.balanceOf(me):0n;
     T={addr:ethers.getAddress(a),sym,dec:Number(dec),sup,bal,c};
     const info=await tinfo(T.addr);T.info=info;
@@ -467,8 +480,11 @@ function needList(p){const need=[[T.addr,p.amt,'$'+T.sym]];if(payOdds&&feeO>0n){
 async function approve(){return confirmLock();}
 async function doLock(){return confirmLock();}
 
-function confirmLock(){
+async function confirmLock(){
   const p=params();if(!p)return;
+  const other=String(p.own).toLowerCase()!==String(me).toLowerCase();
+  let isCode=false;if(other){try{const cd=await ro.getCode(p.own);isCode=!!cd&&cd!=='0x';}catch(e){}}
+  const ownWarn=other?'<div class="warn" style="border-color:var(--red);color:var(--red)">Only <b class="mono">'+E(p.own)+'</b> can ever withdraw this lock, not you. '+(isCode?'This address is a smart contract: it must be able to call withdraw, or the tokens are lost for good. ':'')+'Never use an exchange deposit address.</div><label class="chk"><input type="checkbox" id="cOwn"> I checked this address and it can sign transactions.</label>':'';
   const pct=T.sup>0n?Number(p.amt*1000000n/T.sup)/10000:0;
   openM('<h3 id="mdlT">Check your lock</h3><ul class="sumlist">'+
     '<li><span>Token</span><b>'+fmt(p.amt,T.dec)+' $'+E(T.sym)+' · '+pct.toFixed(2)+'%</b></li>'+
@@ -477,9 +493,11 @@ function confirmLock(){
     '<li><span>Who can withdraw</span><b class="mono">'+short(p.own)+(p.own.toLowerCase()===String(me).toLowerCase()?' (you)':'')+'</b></li>'+
     '<li><span>Fee</span><b>'+(payOdds?fmt(feeO,18)+' $ODDS, burned':ethers.formatEther(feeE)+' ETH')+'</b></li></ul>'+
     '<div class="warn">Nobody can take these tokens out before the date. Not you, not us. You can only move the date later, never earlier.</div>'+
+    '<div class="meta" style="margin:8px 0">Lock normal tokens and V2 LP tokens. Tokens that tax transfers or change balances on their own (rebasing) can leave later withdrawals short.</div>'+ownWarn+
     '<label class="chk"><input type="checkbox" id="cOk"> I understand and want to lock.</label>'+
     '<div class="acts"><button class="btn btn-g" id="cGo" disabled>Lock now</button><button class="btn" data-close>Back</button></div>');
-  $('cOk').onchange=()=>{$('cGo').disabled=!$('cOk').checked;};
+  const okAll=()=>{$('cGo').disabled=!($('cOk').checked&&(!other||($('cOwn')&&$('cOwn').checked)));};
+  $('cOk').onchange=okAll;if(other)$('cOwn').onchange=okAll;
   $('cGo').onclick=()=>runLock(p);
 }
 
