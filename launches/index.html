@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Launch Board · Your Engine</title>
+<meta name="description" content="Every new Torch launch on Robinhood Chain with the facts from the chain: dev share, launch block buys, bundles, holders. No rating, no advice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#030605;--card:rgba(255,255,255,.04);--card2:rgba(255,255,255,.07);--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.16);--tx:#ecf5ef;--dim:#9fb2a7;--dim2:#62756a;--g:#22f08a;--g2:#7dffbd;--disp:'Unbounded',system-ui,sans-serif;--body:'Instrument Sans',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--tx);font-family:var(--body);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:-20% -10% auto;height:70vh;background:radial-gradient(60% 60% at 50% 0%,rgba(34,240,138,.13),transparent 70%);pointer-events:none;z-index:0}
+a{color:var(--g2);text-decoration:none}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px;position:relative;z-index:1}
+nav{display:flex;justify-content:space-between;align-items:center;padding:18px 0;gap:10px;flex-wrap:wrap}
+.brand{font-family:var(--disp);font-weight:700;font-size:15px;color:var(--tx)}
+.pill{border:1px solid var(--line2);border-radius:99px;padding:8px 14px;font-size:13px;color:var(--tx);background:var(--card)}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(28px,6vw,52px);line-height:1.05;margin:26px 0 12px;letter-spacing:-.02em}
+h1 span{background:linear-gradient(90deg,var(--g),var(--g2),var(--g));-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 100%;animation:sh 6s linear infinite}
+@keyframes sh{to{background-position:200% 0}}
+.lead{color:var(--dim);font-size:16px;max-width:640px;line-height:1.55}
+.meta{font-family:var(--mono);font-size:12px;color:var(--dim2);margin:18px 0 22px;display:flex;gap:14px;flex-wrap:wrap}
+.live:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--g);margin-right:7px;box-shadow:0 0 10px var(--g);animation:pl 2s infinite}
+@keyframes pl{50%{opacity:.35}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding-bottom:40px}
+.c{border:1px solid var(--line);background:var(--card);border-radius:18px;padding:18px;position:relative;overflow:hidden;opacity:0;transform:translateY(12px);animation:in .5s forwards}
+.c:hover{border-color:var(--line2);background:var(--card2)}
+@keyframes in{to{opacity:1;transform:none}}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sym{font-family:var(--disp);font-weight:700;font-size:18px;word-break:break-all}
+.age{font-family:var(--mono);font-size:12px;color:var(--dim2);white-space:nowrap}
+.nm{color:var(--dim);font-size:13px;margin:2px 0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kv{font-family:var(--mono);font-size:12.5px;color:var(--dim);margin-bottom:10px}
+ul{list-style:none;border-top:1px solid var(--line);padding-top:10px}
+li{font-size:14px;line-height:1.5;padding:2px 0;color:var(--tx)}
+li:before{content:"·";color:var(--g);margin-right:8px;font-weight:700}
+.wait{color:var(--dim2);font-size:13px;font-style:italic}
+.btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+.b{font-size:12.5px;border:1px solid var(--line2);border-radius:99px;padding:7px 12px;color:var(--tx);background:transparent}
+.b.g{background:var(--g);color:#03130b;border-color:var(--g);font-weight:600}
+.foot{color:var(--dim2);font-size:12.5px;line-height:1.6;border-top:1px solid var(--line);padding:22px 0 40px}
+.soon{border:1px solid var(--line);border-radius:18px;padding:28px;text-align:center;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav><a class="brand" href="https://engine.oddsengine.live/">Your Engine</a><a class="pill" href="https://t.me/OddsEnginePublicBot">Open in Telegram</a></nav>
+  <h1>Every Torch launch.<br><span>Just the facts.</span></h1>
+  <p class="lead">New coins on Robinhood Chain, read straight from the chain the moment they launch: who holds what, who bought in the launch block, what the dev did. Every number links to its proof.</p>
+  <div class="meta"><span class="live" id="st">Loading</span><span id="cnt"></span></div>
+  <div class="grid" id="g"></div>
+  <div class="foot">Facts read on chain. No rating, no advice. A missing line means we could not read that fact yet, not that it is zero. Data: Torch launches, scanned by OddsEngine.<br>
+  <a href="https://engine.oddsengine.live/changelog/">Changelog</a> · <a href="https://engine.oddsengine.live/lock/">Locker</a> · <a href="https://oddsengine.live/">oddsengine.live</a></div>
+</div>
+<script>
+const API='https://api.oddsengine.live';
+const E=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function alter(iso){const t=Date.parse(iso);if(!t)return'';const m=Math.max(0,Math.round((Date.now()-t)/60000));if(m<60)return m+' min old';const h=Math.round(m/60);return h<48?h+' h old':Math.round(h/24)+' days old';}
+function usd(v){if(v==null)return'n/a';v=+v;return v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1e3?'$'+(v/1e3).toFixed(1)+'K':'$'+v.toFixed(0);}
+function karte(c,i){
+  const f=c.facts;
+  const li=f&&f.length?f.map(x=>'<li>'+E(x.t)+'</li>').join(''):'<li class="wait">Scanning, facts appear in a minute</li>';
+  return '<div class="c" style="animation-delay:'+(i*40)+'ms"><div class="top"><div class="sym">$'+E(c.symbol||'?')+'</div><div class="age">'+E(alter(c.launched_utc))+'</div></div>'+
+    '<div class="nm">'+E(c.name||'')+'</div><div class="kv">MC '+usd(c.market_cap_usd)+(c.graduated?' · graduated':' · '+E(c.progress_pct)+'% to graduation')+'</div>'+
+    '<ul>'+li+'</ul><div class="btns"><a class="b g" href="'+E(c.full_scan)+'">Full scan</a><a class="b" href="'+E(c.explorer)+'" target="_blank" rel="noopener">Proof</a><a class="b" href="'+E(c.trade)+'" target="_blank" rel="noopener">On Torch</a></div></div>';
+}
+async function lade(){
+  try{
+    const r=await fetch(API+'/v1/launches?n=24',{cache:'no-store'});const d=await r.json();
+    if(!d.live){document.getElementById('st').textContent='Coming soon';document.getElementById('g').innerHTML='<div class="soon">The Launch Board goes live shortly.</div>';return;}
+    document.getElementById('st').textContent='Live';
+    document.getElementById('cnt').textContent=(d.coins||[]).length+' newest launches · refreshes every 30 s';
+    document.getElementById('g').innerHTML=(d.coins||[]).map(karte).join('');
+  }catch(e){document.getElementById('st').textContent='Reconnecting';}
+}
+lade();setInterval(lade,30000);
+</script>
+</body>
+</html>

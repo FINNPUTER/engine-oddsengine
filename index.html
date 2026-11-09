@@ -786,7 +786,7 @@ body.rp-open{overflow:hidden}
 .rp-chart .note{padding:16px}
 .rp-verdict{border-width:1px;position:relative;overflow:hidden}
 .rp-verdict::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--vc)}
-.rp-ok{--vc:var(--g)}.rp-mid{--vc:var(--amber)}.rp-bad{--vc:var(--red)}
+.rp-info{--vc:var(--dim2)}.rp-gb .f::before{content:"·";color:var(--g)}.rp-ok{--vc:var(--g)}.rp-mid{--vc:var(--amber)}.rp-bad{--vc:var(--red)}
 .rp-vh{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .rp-vh i{width:12px;height:12px;border-radius:50%;background:var(--vc);box-shadow:0 0 12px var(--vc)}
 .rp-vh h2{margin:0;font-family:var(--disp);font-size:18px;flex:1}
@@ -2807,7 +2807,7 @@ setTimeout(trCheck,600);
 
 /* =================== 2.39: live report for any coin (#token=chain:address) =================== */
 let RP=null,RP_Q='',RP_T=null,RP_FULL=null,RP_SIDE='buy';
-const RP_LV={green:['Looks clean so far','rp-ok'],amber:['Mixed, check the flags','rp-mid'],red:['High risk','rp-bad']};
+const RP_LV={};
 function rpUsd(v){v=+v;if(!isFinite(v)||v==null)return 'n/a';const a=Math.abs(v);if(a>=1e9)return '$'+(v/1e9).toFixed(2)+'B';if(a>=1e6)return '$'+(v/1e6).toFixed(2)+'M';if(a>=1e3)return '$'+(v/1e3).toFixed(1)+'K';if(a===0)return '$0';return '$'+(a>=10?v.toFixed(0):v.toFixed(2));}
 function rpPx(v){v=+v;if(!v)return 'n/a';if(v>=1)return '$'+v.toLocaleString('en-US',{maximumFractionDigits:4});const s=v.toFixed(14).split('.')[1];const z=s.length-s.replace(/^0+/,'').length;return '$'+v.toFixed(Math.min(14,z+4)).replace(/0+$/,'');}
 function rpPct(v){v=+v;if(v==null||!isFinite(v))return '';return (v>0?'+':'')+(Math.abs(v)<10?v.toFixed(1):v.toFixed(0))+'%';}
@@ -2937,7 +2937,7 @@ function rpTradeBox(){
 }
 function rpDraw(keep){
   const r=RP,m=r.market||{},sp=r.supply||{},dv=r.dev||{},v=r.verdict||{},sm=r.smart||{};
-  const lv=RP_LV[v.level]||RP_LV.amber;const ch=m.change||{};const tx=(m.txns||{}).h1||{};const vol=(m.vol||{}).h1;
+  const lv=['What the chain shows','rp-info'];const ch=m.change||{};const tx=(m.txns||{}).h1||{};const vol=(m.vol||{}).h1;
   const scroll=keep&&$('#rp')?$('#rp').scrollTop:0;
   const exp=r.explorer_base||'';const ap=r.addr_path||'/address/';
   const links=Object.entries(m.links||{}).slice(0,4).map(([k,u])=>`<a href="${E(u)}" target="_blank" rel="noopener">${E(k==='twitter'?'X':k[0].toUpperCase()+k.slice(1))}</a>`).join('');
@@ -2952,14 +2952,14 @@ function rpDraw(keep){
   <div class="rp-stats"><div><span>Market cap</span><b id="rpMc">${rpUsd(m.mcap)}</b></div><div><span>Liquidity</span><b id="rpLq">${rpUsd(m.liq)}</b></div><div><span>Volume 1h</span><b>${rpUsd(vol)}</b><small class="rp-sub">24h ${rpUsd(((m.vol||{}).h24))}</small></div><div><span>Buys / sells 1h</span><b>${tx.buys!=null?tx.buys+' / '+tx.sells:'n/a'}</b><small class="rp-sub">24h ${(((m.txns||{}).h24)||{}).buys!=null?m.txns.h24.buys+' / '+m.txns.h24.sells:'n/a'}</small></div><div><span>Holders</span><b>${sp.holders?(+sp.holders).toLocaleString('en-US'):'n/a'}</b></div></div>
   <div class="rp-grid">
     <div class="rp-card rp-chart o2" style="grid-area:c" data-ck="${E(rpCk(r))}">${rpCk(r)?`<div class="rp-ctool"><div class="rp-tf">${['1m','5m','15m','1h','4h','1d'].map(t=>`<button type="button" data-tf="${t}" class="${t===RPC.tf?'on':''}">${t}</button>`).join('')}</div><div class="rp-tf"><button type="button" data-cm="px" class="${RPC.mode==='px'?'on':''}">Price</button><button type="button" data-cm="mc" class="${RPC.mode==='mc'?'on':''}">MCap</button></div></div><div class="rp-ck" id="rpCk"><p class="note rp-ckload">Loading chart…</p></div><div class="rp-cl">${r.embed?`<a href="${E(String(r.embed).split('?')[0])}" target="_blank" rel="noopener">GeckoTerminal ↗</a> · `:''}${(r.market||{}).url?`<a href="${E(r.market.url)}" target="_blank" rel="noopener">DexScreener ↗</a>`:''}<span class="rp-cks" id="rpCks"></span></div>`:'<p class="note">No chart for this coin yet.</p>'}</div>
-    <div style="grid-area:t" class="rp-col"><div class="rp-card rp-verdict o1 ${lv[1]}"><div class="rp-vh"><i></i><h2>${E(v.title||lv[0])}</h2>${r.risk_score!=null?`<span class="mono">Score ${E(r.risk_score)}/100</span>`:''}</div><p>${E(v.reason||'')}</p>
-      ${(v.bad||[]).length||(v.good||[]).length?`<div class="rp-gb">${(v.bad||[]).slice(0,5).map(x=>`<div class="b">${E(x)}</div>`).join('')}${(v.good||[]).slice(0,4).map(x=>`<div class="g">${E(x)}</div>`).join('')}</div>`:''}
+    <div style="grid-area:t" class="rp-col"><div class="rp-card rp-verdict o1 ${lv[1]}"><div class="rp-vh"><i></i><h2>${E(lv[0])}</h2></div><p class="note">Facts read on chain. No rating, no advice.</p>
+      ${(v.bad||[]).length||(v.good||[]).length?`<div class="rp-gb">${(v.bad||[]).slice(0,5).concat((v.good||[]).slice(0,4)).map(x=>`<div class="f">${E(x)}</div>`).join('')}</div>`:''}
       ${(r.deep||{}).state==='running'?'<p class="note">Deep scan running, bundles and early buyers arrive in about a minute.</p>':''}</div><div id="rpTB" class="o3">${rpTradeBox()}</div>${rpPulse(r)}</div>
     ${rpBubbles()?`<div class="rp-card rp-map o10" style="grid-area:m"><div class="rp-mh"><h3>Holder map</h3><span class="note">Who holds it, and who is connected</span></div>${rpBubbles()}</div>`:''}
     <div class="rp-col" style="grid-area:L">${rpHist(r)}${rpKette(r)}${rpName(r)}
     <div class="rp-card o13"><h3>Live trades <span class="rp-dot" aria-hidden="true"></span></h3><div id="rpTr">${rpTrades()}</div></div></div>
     <div class="rp-col" style="grid-area:R">
-    <div class="rp-card o9"><h3>Safety</h3><div class="rp-chips">${rpChips()}</div></div>
+    <div class="rp-card o9"><h3>Contract checks</h3><div class="rp-chips">${rpChips()}</div></div>
     <div class="rp-card o6"><h3>Supply</h3>${rpBar('Top 10 wallets',sp.top10_pct,40)}${rpBar((sp.bundled_fwd_pct||0)>=0.1?'Bundled, incl. passed on':'Bundled',(sp.bundled_total_pct!=null?sp.bundled_total_pct:sp.bundled_pct),10)}${(sp.bundled_fwd_pct||0)>=0.1?`<p class="note" style="margin:-4px 0 10px">${rpN(sp.bundled_pct)}% still in the bundle wallets, ${rpN(sp.bundled_fwd_pct)}% passed on through up to ${sp.fwd_hops||1} wallets</p>`:''}${rpBar('Early buyers still holding',sp.early_holding_pct,101)}${rpBar('Fresh wallets',sp.fresh_pct,30)}${(sp.prepared&&sp.prepared.count>=3)?rpBar('Prepared wallets',sp.prepared.pct_of_buyers,25):''}
       ${sp.clusters!=null||sp.same_funder!=null?`<p class="rp-mini">Clusters <b>${sp.clusters||0}</b> · same funder <b>${sp.same_funder||0}</b> · snipers <b>${sp.snipers||0}</b>${sp.largest_pct!=null?` · largest <b>${rpN(sp.largest_pct)}%</b>`:''}</p>`:''}
       ${sp.top_note?`<p class="note">${E(sp.top_note)}</p>`:''}${rpFwd(r)}</div>

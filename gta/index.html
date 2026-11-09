@@ -144,11 +144,11 @@ h2{font-family:var(--disp);font-weight:700;font-size:clamp(20px,3.6vw,28px);lett
       <p class="note">Every new coin named after a GTA character, place or term, on Solana, Base, Ethereum, BNB Chain, Arbitrum and Robinhood Chain. Each one gets the full scan: bundles, snipers, dev wallet.</p></div></div>
     <div class="stats">
       <div class="stat t"><b data-n="new24">0</b><span>new in 24h</span></div>
-      <div class="stat r"><b data-n="red24">0</b><span>flagged high risk</span></div>
+      <div class="stat r"><b data-n="red24">0</b><span>scanned, facts only</span></div>
       <div class="stat"><b data-n="new7">0</b><span>new in 7 days</span></div>
     </div>
     <div class="coins" id="coins" style="margin-top:12px"></div>
-    <div class="legend"><span><i class="dot red"></i>High risk</span><span><i class="dot amber"></i>Careful</span><span><i class="dot green"></i>Looks clean so far</span><span><i class="dot"></i>Scan pending</span></div>
+    <div class="legend"><span><i class="dot green"></i>Scanned, facts in Your Engine</span><span><i class="dot"></i>Scan pending</span></div>
   </section>
 
   <section>
@@ -210,7 +210,7 @@ function coins(lage){
   if(!l.length){box.innerHTML=`<div class="empty">${lage.radar_running?'The radar is on. New GTA coins show up here the moment they launch.':'The radar starts soon. New GTA coins will show up here the moment they launch.'}</div>`;return;}
   box.innerHTML=l.map(c=>{
     const h=+c.hours_ago||0,alt=h<1?Math.max(1,Math.round(h*60))+' min ago':h<48?Math.round(h)+' h ago':Math.round(h/24)+' days ago';
-    return `<div class="coin"><i class="dot ${E(c.level||'')}" title="${E(c.level||'scan pending')}"></i>
+    return `<div class="coin"><i class="dot ${c.scanned?'green':''}" title="${c.scanned?'scanned':'scan pending'}"></i>
       <div class="n"><b>$${E(String(c.symbol||'').replace(/^\$/,''))} <span style="display:inline;color:var(--dim);font-family:var(--body);font-weight:500">${E(c.name||'')}</span></b>
       <span>${E(c.chain)} · ${alt}${c.mc_usd?' · MC '+usd(c.mc_usd):''} · matched "${E(c.matched||'')}"</span></div>
       <a class="btn" data-bot href="https://t.me/OddsEnginePublicBot?start=m_check" target="_blank" rel="noopener">Full scan</a></div>`;}).join('');
@@ -218,7 +218,7 @@ function coins(lage){
 function stats(lage){
   const a=lage.last_24h||{},b=lage.last_7d||{};
   countUp(document.querySelector('[data-n=new24]'),a.new_coins||0);
-  countUp(document.querySelector('[data-n=red24]'),a.red||0);
+  countUp(document.querySelector('[data-n=red24]'),a.scanned||0);
   countUp(document.querySelector('[data-n=new7]'),b.new_coins||0);
 }
 let IO=null;
