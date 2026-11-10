@@ -280,6 +280,7 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {EXRLoader} from 'three/addons/loaders/EXRLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
@@ -977,12 +978,35 @@ void main(){
     const NC = Math.min(220, lanes.length * 6), cp = new Float32Array(NC * 3), cc2 = new Float32Array(NC * 3), cars = [];
     for (let i = 0; i < NC; i++) { const ln = lanes[i % lanes.length], dir = hsh(i * 8.1) < .5 ? 1 : -1; cars.push({ln, s: hsh(i * 6.6) * ln.len, v: (7 + hsh(i * 9.2) * 7) * dir, dir}); cc2.set(dir > 0 ? [1.6, 1.5, 1.3] : [1.8, .15, .2], i * 3); }
     const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.BufferAttribute(cp, 3)); cg.setAttribute('color', new THREE.BufferAttribute(cc2, 3));
-    cityG.add(new THREE.Points(cg, new THREE.PointsMaterial({size: .8, vertexColors: true, toneMapped: false})));
+    cityG.add(new THREE.Points(cg, new THREE.PointsMaterial({size: .38, vertexColors: true, toneMapped: false})));
     const carM = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, 1.35, 4.3).translate(0, .75, 0), new THREE.MeshBasicMaterial({color: 0xffffff}), NC); carM.frustumCulled = false;
-    { const c = new THREE.Color(); for (let i = 0; i < NC; i++) { const k = hsh(i * 3.9); c.setRGB(k < .3 ? .09 : .05, k < .3 ? .09 : .05, k < .3 ? .1 : .07); if (k > .85) c.setRGB(.2, .17, .03); carM.setColorAt(i, c); } } cityG.add(carM); OSMV.push(carM);
+    { const c = new THREE.Color(); for (let i = 0; i < NC; i++) { const k = hsh(i * 3.9); c.setRGB(k < .3 ? .09 : .05, k < .3 ? .09 : .05, k < .3 ? .1 : .07); if (k > .85) c.setRGB(.2, .17, .03); carM.setColorAt(i, c); } } /* box cars dropped, only their head and tail lights drive */
+    // pedestrians: rigged people with a real walk cycle (Mixamo rig), crossing the scramble in every direction
+    const walkers = [], camL = new THREE.Vector3();
+    Promise.all([new Promise((ok, no) => { const L = new GLTFLoader(); L.setMeshoptDecoder(MeshoptDecoder); L.load('assets/ppl_a.glb', ok, undefined, no); }), fetch('assets/walk.json').then(r => r.json())]).then(([gl, wj]) => {
+      const clip = new THREE.AnimationClip('walk', wj.dur, wj.t.map(([n, tt, v]) => new THREE.QuaternionKeyframeTrack(n + '.quaternion', tt, v)));
+      const base = gl.scene; base.updateMatrixWorld(true);
+      const sc = 1.03; // the model comes in at 1.66 m
+      let m0 = null; base.traverse(o => { if (o.isMesh && !m0) m0 = o.material; });
+      const mats = [0xffffff, 0xd9ccff, 0xffd6c8, 0xcfe6ff, 0xbdbdbd, 0xffe8b8].map(c => { const m = m0.clone(); m.color = new THREE.Color(c); m.emissive = new THREE.Color(c).multiplyScalar(.28); if (m.map) m.emissiveMap = m.map; m.fog = true; return m; });
+      const NW = TOUCH ? 14 : 36;
+      for (let i = 0; i < NW; i++) {
+        const o = SkeletonUtils.clone(base); o.scale.multiplyScalar(sc * (.94 + hsh(i * 9.1) * .12));
+        o.traverse(m => { if (m.isMesh) { m.material = mats[i % mats.length]; m.frustumCulled = false; } });
+        const mx = new THREE.AnimationMixer(o), ac = mx.clipAction(clip); ac.play(); ac.time = hsh(i * 7.7) * wj.dur;
+        const pa = PATHS[i % 6], fw = hsh(i * 1.3) < .5, v = 1.1 + hsh(i * 5.5) * .4; ac.timeScale = v / 1.45;
+        walkers.push({o, mx, pa: fw ? pa : [pa[2], pa[3], pa[0], pa[1]], j: (hsh(i * 2.9) - .5) * 5, s: hsh(i * 4.1), v, dir: 1});
+        cityG.add(o);
+      }
+    }).catch(e => console.warn('walkers', e));
     let lastT = 0, scrT = 0;
     cityAnims.push(t => {
       const dt = Math.min(.1, t - lastT); lastT = t;
+      if (walkers.length) { camL.copy(cam.position); cityG.worldToLocal(camL);
+        for (const w of walkers) { const a = w.pa, L = Math.hypot(a[2] - a[0], a[3] - a[1]); w.s += w.dir * w.v * dt / L; if (w.s > 1) { w.s = 1; w.dir = -1; } if (w.s < 0) { w.s = 0; w.dir = 1; }
+          const u = a[0] + (a[2] - a[0]) * w.s - (a[3] - a[1]) / L * w.j, vv = a[1] + (a[3] - a[1]) * w.s + (a[2] - a[0]) / L * w.j; const [wx, wz] = loc(u, vv);
+          const near = Math.hypot(wx - camL.x, wz - camL.z) < 160; w.o.visible = near; if (!near) continue;
+          const [hx, hz] = loc((a[2] - a[0]) * w.dir, (a[3] - a[1]) * w.dir); w.o.position.set(wx, .12, wz); w.o.rotation.y = Math.atan2(hx, hz); w.mx.update(dt); } }
       const cyc = t % 46, walkOn = cyc < 20;
       for (let i = 0; i < NP; i++) { const q = ppl[i]; let f; if (walkOn) f = Math.max(0, Math.min(1, (cyc - q.w) * q.sp)); else f = 1 - Math.max(0, Math.min(1, (cyc - 20 - q.w) * q.sp)); if (cyc >= 20 && cyc < 23) f = 1;
         const back = cyc >= 23; const a = q.pa; const u = back ? a[2] + (a[0] - a[2]) * (1 - f) : a[0] + (a[2] - a[0]) * f, v = back ? a[3] + (a[1] - a[3]) * (1 - f) : a[1] + (a[3] - a[1]) * f;
