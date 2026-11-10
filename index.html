@@ -1152,6 +1152,7 @@ html.pwa footer.wrap{display:none}
     <button role="tab" data-tab="ai">Account</button>
     <a class="gta-tab" href="/gta/">GTA VI</a>
     <a class="gta-tab lock-tab" href="/lock/" id="lockTab" style="display:none">Locker</a>
+    <a class="gta-tab lock-tab" href="/world/" id="worldTab" style="display:none">World</a>
   </nav>
   <a class="gta-pill" href="/gta/" aria-label="GTA VI Tracker">GTA VI</a>
   <button class="btn btn-g btn-sm" id="walletBtn">Connect</button>
@@ -3568,7 +3569,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
@@ -3596,6 +3597,8 @@ function tgPrompt(force){if(DEMO||!ME||!FEAT.engine)return;const L=ME.linked||{}
   try{if(!force&&sessionStorage.getItem('oe_tgprompt'))return;sessionStorage.setItem('oe_tgprompt','1');}catch(e){}
   mbSheet(`<h3>One last step</h3><p>Your wallet is connected. Now link Telegram, that is where Your Engine talks to you: chat, alerts, briefings, voice notes. One tap opens the bot, then you are done.</p><button class="btn btn-g" data-tgl="1">Link Telegram</button><button class="btn" data-mb="close" style="margin-top:8px">Later</button>`);
   const b=document.querySelector('#mbSheet [data-tgl]');if(b)b.onclick=()=>act('tg');}
+/* 2.82.0: back to the World after connecting there */
+const _loadW=load;load=async function(){await _loadW();try{const n=localStorage.getItem('oe_next');if(TOKEN&&n==='/world/'){localStorage.removeItem('oe_next');location.href=n;}}catch(e){}};
 load();
 setInterval(async()=>{if(document.hidden||!TOKEN||DEMO)return;try{const m=await api('/v1/engine/me');const before=ME&&ME.balance&&ME.balance.usd;ME=m;if(m.balance&&before!=null&&m.balance.usd>before+0.0001){toast('Top up arrived: +'+usd(m.balance.usd-before));render();}}catch(e){}},45000);
 
