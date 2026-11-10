@@ -964,7 +964,7 @@ void main(){
       zebra(96, 96, 416, 96, 46); zebra(96, 416, 416, 416, 46); zebra(96, 96, 96, 416, 46); zebra(416, 96, 416, 416, 46); zebra(130, 130, 382, 382, 40); zebra(382, 130, 130, 382, 40);
       const m = new THREE.Mesh(new THREE.PlaneGeometry(56, 56), new THREE.MeshBasicMaterial({map: tex(c), transparent: true, opacity: .55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4})); m.rotation.x = -H; m.rotation.z = -crossRot; m.position.y = .3; cityG.add(m); OSMV.push(m); }
     // people on the crossing, they all go at once when the lights change
-    const NP = 420, pp = new Float32Array(NP * 3), pc = new Float32Array(NP * 3), ppl = [];
+    const NP = 0, pp = new Float32Array(NP * 3), pc = new Float32Array(NP * 3), ppl = [];
     const cr = Math.cos(crossRot), sr = Math.sin(crossRot), loc = (u, v) => [u * cr - v * sr, u * sr + v * cr];
     const PATHS = [[-20, -20, 20, -20], [-20, 20, 20, 20], [-20, -20, -20, 20], [20, -20, 20, 20], [-16, -16, 16, 16], [16, -16, -16, 16]];
     for (let i = 0; i < NP; i++) { const pa = PATHS[i % 6], fw = hsh(i * 1.1) < .5; ppl.push({pa: fw ? pa : [pa[2], pa[3], pa[0], pa[1]], j: (hsh(i * 2.3) - .5) * 4, sp: .055 + hsh(i * 3.7) * .04, w: hsh(i * 4.9) * 3 });
@@ -1003,13 +1003,18 @@ void main(){
   /* the real Shibuya: Google Photorealistic 3D Tiles. If they do not load (no key, quota, offline), the neon city above stays. */
   const GKEY = 'AIzaSyBaY51c1cgAXb3wDYwe_Snno_laaIeEG6s';
   window.__real = false;
+  const OSM0 = () => '© OpenStreetMap contributors'; const say = m => { const el = $('.osm'); if (el) el.innerHTML = E(OSM0()) + ' · <span style="color:#ffb35c">' + E(m) + '</span>'; };
   if (GKEY && !/[?&]osm=1/.test(location.search)) (async () => {
     try {
-      const M = await import('3d-tiles-renderer'), PL = await import('3d-tiles-renderer/plugins');
+      say('Loading the real Shibuya…');
+      let M, PL; try { M = await import('3d-tiles-renderer'); PL = await import('3d-tiles-renderer/plugins'); } catch (e) { say('3D city off: the 3D library did not load (' + (e.message || e) + ')'); throw e; }
       const tiles = new M.TilesRenderer();
+      // first plugin: watches every download, so a refused key or a blocked request shows up on screen instead of only in the console
+      let failed = false;
       tiles.registerPlugin(new PL.GoogleCloudAuthPlugin({apiToken: GKEY, autoRefreshToken: true}));
       tiles.registerPlugin(new PL.TileCompressionPlugin()); tiles.registerPlugin(new PL.UnloadTilesPlugin()); tiles.registerPlugin(new PL.TilesFadePlugin());
       tiles.registerPlugin(new PL.ReorientationPlugin({lat: 35.659510 * Math.PI / 180, lon: 139.700560 * Math.PI / 180, height: 52, up: '+y'}));
+      tiles.registerPlugin({name: 'OE_DIAG', priority: -1000, fetchData: (url, o) => fetch(url, o).then(async r => { if (!r.ok && !failed && /root\.json/.test(url)) { failed = true; let m = r.status + ' ' + r.statusText; try { const j = await r.clone().json(); if (j.error && j.error.message) m = r.status + ': ' + j.error.message; } catch (e) {} say('3D city off, Google says ' + m); } return r; }, e => { if (!failed) { failed = true; say('3D city off: no connection to Google tiles (' + (e.message || e) + ')'); } throw e; })});
       tiles.errorTarget = TOUCH ? 22 : 12; tiles.lruCache.minSize = 600; tiles.lruCache.maxSize = TOUCH ? 900 : 1600;
       // the tile frame has north on +z and west on +x, the city uses east +x and south +z: turn it around
       const holder = new THREE.Group(); holder.rotation.y = Math.PI; holder.add(tiles.group); cityG.add(holder);
@@ -1033,7 +1038,8 @@ void main(){
         o3.set(q.x, q.y + 2.2, q.z); fr.set(o3, down); const h = fr.intersectObject(tiles.group, true)[0]; fc = {x: q.x, z: q.z, y: q.y, h: h ? h.point.y : -1e9, t}; return fc.h; };
       function scene3dCredit() { const a = tiles.getAttributions(); const txt = a.filter(x => x.type === 'string').map(x => x.value).join(' '); $('.osm').innerHTML = '<b style="font-family:Arial,sans-serif;letter-spacing:-.2px;color:#fff;opacity:.85">Google</b> ' + E(txt || 'Map data ©Google') + ' · <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" style="color:inherit">© OpenStreetMap</a>'; }
       setInterval(() => { if (shown) scene3dCredit(); }, 8000);
-    } catch (e) { console.warn('3D tiles unavailable, using the neon city', e); }
+      setTimeout(() => { if (!shown && !failed) say('3D city: still waiting for Google tiles (' + models + ' loaded)'); }, 25000);
+    } catch (e) { console.warn('3D tiles unavailable, using the neon city', e); if (!/3D city off/.test($('.osm').textContent)) say('3D city off: ' + (e.message || e)); }
   })();
   const glass = new THREE.Mesh(new THREE.PlaneGeometry(2 * WX, WY1 - WY0), new THREE.MeshBasicMaterial({color: 0x7ad8ff, transparent: true, opacity: .035, blending: add, depthWrite: false})); glass.position.set(0, (WY0 + WY1) / 2, Z0 + .02); S.add(glass);
 
