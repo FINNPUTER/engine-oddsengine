@@ -974,13 +974,27 @@ void main(){
     const pplM = new THREE.InstancedMesh(new THREE.BoxGeometry(.5, 1.7, .32).translate(0, .85, 0), new THREE.MeshBasicMaterial({color: 0xffffff}), NP); pplM.frustumCulled = false;
     { const c = new THREE.Color(); for (let i = 0; i < NP; i++) { c.setRGB(pc[i * 3] * .55, pc[i * 3 + 1] * .55, pc[i * 3 + 2] * .6); pplM.setColorAt(i, c); } } cityG.add(pplM); OSMV.push(pplM);
     const dmy = new THREE.Object3D();
-    // traffic: headlights one way, tail lights the other
-    const NC = Math.min(220, lanes.length * 6), cp = new Float32Array(NC * 3), cc2 = new Float32Array(NC * 3), cars = [];
-    for (let i = 0; i < NC; i++) { const ln = lanes[i % lanes.length], dir = hsh(i * 8.1) < .5 ? 1 : -1; cars.push({ln, s: hsh(i * 6.6) * ln.len, v: (7 + hsh(i * 9.2) * 7) * dir, dir}); cc2.set(dir > 0 ? [1.6, 1.5, 1.3] : [1.8, .15, .2], i * 3); }
+    // traffic: real Tokyo cars (3D models), white head lights at the front and red tail lights at the back
+    const CT = [['taxi', 4.5, .3], ['kei', 3.4, .18], ['sedan', 5.2, .1], ['van', 4.7, .12, 1], ['truck', 3.4, .1], ['bus', 10.5, .07], ['ae86', 4.2, .13]];
+    const NC = Math.min(TOUCH ? 90 : 200, lanes.length * 6), cp = new Float32Array(NC * 6), cc2 = new Float32Array(NC * 6), cars = [];
+    for (let i = 0; i < NC; i++) { const ln = lanes[i % lanes.length], dir = hsh(i * 8.1) < .5 ? 1 : -1; let r = hsh(i * 3.9), ty = 0; while (ty < CT.length - 1 && r > CT[ty][2]) { r -= CT[ty][2]; ty++; }
+      cars.push({ln, s: hsh(i * 6.6) * ln.len, v: (7 + hsh(i * 9.2) * 7) * (ty === 5 ? .7 : 1) * dir, dir, ty, hl: CT[ty][1] / 2, k: -1}); cc2.set([1.7, 1.6, 1.4], i * 6); cc2.set([1.8, .12, .16], i * 6 + 3); }
     const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.BufferAttribute(cp, 3)); cg.setAttribute('color', new THREE.BufferAttribute(cc2, 3));
-    cityG.add(new THREE.Points(cg, new THREE.PointsMaterial({size: .38, vertexColors: true, toneMapped: false})));
-    const carM = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, 1.35, 4.3).translate(0, .75, 0), new THREE.MeshBasicMaterial({color: 0xffffff}), NC); carM.frustumCulled = false;
-    { const c = new THREE.Color(); for (let i = 0; i < NC; i++) { const k = hsh(i * 3.9); c.setRGB(k < .3 ? .09 : .05, k < .3 ? .09 : .05, k < .3 ? .1 : .07); if (k > .85) c.setRGB(.2, .17, .03); carM.setColorAt(i, c); } } /* box cars dropped, only their head and tail lights drive */
+    cityG.add(new THREE.Points(cg, new THREE.PointsMaterial({size: .32, vertexColors: true, toneMapped: false})));
+    const carIM = [], carBase = [], carTmp = new THREE.Matrix4();
+    if (window.__rec) window.__cars = {cars, cp};
+    { const L = new GLTFLoader(); L.setMeshoptDecoder(MeshoptDecoder);
+      CT.forEach(([n, len, , rot], ty) => L.load('assets/car_' + n + '.glb', gl => {
+        let mesh = null; gl.scene.updateMatrixWorld(true); gl.scene.traverse(o => { if (o.isMesh && !mesh) mesh = o; }); if (!mesh) return;
+        // the geometry is quantized (meshopt), so it is never rewritten: size, turn and ground offset go into one base matrix per car type
+        const g = mesh.geometry, M0 = mesh.matrixWorld.clone(); if (rot) M0.premultiply(new THREE.Matrix4().makeRotationY(Math.PI / 2));
+        g.computeBoundingBox(); const b = g.boundingBox.clone().applyMatrix4(M0), sc = len / (b.max.z - b.min.z);
+        carBase[ty] = new THREE.Matrix4().makeTranslation(-(b.min.x + b.max.x) / 2 * sc, -b.min.y * sc, -(b.min.z + b.max.z) / 2 * sc).multiply(new THREE.Matrix4().makeScale(sc, sc, sc)).multiply(M0);
+        const m = mesh.material.clone(); m.emissive = new THREE.Color(.12, .12, .13); if (m.map) m.emissiveMap = m.map; m.roughness = .45; m.metalness = .1; m.fog = true;
+        const mine = []; cars.forEach((c, i) => { if (c.ty === ty) { c.k = mine.length; mine.push(i); } });
+        const im = new THREE.InstancedMesh(g, m, Math.max(1, mine.length)); im.count = mine.length; im.frustumCulled = false; carIM[ty] = im; cityG.add(im);
+      }, undefined, e => console.warn('car', n, e)));
+    }
     // pedestrians: rigged people with a real walk cycle (Mixamo rig), crossing the scramble in every direction
     const walkers = [], camL = new THREE.Vector3();
     Promise.all([new Promise((ok, no) => { const L = new GLTFLoader(); L.setMeshoptDecoder(MeshoptDecoder); L.load('assets/ppl_a.glb', ok, undefined, no); }), fetch('assets/walk.json').then(r => r.json())]).then(([gl, wj]) => {
@@ -1003,10 +1017,10 @@ void main(){
     cityAnims.push(t => {
       const dt = Math.min(.1, t - lastT); lastT = t;
       if (walkers.length) { camL.copy(cam.position); cityG.worldToLocal(camL);
-        for (const w of walkers) { const a = w.pa, L = Math.hypot(a[2] - a[0], a[3] - a[1]); w.s += w.dir * w.v * dt / L; if (w.s > 1) { w.s = 1; w.dir = -1; } if (w.s < 0) { w.s = 0; w.dir = 1; }
+        const wOn = (t % 46) < 20; for (const w of walkers) { const a = w.pa, L = Math.hypot(a[2] - a[0], a[3] - a[1]); const wait = !wOn && (w.s <= 0 || w.s >= 1); if (!wait) w.s += w.dir * w.v * dt / L; if (w.s > 1) { w.s = 1; w.dir = -1; } if (w.s < 0) { w.s = 0; w.dir = 1; }
           const u = a[0] + (a[2] - a[0]) * w.s - (a[3] - a[1]) / L * w.j, vv = a[1] + (a[3] - a[1]) * w.s + (a[2] - a[0]) / L * w.j; const [wx, wz] = loc(u, vv);
           const near = Math.hypot(wx - camL.x, wz - camL.z) < 160; w.o.visible = near; if (!near) continue;
-          const [hx, hz] = loc((a[2] - a[0]) * w.dir, (a[3] - a[1]) * w.dir); w.o.position.set(wx, .12, wz); w.o.rotation.y = Math.atan2(hx, hz); w.mx.update(dt); } }
+          const [hx, hz] = loc((a[2] - a[0]) * w.dir, (a[3] - a[1]) * w.dir); w.o.position.set(wx, .12, wz); w.o.rotation.y = Math.atan2(hx, hz); if (!wait) w.mx.update(dt); } }
       const cyc = t % 46, walkOn = cyc < 20;
       for (let i = 0; i < NP; i++) { const q = ppl[i]; let f; if (walkOn) f = Math.max(0, Math.min(1, (cyc - q.w) * q.sp)); else f = 1 - Math.max(0, Math.min(1, (cyc - 20 - q.w) * q.sp)); if (cyc >= 20 && cyc < 23) f = 1;
         const back = cyc >= 23; const a = q.pa; const u = back ? a[2] + (a[0] - a[2]) * (1 - f) : a[0] + (a[2] - a[0]) * f, v = back ? a[3] + (a[1] - a[3]) * (1 - f) : a[1] + (a[3] - a[1]) * f;
@@ -1017,9 +1031,9 @@ void main(){
         let k = 1; while (k < ln.cum.length - 1 && ln.cum[k] < ns2) k++; const f = (ns2 - ln.cum[k - 1]) / Math.max(.01, ln.cum[k] - ln.cum[k - 1]); const ax = ln.p[2 * k - 2], az = ln.p[2 * k - 1], bx = ln.p[2 * k], bz = ln.p[2 * k + 1];
         const L = Math.hypot(bx - ax, bz - az) || 1, x = ax + (bx - ax) * f + (bz - az) / L * 2.2 * c.dir, z = az + (bz - az) * f - (bx - ax) / L * 2.2 * c.dir, dO = Math.hypot(x, z);
         if (!(walkOn && dO > 27 && dO < 36 && Math.hypot(x + (bx - ax) / L * c.v * .5, z + (bz - az) / L * c.v * .5) < dO)) c.s = ns2;
-        const ux = (bx - ax) / L * c.dir, uz = (bz - az) / L * c.dir; cp[i * 3] = x + ux * 2.2; cp[i * 3 + 1] = .8; cp[i * 3 + 2] = z + uz * 2.2;
-        dmy.position.set(x, .15, z); dmy.rotation.set(0, Math.atan2(ux, uz), 0); dmy.updateMatrix(); carM.setMatrixAt(i, dmy.matrix); }
-      cg.attributes.position.needsUpdate = true; carM.instanceMatrix.needsUpdate = true;
+        const ux = (bx - ax) / L * c.dir, uz = (bz - az) / L * c.dir, hl = c.hl - .1; cp[i * 6] = x + ux * hl; cp[i * 6 + 1] = .75; cp[i * 6 + 2] = z + uz * hl; cp[i * 6 + 3] = x - ux * hl; cp[i * 6 + 4] = .85; cp[i * 6 + 5] = z - uz * hl;
+        const im = carIM[c.ty]; if (im) { dmy.position.set(x, .04, z); dmy.rotation.set(0, Math.atan2(ux, uz), 0); dmy.updateMatrix(); im.setMatrixAt(c.k, carTmp.multiplyMatrices(dmy.matrix, carBase[c.ty])); } }
+      cg.attributes.position.needsUpdate = true; carIM.forEach(im => { if (im) im.instanceMatrix.needsUpdate = true; });
       if (t - scrT > .2) { scrT = t; drawScreen(t); }
     });
   }
