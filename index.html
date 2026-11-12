@@ -1241,6 +1241,18 @@ addEventListener('pointermove',e=>{const av=$('#av');if(!av)return;const r=av.ge
 function setRing(s){RING.state=s;const el=$('#faceSt');if(el)el.textContent=s;}
 
 /* ---------- shared views ---------- */
+function rotMc(v){v=+v||0;return v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+Math.round(v/1e3)+'K':v?'$'+Math.round(v):'n/a';}
+function rotX(a,b){return a&&b?(b/a).toFixed(1)+'x':'';}
+async function moRotLoad(){const el=$('#moRot');if(!el)return;let d;try{d=await api('/v1/engine/rotation');}catch(e){el.innerHTML='<h3>Meta Rotation</h3><p class="sub">Could not load right now.</p>';return;}
+  const head='<h3>Meta Rotation</h3><p class="sub">When wallets with a proven early track record move into a new meta, holders see it here and in Telegram. Every wallet checked by us on the chart. Wallets stay private.</p>';
+  const rec=d.record&&d.record.rotations?`<div class="note" style="margin-top:10px">Track record: ${d.record.rotations} rotation${d.record.rotations==1?'':'s'}${d.record.settled?`, ${d.record.hit_2x} of ${d.record.settled} with a coin that did 2x or more within 7 days`:''}. Peak based.</div>`:'';
+  if(!d.access){el.innerHTML=head+`<div class="mo-mail" style="display:block;padding:14px;border:1px dashed var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>Holders only</b><p class="note" style="margin-top:6px">Hold the ${E(d.tier||'holder')} tier of $ODDS in a wallet linked to Your Engine and it unlocks on its own. No extra payment.</p></div>`+rec;return;}
+  const it=d.items||[];
+  const test=!d.live?'<p class="note" style="margin:0 0 8px">Testing. Only testers see this until it goes live.</p>':'';
+  const rows=it.length?it.map(r=>{const p=r.proof||{};return `<div class="it" style="display:block;padding:12px 0;border-top:1px solid var(--line,rgba(255,255,255,.09))"><p><b>${E(r.from||'')} → ${E(r.to||'')}</b> · ${r.wallets} proven wallets<small>${r.ts?new Date(r.ts*1000).toLocaleDateString():''}</small></p>
+    <p class="note" style="margin:4px 0 6px">Proof: one of them bought $${E(p.symbol||'?')} at ${rotMc(p.entry)}, peak ${rotMc(p.peak)}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${(r.coins||[]).map(c=>`<a class="btn btn-sm" href="#token=${E(c.token)}">$${E(c.ticker||'?')}${c.peak_mcap&&c.mcap_at_alert?' · '+rotX(c.mcap_at_alert,c.peak_mcap):''}</a>`).join('')}</div></div>`;}).join(''):'<div class="note">Nothing yet. You get it the moment it happens.</div>';
+  el.innerHTML=head+test+`<div class="mem">${rows}</div>`+rec;}
 function sw(on,attr){return `<button class="sw ${on?'on':''}" ${attr} aria-pressed="${on?'true':'false'}" aria-label="Toggle"></button>`;}
 function soon(){
   const ai=TAB!=='engine';
@@ -2505,11 +2517,13 @@ engineView=function(){
     <div class="card rv"><h3>News</h3><p class="sub">Pick your sources. Each one comes straight to your Telegram as it happens, or collected in your morning briefing.</p>
       ${moNews()}
       <div class="mo-mail" style="margin-top:10px"><input id="moNewsAdd" maxlength="200" placeholder="Any public Telegram channel (@name) or RSS link" aria-label="Add a news source"><button class="btn btn-g btn-sm" data-act="newsadd">Add</button></div></div>
+    ${MO&&MO.switches&&MO.switches.rotation?'<div class="card rv" id="moRot"><h3>Meta Rotation</h3><p class="sub">Loading</p></div>':''}
     <div class="card rv"><h3>From OddsEngine</h3><p class="sub">What Your Engine sends you on its own. Switch off anything you do not want.</p>
       <div class="row"><div class="l"><b>OddsEngine news</b><span>What the team posts in the channel and on X, straight to your Telegram</span></div>${sw(!MO||MO.official_news!==false,'data-set="official_news"')}</div>
       <div class="row"><div class="l"><b>Check-ins</b><span>Asks how your training, meeting or appointment went</span></div>${sw(!MO||MO.check_ins!==false,'data-set="check_ins"')}</div>
       ${MO&&MO.switches&&MO.switches.guard?`<div class="row"><div class="l"><b>Wallet Guard</b><span>A message in seconds when your wallet approves an unknown spender or tokens leave without a swap, with a Revoke button. Free</span></div>${sw(!!MO.guard,'data-set="guard"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.smart?`<div class="row"><div class="l"><b>Smart money calls</b><span>A message in Telegram when several top rated wallets buy the same coin. Free</span></div>${sw(!!MO.smart_calls,'data-set="smart_calls"')}</div>`:''}
+      ${MO&&MO.switches&&MO.switches.rotation?`<div class="row"><div class="l"><b>Meta Rotation</b><span>A message in Telegram when proven wallets move into a new meta. For $ODDS holders</span></div>${sw(MO.meta_rotation!==false,'data-set="meta_rotation"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.voice?`<div class="row"><div class="l"><b>Voice replies</b><span>A voice note in Telegram gets a voice note back. Costs a little more than text</span></div>${sw(!!MO.voice_replies,'data-set="voice_replies"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.lang?`<div class="row"><div class="l"><b>Language</b><span>Answers, briefing, alerts and news in this language</span></div><select id="moLang" class="mo-sel mo-wide"><option value="auto">Like I write</option>${Object.entries(MO.languages||{}).map(([k,v])=>`<option value="${E(k)}" ${MO.language===k?'selected':''}>${E(v)}</option>`).join('')}</select></div>`:''}
     </div>
@@ -2676,7 +2690,8 @@ bind=function(){
   const lg=$('#moLang');if(lg)lg.onchange=async()=>{try{await api('/v1/engine/settings',{method:'POST',body:JSON.stringify({language:lg.value})});if(MO)MO.language=lg.value==='auto'?null:lg.value;toast('Language saved');}catch(e){toast('Could not save: '+e.message);}};
   document.querySelectorAll('[data-say]').forEach(b=>b.onclick=()=>{const h=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]);const m=h[+b.dataset.say];if(m)voPlay(m.content,b);});
   document.querySelectorAll('[data-cw]').forEach(b=>b.onclick=async()=>{const c=b.closest('.mo-card');const a=c&&c.querySelector('a[href^="#token="]');const q=a?a.getAttribute('href').slice(7):'';if(!q)return;b.disabled=true;try{const r=await api('/v1/engine/agent/watch',{method:'POST',body:JSON.stringify({q})});toast('Watching $'+(r.symbol||'')+': alerts in Telegram');b.textContent='Watching';}catch(e){toast(e.message||'Could not start');b.disabled=false;}});
-  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=async()=>{const k=b.dataset.set,on=!b.classList.contains('on');try{await api('/v1/engine/settings',{method:'POST',body:JSON.stringify({[k]:on})});b.classList.toggle('on',on);if(MO)MO[k]=on;toast(k==='official_news'?(on?'OddsEngine news on':'OddsEngine news off'):k==='voice_replies'?(on?'Voice replies on':'Voice replies off'):k==='smart_calls'?(on?'Smart money calls on':'Smart money calls off'):(on?'Check-ins on':'Check-ins off'));}catch(e){toast('Could not save: '+e.message);}});
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=async()=>{const k=b.dataset.set,on=!b.classList.contains('on');try{await api('/v1/engine/settings',{method:'POST',body:JSON.stringify({[k]:on})});b.classList.toggle('on',on);if(MO)MO[k]=on;toast(k==='official_news'?(on?'OddsEngine news on':'OddsEngine news off'):k==='voice_replies'?(on?'Voice replies on':'Voice replies off'):k==='smart_calls'?(on?'Smart money calls on':'Smart money calls off'):k==='meta_rotation'?(on?'Meta Rotation on':'Meta Rotation off'):(on?'Check-ins on':'Check-ins off'));}catch(e){toast('Could not save: '+e.message);}});
+  if($('#moRot'))moRotLoad();
   document.querySelectorAll('[data-mailwatch]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({watch:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.watch=on;toast(on?'Important mail goes to Telegram':'Mail alerts off');}catch(e){toast('Could not save: '+e.message);}});
 };
 const _act3=act;
