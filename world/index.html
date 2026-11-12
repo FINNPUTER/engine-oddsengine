@@ -829,7 +829,7 @@ void main(){
     const k = Math.floor(t / 4) % 3; x.textAlign = 'center'; x.textBaseline = 'middle';
     if (k === 0) { x.strokeStyle = '#22f08a'; x.lineWidth = 34; x.lineCap = 'butt'; x.shadowColor = '#22f08a'; x.shadowBlur = 30; x.beginPath(); x.arc(256, 144, 72, -0.63, -0.93 + 6.2832); x.stroke(); x.shadowBlur = 0; }
     else if (k === 1) { x.fillStyle = '#fff'; x.font = '900 italic 64px Unbounded, sans-serif'; x.fillText('THE ENGINE', 256, 120); x.fillStyle = '#22f08a'; x.font = '700 30px "JetBrains Mono", monospace'; x.fillText('WEATHER · CRYPTO · SCANS', 256, 190); }
-    else { x.fillStyle = '#22f08a'; x.font = '900 52px Unbounded, sans-serif'; x.fillText('ODDSENGINE', 256, 116); x.fillStyle = '#fff'; x.font = '700 30px "JetBrains Mono", monospace'; x.fillText('t.me/OddsEnginePublicBot', 256, 186); }
+    else { x.fillStyle = '#22f08a'; x.font = '900 52px Unbounded, sans-serif'; x.fillText('ODDS ENGINE', 256, 116); x.fillStyle = '#fff'; x.font = '700 30px "JetBrains Mono", monospace'; x.fillText('t.me/OddsEnginePublicBot', 256, 186); }
     x.fillStyle = 'rgba(255,255,255,.05)'; for (let y = (t * 60) % 6; y < 288; y += 6) x.fillRect(0, y, 512, 2);
     scT.needsUpdate = true;
   }
@@ -981,7 +981,7 @@ void main(){
       cars.push({ln, s: hsh(i * 6.6) * ln.len, v: (7 + hsh(i * 9.2) * 7) * (ty === 5 ? .7 : 1) * dir, dir, ty, hl: CT[ty][1] / 2, k: -1}); cc2.set([1.7, 1.6, 1.4], i * 6); cc2.set([1.8, .12, .16], i * 6 + 3); }
     const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.BufferAttribute(cp, 3)); cg.setAttribute('color', new THREE.BufferAttribute(cc2, 3));
     cityG.add(new THREE.Points(cg, new THREE.PointsMaterial({size: .32, vertexColors: true, toneMapped: false})));
-    const carIM = [], carBase = [], carTmp = new THREE.Matrix4();
+    const carIM = [], carBase = [], carTmp = new THREE.Matrix4(), carN = new Array(7).fill(0), camC = new THREE.Vector3();
     if (window.__rec) window.__cars = {cars, cp};
     { const L = new GLTFLoader(); L.setMeshoptDecoder(MeshoptDecoder);
       CT.forEach(([n, len, , rot], ty) => L.load('assets/car_' + n + '.glb', gl => {
@@ -992,7 +992,7 @@ void main(){
         carBase[ty] = new THREE.Matrix4().makeTranslation(-(b.min.x + b.max.x) / 2 * sc, -b.min.y * sc, -(b.min.z + b.max.z) / 2 * sc).multiply(new THREE.Matrix4().makeScale(sc, sc, sc)).multiply(M0);
         const m = mesh.material.clone(); m.emissive = new THREE.Color(.12, .12, .13); if (m.map) m.emissiveMap = m.map; m.roughness = .45; m.metalness = .1; m.fog = true;
         const mine = []; cars.forEach((c, i) => { if (c.ty === ty) { c.k = mine.length; mine.push(i); } });
-        const im = new THREE.InstancedMesh(g, m, Math.max(1, mine.length)); im.count = mine.length; im.frustumCulled = false; carIM[ty] = im; cityG.add(im);
+        const im = new THREE.InstancedMesh(g, m, Math.max(1, mine.length)); im.count = 0; im.frustumCulled = false; carIM[ty] = im; cityG.add(im);
       }, undefined, e => console.warn('car', n, e)));
     }
     // pedestrians: rigged people with a real walk cycle (Mixamo rig), crossing the scramble in every direction
@@ -1027,19 +1027,20 @@ void main(){
         const L = Math.hypot(a[2] - a[0], a[3] - a[1]), ox = -(a[3] - a[1]) / L * q.j, oz = (a[2] - a[0]) / L * q.j; const [wx, wz] = loc(u + ox, v + oz);
         const [dx2, dz2] = loc((a[2] - a[0]) * (back ? -1 : 1), (a[3] - a[1]) * (back ? -1 : 1)); dmy.position.set(wx, .15 + Math.abs(Math.sin(t * 9 + i)) * .05 * (f > 0 && f < 1 ? 1 : 0), wz); dmy.rotation.set(0, Math.atan2(dx2, dz2), 0); dmy.updateMatrix(); pplM.setMatrixAt(i, dmy.matrix); }
       pplM.instanceMatrix.needsUpdate = true;
+      camC.copy(cam.position); cityG.worldToLocal(camC); carN.fill(0); const carR = TOUCH ? 140 : 220;
       for (let i = 0; i < NC; i++) { const c = cars[i], ln = c.ln; let ns2 = c.s + c.v * dt; if (ns2 > ln.len) ns2 -= ln.len; if (ns2 < 0) ns2 += ln.len;
         let k = 1; while (k < ln.cum.length - 1 && ln.cum[k] < ns2) k++; const f = (ns2 - ln.cum[k - 1]) / Math.max(.01, ln.cum[k] - ln.cum[k - 1]); const ax = ln.p[2 * k - 2], az = ln.p[2 * k - 1], bx = ln.p[2 * k], bz = ln.p[2 * k + 1];
         const L = Math.hypot(bx - ax, bz - az) || 1, x = ax + (bx - ax) * f + (bz - az) / L * 2.2 * c.dir, z = az + (bz - az) * f - (bx - ax) / L * 2.2 * c.dir, dO = Math.hypot(x, z);
         if (!(walkOn && dO > 27 && dO < 36 && Math.hypot(x + (bx - ax) / L * c.v * .5, z + (bz - az) / L * c.v * .5) < dO)) c.s = ns2;
         const ux = (bx - ax) / L * c.dir, uz = (bz - az) / L * c.dir, hl = c.hl - .1; cp[i * 6] = x + ux * hl; cp[i * 6 + 1] = .75; cp[i * 6 + 2] = z + uz * hl; cp[i * 6 + 3] = x - ux * hl; cp[i * 6 + 4] = .85; cp[i * 6 + 5] = z - uz * hl;
-        const im = carIM[c.ty]; if (im) { dmy.position.set(x, .04, z); dmy.rotation.set(0, Math.atan2(ux, uz), 0); dmy.updateMatrix(); im.setMatrixAt(c.k, carTmp.multiplyMatrices(dmy.matrix, carBase[c.ty])); } }
-      cg.attributes.position.needsUpdate = true; carIM.forEach(im => { if (im) im.instanceMatrix.needsUpdate = true; });
+        const im = carIM[c.ty]; if (im && Math.hypot(x - camC.x, z - camC.z) < carR) { dmy.position.set(x, .04, z); dmy.rotation.set(0, Math.atan2(ux, uz), 0); dmy.updateMatrix(); im.setMatrixAt(carN[c.ty]++, carTmp.multiplyMatrices(dmy.matrix, carBase[c.ty])); } }
+      cg.attributes.position.needsUpdate = true; carIM.forEach((im, ty) => { if (im) { im.count = carN[ty]; im.instanceMatrix.needsUpdate = true; } });
       if (t - scrT > .2) { scrT = t; drawScreen(t); }
     });
   }
   fetch('assets/city.json').then(r => r.json()).then(buildCity).catch(() => {});
   /* the real Shibuya: Google Photorealistic 3D Tiles. If they do not load (no key, quota, offline), the neon city above stays. */
-  const GKEY = 'AIzaSyBaY51c1cgAXb3wDYwe_Snno_laaIeEG6s';
+  const GKEY = ''; // Google 3D tiles are not served to EEA accounts, so the neon city is the city
   window.__real = false;
   const OSM0 = () => '© OpenStreetMap contributors'; const say = m => { const el = $('.osm'); if (el) el.innerHTML = E(OSM0()) + ' · <span style="color:#ffb35c">' + E(m) + '</span>'; };
   if (GKEY && !/[?&]osm=1/.test(location.search)) (async () => {
@@ -1088,7 +1089,18 @@ void main(){
     x.shadowBlur = 0; x.fillStyle = '#fff'; x.globalAlpha = .7; x.fillText(text, 512, c.height / 2);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map: tex(c), transparent: true, depthWrite: false, blending: add})); return m;
   }
-  const sign1 = neonSign('ODDSENGINE', 9, 1.6, '#22f08a', '#22f08a', 'italic 900 150px Unbounded'); sign1.position.set(0, 8.2, Z0 + .15); S.add(sign1);
+  // the real mark over the window: open ring (gap at the upper right, like the app icon) plus ODDS ENGINE
+  function logoSign(w, h) {
+    const [c, x] = cnv(1024, Math.round(1024 * h / w)), cy = c.height / 2, r = 54, lw = 24;
+    x.font = '900 104px Unbounded'; const tw = x.measureText('ODDS ENGINE').width, gap = 46, total = 2 * r + lw + gap + tw, x0 = 512 - total / 2, cx = x0 + r + lw / 2;
+    const draw = () => { x.beginPath(); x.arc(cx, cy, r, -36 * Math.PI / 180, (-53 + 360) * Math.PI / 180); x.stroke(); x.textAlign = 'left'; x.textBaseline = 'middle'; x.fillText('ODDS ENGINE', cx + r + lw / 2 + gap, cy + 4); };
+    x.lineWidth = lw; x.lineCap = 'butt'; x.shadowColor = '#22f08a'; x.shadowBlur = 40; x.strokeStyle = x.fillStyle = '#22f08a'; for (let i = 0; i < 3; i++) draw();
+    x.shadowBlur = 0; x.globalAlpha = .7; x.strokeStyle = x.fillStyle = '#fff'; draw();
+    return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({map: tex(c), transparent: true, depthWrite: false, blending: add}));
+  }
+  let sign1 = logoSign(9, 1.6); sign1.position.set(0, 8.2, Z0 + .15); S.add(sign1);
+  // canvas text needs the font: draw the sign again once Unbounded is ready
+  document.fonts && document.fonts.load('900 104px Unbounded').then(() => { const n = logoSign(9, 1.6); n.position.copy(sign1.position); S.remove(sign1); S.add(n); sign1 = n; }).catch(() => {});
   const sign2 = neonSign('HQ', 3.2, 1.6, '#ff4fa3', '#ff4fa3', 'italic 900 300px Unbounded'); sign2.position.set(X1 - .1, 6.4, -1.5); sign2.rotation.y = -H; S.add(sign2);
   // pink neon palm on the left wall
   { const [c, x] = cnv(512, 512); x.strokeStyle = '#ff4fa3'; x.shadowColor = '#ff4fa3'; x.shadowBlur = 30; x.lineWidth = 12; x.lineCap = 'round'; for (let k = 0; k < 2; k++) { x.beginPath(); x.moveTo(250, 480); x.quadraticCurveTo(290, 300, 260, 170); x.stroke(); for (let i = 0; i < 7; i++) { const a = -Math.PI / 2 + (i - 3) * .5; x.beginPath(); x.moveTo(260, 170); x.quadraticCurveTo(260 + Math.cos(a) * 90, 170 + Math.sin(a) * 70 - 20, 260 + Math.cos(a) * 170, 170 + Math.sin(a) * 80 + 60); x.stroke(); } }
@@ -1361,6 +1373,7 @@ void main(){
 
   /* ================= input ================= */
   const P = {yaw: 0, pitch: .3, dist: TOUCH ? 6.6 : 5.8, vel: new THREE.Vector3(), target: null, autoUse: null, keys: {}, joy: {x: 0, y: 0}, still: 0};
+  if (window.__rec) window.__P = P;
   addEventListener('keydown', e => { if (e.target === ta) return; const k = e.key.toLowerCase(); P.keys[k] = 1; if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault(); if (k === 'e' && ST.near && !ST.using) useStation(ST.near); else if (k === 'e' && ST.pnear) showPartner(ST.pnear.p); if (k === 'f' && !e.repeat) toggleFly(); });
   addEventListener('keyup', e => { P.keys[e.key.toLowerCase()] = 0; });
   addEventListener('blur', () => { P.keys = {}; });
@@ -1454,6 +1467,7 @@ void main(){
   const inRoom = q => Math.abs(q.x) < X1 && q.z > Z0 && q.z < Z1 && q.y > -.5 && q.y < HT;
   const floorAt = q => { if (Math.abs(q.x) < X1 + .6 && Math.abs(q.z) < Z1 + .6) return q.y > HT - .7 ? HT + .02 : (q.z > Z0 - .6 ? 0 : (window.__cityFloor ? window.__cityFloor(q) : -100)); const r = window.__realFloor && window.__realFloor(q, T.v); if (r != null && r > -1e8) return Math.max(r, window.__cityFloor ? window.__cityFloor(q) - 40 : -1e9); return window.__cityFloor ? window.__cityFloor(q) : -100; };
   const colliders = ST_LIST.map(s => ({x: s.x, z: s.z, r: s.r})).concat([{x: 0, z: 5.6, r: 2.2}, {x: -2, z: 5.6, r: .9}, {x: 2, z: 5.6, r: .9}, {x: 0, z: 3.3, r: 1.1}, {x: -13.6, z: -11.2, r: .8}, {x: 13.6, z: -11.2, r: .8}, {x: 16.3, z: 11.3, r: .8}, {x: -16.3, z: 11.3, r: .8}, {x: -16.6, z: -9.8, r: 1.1}, {x: 3.1, z: 4.1, r: .6}]);
+  const navCol = colliders.filter(c => !(Math.abs(c.x) < 2.5 && c.z > 2 && c.z < 7.5)).concat([{x: 0, z: 5, r: 3.4}]);
   function frame() {
     requestAnimationFrame(frame);
     if (document.hidden) return;
@@ -1464,8 +1478,9 @@ void main(){
     mv.set(0, 0, 0);
     if (Math.hypot(ix, iz) > .08) { if (ST.using) leaveStation(); P.target = null; P.autoUse = null; const l = Math.min(1, Math.hypot(ix, iz)); const a = Math.atan2(ix, iz) + P.yaw; mv.set(Math.sin(a) * l, 0, Math.cos(a) * l); }
     else if (P.target) { mv.set(P.target.x - bot.position.x, 0, P.target.z - bot.position.z); const d = mv.length();
-      { const ux = mv.x / (d || 1), uz = mv.z / (d || 1); let blk = null, bp = 1e9; for (const c of colliders) { const cx = c.x - bot.position.x, cz = c.z - bot.position.z, pr = cx * ux + cz * uz; if (pr <= 0 || pr >= d) continue; const off = Math.abs(cx * uz - cz * ux); if (off < c.r + .55 && pr < bp && Math.hypot(P.target.x - c.x, P.target.z - c.z) > c.r + .5) { bp = pr; blk = c; } }
-        if (blk) { const sgn = ((blk.x - bot.position.x) * uz - (blk.z - bot.position.z) * ux) > 0 ? 1 : -1; const wx = blk.x + uz * sgn * (blk.r + 1.1), wz = blk.z - ux * sgn * (blk.r + 1.1); mv.set(wx - bot.position.x, 0, wz - bot.position.z).normalize().multiplyScalar(d); } } if (d < .2) { P.target = null; mv.set(0, 0, 0); if (P.autoUse) { const s = P.autoUse; P.autoUse = null; useStation(s); } } else mv.multiplyScalar(Math.min(1, d / 1.2) / d); }
+      { const ux = mv.x / (d || 1), uz = mv.z / (d || 1); let blk = null, bp = 1e9; for (const c of navCol) { const cx = c.x - bot.position.x, cz = c.z - bot.position.z, pr = cx * ux + cz * uz; if (pr <= 0 || pr >= d) continue; const off = Math.abs(cx * uz - cz * ux); if (off < c.r + .55 && pr < bp && Math.hypot(P.target.x - c.x, P.target.z - c.z) > c.r + .5) { bp = pr; blk = c; } }
+        if (blk) { const sgn = (((blk.x - bot.position.x) * uz - (blk.z - bot.position.z) * ux) > 0 ? 1 : -1) * (P.stuckFlip ? -1 : 1); const wx = blk.x + uz * sgn * (blk.r + 1.1), wz = blk.z - ux * sgn * (blk.r + 1.1); mv.set(wx - bot.position.x, 0, wz - bot.position.z).normalize().multiplyScalar(d); } } if (d < .2) { P.target = null; mv.set(0, 0, 0); if (P.autoUse) { const s = P.autoUse; P.autoUse = null; useStation(s); } } else mv.multiplyScalar(Math.min(1, d / 1.2) / d); }
+    if (P.target && !P.fly) { P.stuckT = (P.stuckT || 0) + dt; if (P.stuckT > 1.1) { const mvd = P.stuckP ? Math.hypot(bot.position.x - P.stuckP.x, bot.position.z - P.stuckP.z) : 9; if (mvd < .35) P.stuckFlip = !P.stuckFlip; P.stuckP = bot.position.clone(); P.stuckT = 0; } } else { P.stuckT = 0; P.stuckP = null; }
     const old = bot.position.clone(), wasIn = inRoom(old);
     if (P.fly) {
       if (P.home) { const tgt = P.home === 1 ? new THREE.Vector3(0, 3.2, Z0 - 14) : new THREE.Vector3(0, 2.6, Z0 + 6); const d3 = tgt.clone().sub(bot.position); const dd = d3.length();

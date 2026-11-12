@@ -3401,7 +3401,7 @@ function cryptoView(){
   const mods=(C.modules||[]).filter(m=>m.all&&m.all.n);
   return mbHead('Crypto Edition','Crypto markets','Live prices and the strategies the engine runs on Polymarket crypto markets.')+
   `<div class="mb-px rv d2">${as.map(a=>`<div class="mb-pc"><span>${E(a.sym||a.id)}</span><b>${rpPx(px[a.id])}</b></div>`).join('')||'<p class="note">Prices are loading on the server.</p>'}</div>
-  ${mods.length?`<h3 class="mb-h3 rv d3">Strategies</h3><div class="mb-list rv d3">${mods.map(m=>`<div class="mb-row"><span class="mb-sym">${E(m.name||m.id)}</span><span class="mb-sub">${Math.round(m.all.win_rate*100)}% won · ${m.all.n} trades</span></div>`).join('')}</div>`:''}
+  ${mods.length?`<h3 class="mb-h3 rv d3">Strategies</h3><div class="mb-list rv d3">${mods.map(m=>`<div class="mb-row"><span class="mb-sym">${E(m.name||m.id)}</span><span class="mb-sub">${m.pairs&&m.pairs.windows?`${Math.round((m.pairs.locked_rate!=null?m.pairs.locked_rate:m.pairs.locked/m.pairs.windows)*100)}% paired · ${m.pairs.windows} windows`:`${Math.round(m.all.win_rate*100)}% won · ${m.all.n} trades`}</span></div>`).join('')}</div>`:''}
   <p class="note rv d3">${C.stale?'Live data is a few minutes behind right now. ':''}Not financial advice.</p>
   <a class="btn btn-g mb-wide rv d3" href="https://terminal.oddsengine.live" target="_blank" rel="noopener">Open the terminal</a>`;
 }
