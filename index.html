@@ -1253,6 +1253,42 @@ async function moRotLoad(){const el=$('#moRot');if(!el)return;let d;try{d=await 
     <p class="note" style="margin:4px 0 6px">Proof: one of them bought $${E(p.symbol||'?')} at ${rotMc(p.entry)}, peak ${rotMc(p.peak)}</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px">${(r.coins||[]).map(c=>`<a class="btn btn-sm" href="#token=${E(c.token)}">$${E(c.ticker||'?')}${c.peak_mcap&&c.mcap_at_alert?' · '+rotX(c.mcap_at_alert,c.peak_mcap):''}</a>`).join('')}</div></div>`;}).join(''):'<div class="note">Nothing yet. You get it the moment it happens.</div>';
   el.innerHTML=head+test+`<div class="mem">${rows}</div>`+rec;}
+/* Seit 2.84.9: Auto mode. Der Nutzer traegt seinen eigenen Kalshi-Schluessel und seine Limits ein. Der Schluessel geht nur
+   einmal an den Server, wird dort verschluesselt gespeichert und nie wieder angezeigt. */
+const AUTO_IN='width:100%;border-radius:12px;border:1px solid var(--line2);background:rgba(0,0,0,.35);padding:11px 13px;color:inherit;font:inherit;outline:none;margin-top:6px';
+function moAutoForm(d,neu){const c=d.coins||['btc','eth'];return `<div style="display:grid;gap:12px;margin-top:12px">
+  ${neu?`<label class="note">Kalshi Key ID<input id="atKid" style="${AUTO_IN}" autocomplete="off" spellcheck="false" placeholder="a1b2c3d4-…"></label>
+  <label class="note">Private key (the whole file, with the BEGIN and END lines)<textarea id="atPem" style="${AUTO_IN};height:110px;resize:vertical;font-family:ui-monospace,monospace;font-size:12px" autocomplete="off" spellcheck="false" placeholder="-----BEGIN RSA PRIVATE KEY-----"></textarea></label>`:''}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <label class="note">Max per call, in $<input id="atCall" type="number" min="1" max="${d.max.usd_per_call}" step="1" value="${d.usd_per_call||5}" style="${AUTO_IN}"></label>
+    <label class="note">Max per day, in $<input id="atDay" type="number" min="1" max="${d.max.usd_per_day}" step="1" value="${d.usd_per_day||20}" style="${AUTO_IN}"></label></div>
+  <div class="note" style="display:flex;gap:16px;flex-wrap:wrap"><label><input type="checkbox" id="atBtc" ${c.indexOf('btc')>=0?'checked':''}> Bitcoin</label><label><input type="checkbox" id="atEth" ${c.indexOf('eth')>=0?'checked':''}> ETH</label></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-g" id="atSave" type="button">${neu?'Check key and save':'Save limits'}</button>${neu&&d.status!=='none'?'<button class="btn btn-sm" id="atCancel" type="button">Cancel</button>':''}</div>
+  <div class="note" id="atMsg"></div></div>`;}
+async function moAutoLoad(neu){const el=$('#moAuto');if(!el)return;let d;try{d=await api('/v1/engine/autotrade');}catch(e){el.innerHTML='<h3>Auto mode</h3><p class="sub">Could not load right now.</p>';return;}
+  const head='<h3>Auto mode</h3><p class="sub">The engine buys the Above X calls for you, in your own Kalshi account, within the limits you set. It never holds your money.</p>';
+  const kasten=(t,x)=>`<div class="mo-mail" style="display:block;padding:14px;border:1px dashed var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>${t}</b><p class="note" style="margin-top:6px">${x}</p></div>`;
+  if(!d.available){el.innerHTML=head+kasten('Not open yet','Auto mode is not switched on yet.');return;}
+  if(!d.holder){el.innerHTML=head+kasten('Holders only',`Hold the ${E(d.tier||'holder')} tier of $ODDS in a wallet linked to Your Engine. Then come back here.`);return;}
+  if(!d.configured){el.innerHTML=head+kasten('Almost there','Auto mode is being set up on our side. Check back soon.');return;}
+  const how=`<details style="margin-top:12px"><summary class="note" style="cursor:pointer">How to get your Kalshi key</summary><ol class="note" style="margin:8px 0 0 18px;display:grid;gap:5px"><li>Open a Kalshi account, finish their ID check and deposit yourself. Kalshi is not available in every country.</li><li>In Kalshi go to Account and security, then API Keys, and create a key.</li><li>Kalshi shows a Key ID and lets you download a private key file once. Paste both here.</li><li>You can delete the key in Kalshi at any time. That stops the engine at once.</li></ol></details>`;
+  const risk='<p class="note" style="margin-top:12px">A single call can lose. Automatic trading can lose your whole balance on the exchange. Whoever holds the key can trade in your account. Past results are no guarantee of future results.</p>';
+  let body='';
+  if(d.status==='none'||neu){body=moAutoForm(d,true)+how;}
+  else{const st={active:['Active','The engine buys the next call for you.'],pending:['Waiting for approval','Your key is saved and checked. Auto mode starts as soon as we approve your wallet.'],paused:['Paused','Nothing is bought until you resume.'],revoked:['Switched off','Auto mode was switched off for this wallet.']}[d.status]||[d.status,''];
+    const s=d.stats||{};
+    body=`<div class="mo-mail" style="display:block;padding:14px;border:1px solid var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>${E(st[0])}</b><p class="note" style="margin-top:6px">${E(st[1])} Key ${E(d.key_id||'')}</p>
+      ${s.orders?`<p class="note" style="margin-top:8px">${s.filled} of ${s.orders} orders filled. Settled so far: paid $${s.spent}, got back $${s.back}, result ${s.pnl>=0?'+':''}$${s.pnl}.</p>`:'<p class="note" style="margin-top:8px">No orders yet.</p>'}</div>`
+      +moAutoForm(d,false)+`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${d.status==='active'||d.status==='paused'?`<button class="btn btn-sm" id="atPause" type="button">${d.status==='paused'?'Resume':'Pause'}</button>`:''}<button class="btn btn-sm" id="atNew" type="button">Replace key</button><button class="btn btn-sm" id="atDel" type="button">Remove key</button></div>`;}
+  el.innerHTML=head+body+risk;
+  const m=t=>{const x=$('#atMsg');if(x)x.textContent=t;};
+  const sv=$('#atSave');if(sv)sv.addEventListener('click',async()=>{const b={usd_per_call:+$('#atCall').value,usd_per_day:+$('#atDay').value,coins:[$('#atBtc').checked?'btc':'',$('#atEth').checked?'eth':''].filter(Boolean)};
+    if($('#atKid')){b.key_id=$('#atKid').value.trim();b.private_key=$('#atPem').value.trim();if(!b.key_id||!b.private_key){m('Paste the Key ID and the private key.');return;}}
+    sv.disabled=true;m('Checking with Kalshi');try{const r=await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify(b)});if(r.ok===false){m(r.error||'Could not save.');sv.disabled=false;return;}toast('Saved');moAutoLoad();}catch(e){m(e.message||'Could not save.');sv.disabled=false;}});
+  const cn=$('#atCancel');if(cn)cn.addEventListener('click',()=>moAutoLoad());
+  const pa=$('#atPause');if(pa)pa.addEventListener('click',async()=>{try{await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify({pause:d.status!=='paused'})});}catch(e){}moAutoLoad();});
+  const nw=$('#atNew');if(nw)nw.addEventListener('click',()=>moAutoLoad(true));
+  const dl=$('#atDel');if(dl)dl.addEventListener('click',async()=>{if(dl.dataset.sure!=='1'){dl.dataset.sure='1';dl.textContent='Tap again to remove';return;}try{await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify({remove:true})});}catch(e){}toast('Key removed');moAutoLoad();});}
 function sw(on,attr){return `<button class="sw ${on?'on':''}" ${attr} aria-pressed="${on?'true':'false'}" aria-label="Toggle"></button>`;}
 function soon(){
   const ai=TAB!=='engine';
@@ -2518,6 +2554,7 @@ engineView=function(){
       ${moNews()}
       <div class="mo-mail" style="margin-top:10px"><input id="moNewsAdd" maxlength="200" placeholder="Any public Telegram channel (@name) or RSS link" aria-label="Add a news source"><button class="btn btn-g btn-sm" data-act="newsadd">Add</button></div></div>
     ${MO&&MO.switches&&MO.switches.rotation?'<div class="card rv" id="moRot"><h3>Meta Rotation</h3><p class="sub">Loading</p></div>':''}
+    ${MO&&MO.switches&&MO.switches.autotrade?'<div class="card rv" id="moAuto"><h3>Auto mode</h3><p class="sub">Loading</p></div>':''}
     <div class="card rv"><h3>From OddsEngine</h3><p class="sub">What Your Engine sends you on its own. Switch off anything you do not want.</p>
       <div class="row"><div class="l"><b>OddsEngine news</b><span>What the team posts in the channel and on X, straight to your Telegram</span></div>${sw(!MO||MO.official_news!==false,'data-set="official_news"')}</div>
       <div class="row"><div class="l"><b>Check-ins</b><span>Asks how your training, meeting or appointment went</span></div>${sw(!MO||MO.check_ins!==false,'data-set="check_ins"')}</div>
@@ -2692,6 +2729,7 @@ bind=function(){
   document.querySelectorAll('[data-cw]').forEach(b=>b.onclick=async()=>{const c=b.closest('.mo-card');const a=c&&c.querySelector('a[href^="#token="]');const q=a?a.getAttribute('href').slice(7):'';if(!q)return;b.disabled=true;try{const r=await api('/v1/engine/agent/watch',{method:'POST',body:JSON.stringify({q})});toast('Watching $'+(r.symbol||'')+': alerts in Telegram');b.textContent='Watching';}catch(e){toast(e.message||'Could not start');b.disabled=false;}});
   document.querySelectorAll('[data-set]').forEach(b=>b.onclick=async()=>{const k=b.dataset.set,on=!b.classList.contains('on');try{await api('/v1/engine/settings',{method:'POST',body:JSON.stringify({[k]:on})});b.classList.toggle('on',on);if(MO)MO[k]=on;toast(k==='official_news'?(on?'OddsEngine news on':'OddsEngine news off'):k==='voice_replies'?(on?'Voice replies on':'Voice replies off'):k==='smart_calls'?(on?'Smart money calls on':'Smart money calls off'):k==='meta_rotation'?(on?'Meta Rotation on':'Meta Rotation off'):(on?'Check-ins on':'Check-ins off'));}catch(e){toast('Could not save: '+e.message);}});
   if($('#moRot'))moRotLoad();
+  if($('#moAuto'))moAutoLoad();
   document.querySelectorAll('[data-mailwatch]').forEach(b=>b.onclick=async()=>{const on=!b.classList.contains('on');try{await api('/v1/engine/agent/mail',{method:'POST',body:JSON.stringify({watch:on})});b.classList.toggle('on',on);if(MO&&MO.mail)MO.mail.watch=on;toast(on?'Important mail goes to Telegram':'Mail alerts off');}catch(e){toast('Could not save: '+e.message);}});
 };
 const _act3=act;
