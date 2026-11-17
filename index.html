@@ -1253,7 +1253,7 @@ async function moRotLoad(){const el=$('#moRot');if(!el)return;let d;try{d=await 
     <p class="note" style="margin:4px 0 6px">Proof: one of them bought $${E(p.symbol||'?')} at ${rotMc(p.entry)}, peak ${rotMc(p.peak)}</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px">${(r.coins||[]).map(c=>`<a class="btn btn-sm" href="#token=${E(c.token)}">$${E(c.ticker||'?')}${c.peak_mcap&&c.mcap_at_alert?' · '+rotX(c.mcap_at_alert,c.peak_mcap):''}</a>`).join('')}</div></div>`;}).join(''):'<div class="note">Nothing yet. You get it the moment it happens.</div>';
   el.innerHTML=head+test+`<div class="mem">${rows}</div>`+rec;}
-/* Seit 2.84.12: Auto mode. Der Nutzer traegt seinen eigenen Kalshi-Schluessel und seine Limits ein. Der Schluessel geht nur
+/* Seit 2.84.15: Auto mode. Der Nutzer traegt seinen eigenen Kalshi-Schluessel und seine Limits ein. Der Schluessel geht nur
    einmal an den Server, wird dort verschluesselt gespeichert und nie wieder angezeigt. */
 const AUTO_IN='width:100%;border-radius:12px;border:1px solid var(--line2);background:rgba(0,0,0,.35);padding:11px 13px;color:inherit;font:inherit;outline:none;margin-top:6px';
 function moAutoForm(d,neu){const c=d.coins||['btc','eth'];return `<div style="display:grid;gap:12px;margin-top:12px">
@@ -1265,14 +1265,25 @@ function moAutoForm(d,neu){const c=d.coins||['btc','eth'];return `<div style="di
   <div class="note" style="display:flex;gap:16px;flex-wrap:wrap"><label><input type="checkbox" id="atBtc" ${c.indexOf('btc')>=0?'checked':''}> Bitcoin</label><label><input type="checkbox" id="atEth" ${c.indexOf('eth')>=0?'checked':''}> ETH</label></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-g" id="atSave" type="button">${neu?'Check key and save':'Save limits'}</button>${neu&&d.status!=='none'?'<button class="btn btn-sm" id="atCancel" type="button">Cancel</button>':''}</div>
   <div class="note" id="atMsg"></div></div>`;}
-function moAutoPlan(p){if(!p)return '';const z=[];
-  z.push(p.fee_pct>0?`Fee: ${p.fee_pct}% of your profit, taken from your $ODDS balance. No profit, no fee.`:'Team seat: no fee.');
-  if(p.min_pct>0)z.push(`Holding: ${p.holding_pct==null?'not readable right now':p.holding_pct.toFixed(2)+'%'} of the $ODDS supply, needs ${p.min_pct}%. Drop below and Auto mode pauses at once.`);
-  if(p.fee_pct>0)z.push(`$ODDS balance: $${(p.credit_usd||0).toFixed(2)}, needs $${(p.credit_needed_usd||0).toFixed(2)} for your daily limit.${p.fees_usd?` Fees so far: $${p.fees_usd.toFixed(2)}.`:''}`);
-  let warn='';
-  if(p.hold_pause)warn=`<p class="note" style="margin-top:8px;color:#ffb547">Paused because your wallet dropped below ${p.min_pct}% of the supply. Top up, then press Resume.</p>`;
-  else if(p.fee_pct>0&&(p.credit_usd||0)<(p.credit_needed_usd||0))warn=`<p class="note" style="margin-top:8px;color:#ffb547">Waiting for balance. Top up $ODDS in Your Engine and it continues by itself.</p>`;
-  return `<p class="note" style="margin-top:8px">${z.map(E).join('<br>')}</p>${warn}`;}
+function moAutoPlan(d,day){const p=d.plan;if(!p)return '';
+  const fee=p.fee_pct>0, tag=day||d.usd_per_day||20, need=fee?Math.round(p.fee_pct*tag)/100:0, have=p.credit_usd||0;
+  const okH=!(p.min_pct>0)||(p.holding_pct!=null&&p.holding_pct>=p.min_pct&&!p.hold_pause), okC=!fee||have>=need, okK=d.status!=='none';
+  const st=(ok,n,t,x,btn)=>`<div class="step ${ok?'done':''}" style="${ok?'':'border-color:rgba(255,181,71,.55)'}"><div class="n">${ok?'✓':n}</div><div><b>${t}</b><span>${x}</span>${ok||!btn?'':`<div style="margin-top:10px">${btn}</div>`}</div></div>`;
+  const z=[];
+  if(p.min_pct>0)z.push(st(okH,'1',`Hold ${p.min_pct}% of the $ODDS supply`,
+    p.holding_pct==null?'Your wallet could not be read right now. Try again in a minute.':
+    okH?`You hold ${p.holding_pct.toFixed(2)}%. Keep it there: below ${p.min_pct}% Auto mode pauses at once.`:
+    `You hold ${p.holding_pct.toFixed(2)}%. You need ${(p.min_pct-p.holding_pct).toFixed(2)}% more.${p.hold_pause?' Buy, then press Resume.':''}`,
+    `<a class="btn btn-g btn-sm" href="${BUY_ODDS}" target="_blank" rel="noopener">Buy $ODDS</a>`));
+  z.push(fee?st(okC,'2','Load your $ODDS balance',
+    okC?`You have $${have.toFixed(2)} loaded. The fee is ${p.fee_pct}% of your profit and is paid from this balance. No profit, no fee.`:
+    `The fee is ${p.fee_pct}% of your profit and is paid from this balance. For a daily limit of $${tag} you need $${need.toFixed(2)} loaded. You have $${have.toFixed(2)}. Load $${Math.max(0,need-have).toFixed(2)} more and it starts by itself.`,
+    `<button class="btn btn-g btn-sm" data-act="toai" type="button">Top up now</button>`)
+    :st(true,'2','Team seat','No fee on this wallet.'));
+  z.push(st(okK,'3','Connect your Kalshi key',okK?`Key ${E(d.key_id||'')} is saved, encrypted.`:'Paste it in the form below. Your money stays in your own Kalshi account.'));
+  const offen=[okH,okC,okK].filter(x=>!x).length;
+  const kopf=offen?`<b style="color:#ffb547">${offen} ${offen===1?'step':'steps'} left before the engine can trade for you</b>`:'<b style="color:var(--g)">Everything is in place</b>';
+  return `<div id="atNeeds" style="margin-top:10px">${kopf}<div style="display:grid;gap:8px;margin-top:10px">${z.join('')}</div>${p.fees_usd?`<p class="note" style="margin-top:8px">Fees so far: $${p.fees_usd.toFixed(2)}.</p>`:''}</div>`;}
 async function moAutoLoad(neu){const el=$('#moAuto');if(!el)return;let d;try{d=await api('/v1/engine/autotrade');}catch(e){el.innerHTML='<h3>Auto mode</h3><p class="sub">Could not load right now.</p>';return;}
   const head='<h3>Auto mode</h3><p class="sub">The engine buys the Above X calls for you, in your own Kalshi account, within the limits you set. It never holds your money.</p>';
   const kasten=(t,x)=>`<div class="mo-mail" style="display:block;padding:14px;border:1px dashed var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>${t}</b><p class="note" style="margin-top:6px">${x}</p></div>`;
@@ -1287,9 +1298,10 @@ async function moAutoLoad(neu){const el=$('#moAuto');if(!el)return;let d;try{d=a
     const s=d.stats||{};
     body=`<div class="mo-mail" style="display:block;padding:14px;border:1px solid var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>${E(st[0])}</b><p class="note" style="margin-top:6px">${E(st[1])} Key ${E(d.key_id||'')}</p>
       ${s.orders?`<p class="note" style="margin-top:8px">${s.filled} of ${s.orders} orders filled. Settled so far: paid $${s.spent}, got back $${s.back}, result ${s.pnl>=0?'+':''}$${s.pnl}.</p>`:'<p class="note" style="margin-top:8px">No orders yet.</p>'}
-      ${moAutoPlan(d.plan)}</div>`
+      </div>`
       +moAutoForm(d,false)+`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${d.status==='active'||d.status==='paused'?`<button class="btn btn-sm" id="atPause" type="button">${d.status==='paused'?'Resume':'Pause'}</button>`:''}<button class="btn btn-sm" id="atNew" type="button">Replace key</button><button class="btn btn-sm" id="atDel" type="button">Remove key</button></div>`;}
-  el.innerHTML=head+body+risk;
+  el.innerHTML=head+moAutoPlan(d)+body+risk;
+  const dy=$('#atDay');if(dy)dy.addEventListener('input',()=>{const n=$('#atNeeds');if(n)n.outerHTML=moAutoPlan(d,+dy.value||0);});
   const m=t=>{const x=$('#atMsg');if(x)x.textContent=t;};
   const sv=$('#atSave');if(sv)sv.addEventListener('click',async()=>{const b={usd_per_call:+$('#atCall').value,usd_per_day:+$('#atDay').value,coins:[$('#atBtc').checked?'btc':'',$('#atEth').checked?'eth':''].filter(Boolean)};
     if($('#atKid')){b.key_id=$('#atKid').value.trim();b.private_key=$('#atPem').value.trim();if(!b.key_id||!b.private_key){m('Paste the Key ID and the private key.');return;}}
@@ -2508,8 +2520,11 @@ engineView=function(){
   <section class="hero mo-hero">
     <div>
       <span class="eyebrow rv"><b>●</b> Your Engine${moBeta()?' <span class="mo-beta">Beta</span>':''}</span>
-      <h1 class="rv d1"><span class="shiny">It works for you now.</span></h1>
-      <p class="lead rv d2">Ask it here or in Telegram, by text or voice note. It reads the chain, the markets and the news, makes images, talks to any AI model, remembers what matters to you and pings you on its own: every morning, when a price moves, when a page changes.</p>
+      <h1 class="rv d1"><span class="shiny">The crypto butler in your Telegram.</span></h1>
+      <p class="lead rv d2">One agent for your whole crypto day. Ask it here or in Telegram, by text or voice note. You pay per answer in $ODDS, no subscription.</p>
+      <div class="rv d2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 16px;max-width:640px">
+        ${[['Scans any coin','Dev, funders, bundles and liquidity before you buy'],['Guards your wallet','Warns you about risky approvals and drains'],['Tracks your portfolio','All your wallets in one card, with profit and loss'],(MO&&MO.switches&&MO.switches.autotrade)?['Auto mode','Buys the engine\'s BTC and ETH calls in your own Kalshi account']:['Pings you on its own','Morning briefing, price alerts, watched pages']].map(x=>`<div style="padding:11px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)"><b style="display:block;font-size:14px">${x[0]}</b><span class="note" style="font-size:12.5px">${x[1]}</span></div>`).join('')}
+      </div>
       <div class="chips rv d3">
         <span class="chip ${L.wallet?'ok':''}"><span class="d"></span>Wallet ${L.wallet?'linked':'not linked'}</span>
         <span class="chip ${L.telegram?'ok':''}"><span class="d"></span>Telegram ${L.telegram?'linked':'not linked'}</span>
