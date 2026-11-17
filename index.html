@@ -1253,7 +1253,7 @@ async function moRotLoad(){const el=$('#moRot');if(!el)return;let d;try{d=await 
     <p class="note" style="margin:4px 0 6px">Proof: one of them bought $${E(p.symbol||'?')} at ${rotMc(p.entry)}, peak ${rotMc(p.peak)}</p>
     <div style="display:flex;flex-wrap:wrap;gap:6px">${(r.coins||[]).map(c=>`<a class="btn btn-sm" href="#token=${E(c.token)}">$${E(c.ticker||'?')}${c.peak_mcap&&c.mcap_at_alert?' · '+rotX(c.mcap_at_alert,c.peak_mcap):''}</a>`).join('')}</div></div>`;}).join(''):'<div class="note">Nothing yet. You get it the moment it happens.</div>';
   el.innerHTML=head+test+`<div class="mem">${rows}</div>`+rec;}
-/* Seit 2.84.9: Auto mode. Der Nutzer traegt seinen eigenen Kalshi-Schluessel und seine Limits ein. Der Schluessel geht nur
+/* Seit 2.84.12: Auto mode. Der Nutzer traegt seinen eigenen Kalshi-Schluessel und seine Limits ein. Der Schluessel geht nur
    einmal an den Server, wird dort verschluesselt gespeichert und nie wieder angezeigt. */
 const AUTO_IN='width:100%;border-radius:12px;border:1px solid var(--line2);background:rgba(0,0,0,.35);padding:11px 13px;color:inherit;font:inherit;outline:none;margin-top:6px';
 function moAutoForm(d,neu){const c=d.coins||['btc','eth'];return `<div style="display:grid;gap:12px;margin-top:12px">
@@ -1265,6 +1265,14 @@ function moAutoForm(d,neu){const c=d.coins||['btc','eth'];return `<div style="di
   <div class="note" style="display:flex;gap:16px;flex-wrap:wrap"><label><input type="checkbox" id="atBtc" ${c.indexOf('btc')>=0?'checked':''}> Bitcoin</label><label><input type="checkbox" id="atEth" ${c.indexOf('eth')>=0?'checked':''}> ETH</label></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-g" id="atSave" type="button">${neu?'Check key and save':'Save limits'}</button>${neu&&d.status!=='none'?'<button class="btn btn-sm" id="atCancel" type="button">Cancel</button>':''}</div>
   <div class="note" id="atMsg"></div></div>`;}
+function moAutoPlan(p){if(!p)return '';const z=[];
+  z.push(p.fee_pct>0?`Fee: ${p.fee_pct}% of your profit, taken from your $ODDS balance. No profit, no fee.`:'Team seat: no fee.');
+  if(p.min_pct>0)z.push(`Holding: ${p.holding_pct==null?'not readable right now':p.holding_pct.toFixed(2)+'%'} of the $ODDS supply, needs ${p.min_pct}%. Drop below and Auto mode pauses at once.`);
+  if(p.fee_pct>0)z.push(`$ODDS balance: $${(p.credit_usd||0).toFixed(2)}, needs $${(p.credit_needed_usd||0).toFixed(2)} for your daily limit.${p.fees_usd?` Fees so far: $${p.fees_usd.toFixed(2)}.`:''}`);
+  let warn='';
+  if(p.hold_pause)warn=`<p class="note" style="margin-top:8px;color:#ffb547">Paused because your wallet dropped below ${p.min_pct}% of the supply. Top up, then press Resume.</p>`;
+  else if(p.fee_pct>0&&(p.credit_usd||0)<(p.credit_needed_usd||0))warn=`<p class="note" style="margin-top:8px;color:#ffb547">Waiting for balance. Top up $ODDS in Your Engine and it continues by itself.</p>`;
+  return `<p class="note" style="margin-top:8px">${z.map(E).join('<br>')}</p>${warn}`;}
 async function moAutoLoad(neu){const el=$('#moAuto');if(!el)return;let d;try{d=await api('/v1/engine/autotrade');}catch(e){el.innerHTML='<h3>Auto mode</h3><p class="sub">Could not load right now.</p>';return;}
   const head='<h3>Auto mode</h3><p class="sub">The engine buys the Above X calls for you, in your own Kalshi account, within the limits you set. It never holds your money.</p>';
   const kasten=(t,x)=>`<div class="mo-mail" style="display:block;padding:14px;border:1px dashed var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>${t}</b><p class="note" style="margin-top:6px">${x}</p></div>`;
@@ -1278,7 +1286,8 @@ async function moAutoLoad(neu){const el=$('#moAuto');if(!el)return;let d;try{d=a
   else{const st={active:['Active','The engine buys the next call for you.'],pending:['Waiting for approval','Your key is saved and checked. Auto mode starts as soon as we approve your wallet.'],paused:['Paused','Nothing is bought until you resume.'],revoked:['Switched off','Auto mode was switched off for this wallet.']}[d.status]||[d.status,''];
     const s=d.stats||{};
     body=`<div class="mo-mail" style="display:block;padding:14px;border:1px solid var(--line2,rgba(255,255,255,.2));border-radius:14px;margin-top:6px"><b>${E(st[0])}</b><p class="note" style="margin-top:6px">${E(st[1])} Key ${E(d.key_id||'')}</p>
-      ${s.orders?`<p class="note" style="margin-top:8px">${s.filled} of ${s.orders} orders filled. Settled so far: paid $${s.spent}, got back $${s.back}, result ${s.pnl>=0?'+':''}$${s.pnl}.</p>`:'<p class="note" style="margin-top:8px">No orders yet.</p>'}</div>`
+      ${s.orders?`<p class="note" style="margin-top:8px">${s.filled} of ${s.orders} orders filled. Settled so far: paid $${s.spent}, got back $${s.back}, result ${s.pnl>=0?'+':''}$${s.pnl}.</p>`:'<p class="note" style="margin-top:8px">No orders yet.</p>'}
+      ${moAutoPlan(d.plan)}</div>`
       +moAutoForm(d,false)+`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${d.status==='active'||d.status==='paused'?`<button class="btn btn-sm" id="atPause" type="button">${d.status==='paused'?'Resume':'Pause'}</button>`:''}<button class="btn btn-sm" id="atNew" type="button">Replace key</button><button class="btn btn-sm" id="atDel" type="button">Remove key</button></div>`;}
   el.innerHTML=head+body+risk;
   const m=t=>{const x=$('#atMsg');if(x)x.textContent=t;};
@@ -1286,7 +1295,7 @@ async function moAutoLoad(neu){const el=$('#moAuto');if(!el)return;let d;try{d=a
     if($('#atKid')){b.key_id=$('#atKid').value.trim();b.private_key=$('#atPem').value.trim();if(!b.key_id||!b.private_key){m('Paste the Key ID and the private key.');return;}}
     sv.disabled=true;m('Checking with Kalshi');try{const r=await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify(b)});if(r.ok===false){m(r.error||'Could not save.');sv.disabled=false;return;}toast('Saved');moAutoLoad();}catch(e){m(e.message||'Could not save.');sv.disabled=false;}});
   const cn=$('#atCancel');if(cn)cn.addEventListener('click',()=>moAutoLoad());
-  const pa=$('#atPause');if(pa)pa.addEventListener('click',async()=>{try{await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify({pause:d.status!=='paused'})});}catch(e){}moAutoLoad();});
+  const pa=$('#atPause');if(pa)pa.addEventListener('click',async()=>{try{const r=await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify({pause:d.status!=='paused'})});if(r&&r.ok===false){m(r.error||'Could not resume.');return;}}catch(e){}moAutoLoad();});
   const nw=$('#atNew');if(nw)nw.addEventListener('click',()=>moAutoLoad(true));
   const dl=$('#atDel');if(dl)dl.addEventListener('click',async()=>{if(dl.dataset.sure!=='1'){dl.dataset.sure='1';dl.textContent='Tap again to remove';return;}try{await api('/v1/engine/autotrade',{method:'POST',body:JSON.stringify({remove:true})});}catch(e){}toast('Key removed');moAutoLoad();});}
 function sw(on,attr){return `<button class="sw ${on?'on':''}" ${attr} aria-pressed="${on?'true':'false'}" aria-label="Toggle"></button>`;}
