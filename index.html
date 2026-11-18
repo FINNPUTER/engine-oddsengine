@@ -982,6 +982,24 @@ html.pwa footer.wrap{display:none}
   background:linear-gradient(100deg,#fff 0%,#c9ffe2 40%,var(--g) 70%,#fff 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:mbShine 6s linear infinite}
 @keyframes mbShine{to{background-position:-220% 0}}
 .mb-hd .lead{font-size:14.5px;margin:0;color:var(--dim)}
+@media (max-width:345px){.gta-pill{padding-left:7px!important;padding-right:7px!important;font-size:9px!important}.brand{font-size:11px!important;gap:5px!important;letter-spacing:.02em!important}}
+.mb-chains{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 14px}
+.mb-chain{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);font-size:12px;color:var(--dim);white-space:nowrap}
+.mb-chain img{width:16px;height:16px;border-radius:50%;flex:none;background:#fff}
+.mb-chain.new{border-color:rgba(34,240,138,.35);color:var(--tx)}
+.mb-chain i{font:700 9px/1 'JetBrains Mono',monospace;font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:var(--g)}
+.ax-card h3{margin:8px 0 4px}.ax-card .sub{margin:0 0 12px}
+.ax-g{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.ax-t{padding:12px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03);min-width:0}
+.ax-t span{display:block;font:600 10.5px/1 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--dim2)}
+.ax-t b{display:block;font:700 clamp(15px,4.4vw,19px)/1.2 'JetBrains Mono',monospace;margin-top:8px;overflow-wrap:anywhere}
+.ax-t i{display:block;font-style:normal;font-size:12px;color:var(--dim);margin-top:4px}
+.ax-t .g,.ax-t i.g{color:var(--g)}.ax-t .r,.ax-t i.r{color:var(--red)}
+.ax-bars{display:flex;align-items:flex-end;gap:3px;height:54px;margin-top:14px}
+.ax-bars i{flex:1 1 0;min-width:0;border-radius:3px 3px 0 0;background:var(--g);opacity:.85}.ax-bars i.r{background:var(--red)}
+.ax-btn{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.ax-n{margin:8px 0 0;font-size:12px}
+@media (max-width:560px){.ax-g{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.ax-g .ax-t:first-child{grid-column:1/-1}}
+@media (max-width:350px){.ax-g{grid-template-columns:minmax(0,1fr)}}
 .mb-h3{font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--dim2);margin:22px 2px 10px}
 .mb-wide{width:100%;justify-content:center;margin-top:14px;display:flex}
 
@@ -1372,7 +1390,7 @@ function walletsCard(){
   const m=ME||{};
   return `<div class="card rv"><h3>Wallets</h3><p class="sub">Public addresses only. One 0x address covers every EVM chain: Robinhood Chain, Base, Ethereum, BNB and more.</p>
       <div id="wList">${(m.wallets||[]).map(w=>`<div class="wl"><span class="ch">${E(w.main?'MAIN':w.linked?'LINKED':w.chain)}</span><span class="ad">${E(w.address)}</span>${w.main||w.linked?'':`<button class="x" data-wdel="${E(w.address)}" aria-label="Remove">×</button>`}</div>`).join('')||'<div class="note">Connect your wallet first.</div>'}</div>
-      <form class="addrow" id="wForm"><input id="wIn" placeholder="0x… or a Solana address" autocomplete="off" spellcheck="false" aria-label="Wallet address"><button class="btn btn-g btn-sm" type="submit">Add</button></form>
+      <form class="addrow" id="wForm"><input id="wIn" placeholder="0x…, Solana, TRON or TON address" autocomplete="off" spellcheck="false" aria-label="Wallet address"><button class="btn btn-g btn-sm" type="submit">Add</button></form>
       ${linkBox()}
     </div>`;
 }
@@ -1615,7 +1633,7 @@ function bind(){
   document.querySelectorAll('[data-chip]').forEach(b=>b.onclick=()=>{MF.chip=b.dataset.chip;MF.n=PAGE();document.querySelectorAll('[data-chip]').forEach(x=>x.classList.toggle('on',x===b));renderModels();});
   const ms=$('#mSearch');if(ms)ms.oninput=()=>{MF.q=ms.value;MF.n=PAGE();renderModels();};
   const so=$('#mSort');if(so)so.onchange=()=>{MF.sort=so.value;renderModels();};
-  const wf=$('#wForm');if(wf)wf.onsubmit=async e=>{e.preventDefault();if(!connected()){toast('Connect your wallet first');return;}const v=$('#wIn').value.trim();const chain=/^0x[0-9a-fA-F]{40}$/.test(v)?'EVM':(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(v)?'SOL':null);
+  const wf=$('#wForm');if(wf)wf.onsubmit=async e=>{e.preventDefault();if(!connected()){toast('Connect your wallet first');return;}const v=$('#wIn').value.trim();const chain=/^0x[0-9a-fA-F]{40}$/.test(v)?'EVM':/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(v)?'TRON':/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(v)?'TON':(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(v)?'SOL':null);
     if(!chain){toast('That does not look like a wallet address');return;}
     if(await save('/v1/engine/wallets',{address:v,chain})){ME.wallets=(ME.wallets||[]).concat([{chain,address:chain==='EVM'?v.toLowerCase():v}]);render();toast('Wallet added');}};
   const lf=$('#lForm');if(lf)lf.onsubmit=async e=>{e.preventDefault();const v=$('#lIn').value.trim();if(!/^0x[0-9a-fA-F]{40}$/.test(v)){toast('Enter the 0x address of your Torch wallet');return;}
@@ -2476,7 +2494,7 @@ function moCards(cs){if(!cs||!cs.length)return '';return cs.map(c=>{const bs=[].
   return `<div class="mo-card"><pre>${E(c.text)}</pre><div class="mo-cb">${bs.map(([t,u])=>{u=String(u||'');
     if(u.startsWith('cb:w:'))return `<button type="button" data-cw="${E(u.slice(5))}">${E(t)}</button>`;
     if(u.startsWith('cb:'))return '';
-    const m=u.match(/#token=([a-z]+:[0-9A-Za-z]+)/);return m?`<a href="#token=${E(m[1])}">${E(t)}</a>`:`<a href="${E(u)}" target="_blank" rel="noopener">${E(t)}</a>`;}).join('')}</div></div>`;}).join('');}
+    const m=u.match(/#token=([a-z]+:[0-9A-Za-z_-]+)/);return m?`<a href="#token=${E(m[1])}">${E(t)}</a>`:`<a href="${E(u)}" target="_blank" rel="noopener">${E(t)}</a>`;}).join('')}</div></div>`;}).join('');}
 function moReady(){const m=ME||{};const L=m.linked||{};const b=m.balance||{};if(!connected())return false;if(MO&&MO.access)return !!(MO.access.ready||(MO.access.telegram&&MO.access.trial_left>0));return !!(L.wallet&&L.telegram&&(b.usd||0)>=0.05);}
 function moWhy(){if(!connected())return 'Connect your wallet to start';const m=ME||{};const L=m.linked||{};const a=(MO&&MO.access)||{missing:[]};if(!L.telegram||(a.missing||[]).includes('telegram'))return 'Link Telegram to start';return 'Top up with $ODDS to start';}
 function moNote(){const u=MO&&MO.feedback_url;return `<p class="mo-betanote">Your Engine is in beta. Something off? Just write "feedback:" and what happened. It goes privately to the team, nobody else sees it.${u?` Testers chat: <a href="${E(u)}" target="_blank" rel="noopener">beta group</a>.`:''}</p>`;}
@@ -2523,7 +2541,7 @@ engineView=function(){
       <h1 class="rv d1"><span class="shiny">The crypto butler in your Telegram.</span></h1>
       <p class="lead rv d2">One agent for your whole crypto day. Ask it here or in Telegram, by text or voice note. You pay per answer in $ODDS, no subscription.</p>
       <div class="rv d2" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 16px;max-width:640px">
-        ${[['Scans any coin','Dev, funders, bundles and liquidity before you buy'],['Guards your wallet','Warns you about risky approvals and drains'],['Tracks your portfolio','All your wallets in one card, with profit and loss'],(MO&&MO.switches&&MO.switches.autotrade)?['Auto mode','Buys the engine\'s BTC and ETH calls in your own Kalshi account']:['Pings you on its own','Morning briefing, price alerts, watched pages']].map(x=>`<div style="padding:11px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)"><b style="display:block;font-size:14px">${x[0]}</b><span class="note" style="font-size:12.5px">${x[1]}</span></div>`).join('')}
+        ${[['Scans any coin','Dev, funders, bundles and liquidity before you buy'],['Guards your wallet','Warns you about risky approvals and drains'],['Tracks your portfolio','All your wallets in one card, with profit and loss'],(FEAT.autotrade||(MO&&MO.switches&&MO.switches.autotrade))?['Auto mode','Buys the engine\'s BTC and ETH calls in your own Kalshi account']:['Pings you on its own','Morning briefing, price alerts, watched pages']].map(x=>`<div style="padding:11px 13px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.03)"><b style="display:block;font-size:14px">${x[0]}</b><span class="note" style="font-size:12.5px">${x[1]}</span></div>`).join('')}
       </div>
       <div class="chips rv d3">
         <span class="chip ${L.wallet?'ok':''}"><span class="d"></span>Wallet ${L.wallet?'linked':'not linked'}</span>
@@ -2534,6 +2552,7 @@ engineView=function(){
     </div>
     ${face('idle')}
   </section>
+  ${axCard()}
   ${yeDo()}
   ${L.wallet&&L.telegram&&b.usd?'':`<section class="rv"><div class="card"><h3>Three steps and it is yours</h3><p class="sub">Takes about a minute. Your Engine only ever sees public addresses.</p>
     <div class="steps">
@@ -3002,7 +3021,8 @@ function rpChips(){
   if(s.owner_renounced!=null)add(s.owner_renounced,s.owner_renounced?'Owner renounced':'Owner active');
   if(s.take_back)add(false,'Owner can take back');if(s.hidden_owner)add(false,'Hidden owner');if(s.pausable)add(false,'Pausable');if(s.blacklist)add(false,'Blacklist');
   if(s.transfer_fee_pct)add(s.transfer_fee_pct<3,`Transfer fee ${rpN(s.transfer_fee_pct)}%`);if(s.permanent_delegate)add(false,'Permanent delegate');
-  return c.length?c.join(''):'<p class="note">No contract flags read for this chain.</p>';
+  const sn=RP.scope_note?`<p class="note" style="margin-top:10px">${E(RP.scope_note)}</p>`:'';
+  return (c.length?c.join(''):'<p class="note">No contract flags read for this chain.</p>')+sn;
 }
 function rpTradeBox(){
   if(!RP.can_trade)return '';
@@ -3146,7 +3166,7 @@ function rpBind(){
   document.querySelectorAll('[data-gxc]').forEach(b=>b.onclick=()=>{if(GX&&GX.focus)GX.focus(b.classList.contains('on')?null:+b.dataset.gxc);});
 }
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#rp')&&$('#rp').classList.contains('show')&&!$('#sheet').classList.contains('show'))rpClose();});
-function rpCheck(){const m=location.hash.match(/token=([a-z]+:[0-9A-Za-z]{32,66})/);if(m&&m[1]!==RP_Q)rpOpen(m[1]);else if(m&&!$('#rp')?.classList.contains('show'))rpOpen(m[1]);}
+function rpCheck(){const m=location.hash.match(/token=([a-z]+:[0-9A-Za-z_-]{32,66})/);if(m&&m[1]!==RP_Q)rpOpen(m[1]);else if(m&&!$('#rp')?.classList.contains('show'))rpOpen(m[1]);}
 addEventListener('hashchange',rpCheck);
 (function waitMe(n){if(typeof ME!=='undefined'&&(ME||n>25||!TOKEN)){rpCheck();return;}setTimeout(()=>waitMe(n+1),200);})(0);
 
@@ -3431,9 +3451,47 @@ async function mbPushOff(){
 }
 
 /* ---------- views ---------- */
+
+/* Seit 2.84.16: Above X steht auch in der App (Engine und Crypto), fuer jeden sichtbar, auch ohne Wallet.
+   Zahlen kommen live aus /v1/options. Auto mode Hinweis haengt am oeffentlichen Schalter. */
+let AX=null,AX_T=null;
+function axMoney(v,sign){const n=Math.round(Math.abs(Number(v)||0));return (sign?(v<0?'-':'+'):'')+'$'+n.toLocaleString('en-US');}
+function axInner(){
+  const O=AX;const auto=FEAT.autotrade||(MO&&MO.switches&&MO.switches.autotrade);
+  const head=`<span class="eyebrow"><b>●</b> Above X${O&&!O.err?' · live':''}</span><h3>BTC and ETH calls on Kalshi and Polymarket</h3>`;
+  const foot=`<div class="ax-btn"><a class="btn btn-g btn-sm" href="https://terminal.oddsengine.live" target="_blank" rel="noopener">See the full record</a>${auto?'<button class="btn btn-sm" data-ax="auto">Auto mode</button>':''}</div>
+  ${auto?'<p class="note ax-n">Auto mode buys these calls in your own Kalshi account. Your key, your money, your limits. Invite only.</p>':''}
+  <p class="note ax-n">Past results are no guarantee of future results.</p>`;
+  if(!O)return head+'<p class="sub"><span class="typing"><i></i><i></i><i></i></span> Loading the record</p>';
+  const R=O.record&&O.record.all;
+  if(O.err||!R||!R.n)return head+'<p class="sub">Every call is counted from day one and settled by the official result of the venue.</p>'+foot;
+  const K=O.capital||null,D=O.days||{};
+  const t=[];
+  t.push(`<div class="ax-t"><span>Result</span><b class="${R.pnl<0?'r':'g'}">${axMoney(R.pnl,1)}</b><i>${Number(R.n).toLocaleString('en-US')} calls, every one counted</i></div>`);
+  if(K&&K.start)t.push(`<div class="ax-t"><span>Start to now</span><b>${axMoney(K.start)} to ${axMoney(K.now)}</b><i class="${K.return<0?'r':'g'}">${K.return<0?'-':'+'}${Math.round(Math.abs(K.return)*100).toLocaleString('en-US')}% since the start</i></div>`);
+  if(D.count)t.push(`<div class="ax-t"><span>Days</span><b>${D.green} of ${D.count} green</b><i>fees included</i></div>`);
+  const bd=(O.by_day||[]).slice(-30);let bars='';
+  if(bd.length>2){const mx=Math.max(...bd.map(x=>Math.abs(x.pnl)))||1;
+    bars=`<div class="ax-bars" aria-hidden="true">${bd.map(x=>{const h=Math.max(4,Math.round(Math.abs(x.pnl)/mx*100));return `<i class="${x.pnl<0?'r':'g'}" style="height:${h}%"></i>`;}).join('')}</div><p class="note ax-n" style="margin-top:6px">Result per day, last ${bd.length} days</p>`;}
+  return head+`<p class="sub">Every call is counted from day one and settled by the official result of the venue.</p><div class="ax-g">${t.join('')}</div>${bars}`+foot;
+}
+function axCard(){if(!FEAT.options)return '';return `<section class="rv"><div class="card ax-card"><div class="ax-slot">${axInner()}</div></div></section>`;}
+function axPaint(){document.querySelectorAll('.ax-slot').forEach(e=>{e.innerHTML=axInner();});}
+async function axLoad(){
+  try{AX=await api('/v1/options');}catch(e){if(!AX)AX={err:1};}
+  axPaint();
+  if(!AX_T)AX_T=setInterval(()=>{if(!document.hidden)axLoad();},120000);
+}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ax="auto"]');if(!b)return;
+  const el=document.getElementById('moAuto');
+  if(el){el.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  if(typeof MB_TABS!=='undefined'&&MB_TABS.includes(TAB)&&typeof connected==='function'&&connected()&&MO&&MO.switches&&MO.switches.autotrade){TAB='engine';render();setTimeout(()=>{const x=document.getElementById('moAuto');if(x)x.scrollIntoView({behavior:'smooth',block:'start'});},350);return;}
+  window.open('https://oddsengine.live/#auto','_blank','noopener');});
+/* Seit 2.84.17: die Chains als Reihe unter dem Scan-Kopf. Ein Logo erscheint, sobald chain-<id>.svg im Repo liegt, sonst nur der Name. */
+function mbChains(){return `<div class="mb-chains rv d2">${[['solana','Solana'],['base','Base'],['ethereum','Ethereum'],['bsc','BNB Chain'],['arbitrum','Arbitrum'],['robinhood','Robinhood Chain'],['tron','TRON'],['ton','TON']].map(c=>`<span class="mb-chain${c[0]==='tron'||c[0]==='ton'?' new':''}"><img src="chain-${c[0]}.${c[0]==='tron'||c[0]==='ton'?'png':'svg'}" alt="" width="16" height="16" loading="lazy" onerror="this.remove()">${c[1]}${c[0]==='tron'||c[0]==='ton'?'<i>new</i>':''}</span>`).join('')}</div>`;}
 function mbHead(eye,title,sub){return `<section class="mb-hd rv d1"><span class="eyebrow"><b>●</b> ${eye}</span><h1>${title}</h1>${sub?`<p class="lead">${sub}</p>`:''}</section>`;}
 function scanView(){
-  return mbHead('Scan','Scan any coin','Paste a contract address, a chart link or a $ticker. Solana, Base, Ethereum, BNB Chain, Arbitrum and Robinhood Chain.')+
+  return mbHead('Scan','Scan any coin','Paste a contract address, a chart link or a $ticker.')+mbChains()+
   `<form class="mb-scan rv d2" id="mbScanF" autocomplete="off"><input id="mbScanQ" inputmode="text" placeholder="CA, link or $TICKER" aria-label="Contract address, link or ticker"><button class="btn btn-g" type="submit">Scan</button></form>
   <div id="mbScanOut"></div>
   <div class="mb-chips rv d2">${['$ODDS','$TORCH'].map(t=>`<button data-mbq="${t}">${t}</button>`).join('')}<button data-mbpaste="1">Paste</button></div>
@@ -3478,6 +3536,7 @@ function cryptoView(){
   const mods=(C.modules||[]).filter(m=>m.all&&m.all.n);
   return mbHead('Crypto Edition','Crypto markets','Live prices and the strategies the engine runs on Polymarket crypto markets.')+
   `<div class="mb-px rv d2">${as.map(a=>`<div class="mb-pc"><span>${E(a.sym||a.id)}</span><b>${rpPx(px[a.id])}</b></div>`).join('')||'<p class="note">Prices are loading on the server.</p>'}</div>
+  ${axCard()}
   ${mods.length?`<h3 class="mb-h3 rv d3">Strategies</h3><div class="mb-list rv d3">${mods.map(m=>`<div class="mb-row"><span class="mb-sym">${E(m.name||m.id)}</span><span class="mb-sub">${m.pairs&&m.pairs.windows?`${Math.round((m.pairs.locked_rate!=null?m.pairs.locked_rate:m.pairs.locked/m.pairs.windows)*100)}% paired · ${m.pairs.windows} windows`:`${Math.round(m.all.win_rate*100)}% won · ${m.all.n} trades`}</span></div>`).join('')}</div>`:''}
   <p class="note rv d3">${C.stale?'Live data is a few minutes behind right now. ':''}Not financial advice.</p>
   <a class="btn btn-g mb-wide rv d3" href="https://terminal.oddsengine.live" target="_blank" rel="noopener">Open the terminal</a>`;
@@ -3646,7 +3705,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);FEAT.options=!!(d.features&&d.features.options);FEAT.autotrade=!!(d.features&&d.features.options_autotrade);if(FEAT.options)axLoad();if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
