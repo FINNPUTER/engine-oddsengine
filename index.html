@@ -1164,7 +1164,14 @@ html.pwa footer.wrap{display:none}
 .mlt{overflow-x:auto;margin:6px 0 4px}.mlt table{width:100%;border-collapse:collapse;font-size:13px}
 .mlt th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);text-align:left;font-weight:500;padding:6px 8px;border-bottom:1px solid var(--line)}
 .mlt td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.mlt td.mh,.mlt th.mh{}@media(max-width:600px){.mlt .mh{display:none}.mlt td,.mlt th{padding:7px 6px}}
 .mlc{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-family:var(--mono);border:1px solid var(--line2)}.mlc.w{color:var(--g);border-color:var(--g)}.mlc.l{color:var(--red);border-color:var(--red)}
+:root{--hcUp:var(--g);--hcDn:var(--red);--hcGrid:rgba(255,255,255,.06);--hcGrid2:rgba(255,255,255,.25);--hcAx:#62756a;--hcTip:rgba(10,16,13,.92)}
+.hcsvg{width:100%;height:auto;display:block;max-height:220px;overflow:visible;touch-action:pan-y}
+.hcax{font-family:var(--mono);font-size:10px;fill:var(--hcAx)}.hcpl{font-family:var(--mono);font-size:10.5px;font-weight:600}
+.hcpulse{opacity:.35;transform-box:fill-box;transform-origin:center;animation:hcp 1.8s ease-out infinite}
+@keyframes hcp{0%{transform:scale(.45);opacity:.55}100%{transform:scale(1.6);opacity:0}}
+@media (prefers-reduced-motion:reduce){.hcpulse{animation:none}}
 </style>
 </head>
 <body>
@@ -1345,16 +1352,41 @@ let ML=null;
 const mlf=(c,v)=>Number(v).toLocaleString('en-US',{maximumFractionDigits:c==='btc'?0:2});
 const mlm=v=>v==null?'n/a':(v<0?'-':'')+'$'+Math.abs(v).toFixed(2);
 function mlWin(p,now){return p.side==='yes'?now>p.strike:now<=p.strike;}
-function mlChart(c,P,pos){const pts=(P&&P.points)||[];if(pts.length<2)return '<p class="note">Waiting for prices</p>';
-  const w=640,h=150,pl=4,pr=150,pt=10,pb=10;let lo=Math.min(...pts.map(p=>p[1])),hi=Math.max(...pts.map(p=>p[1]));
-  const sp=Math.max(hi-lo,c==='btc'?40:2),pad=sp*.25;lo-=pad;hi+=pad;const t0=pts[0][0],t1=pts[pts.length-1][0],now=pts[pts.length-1][1];
-  const X=t=>pl+(t-t0)/Math.max(1,t1-t0)*(w-pl-pr),Y=v=>pt+(hi-v)/(hi-lo)*(h-pt-pb);const line=pts.map(p=>X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)).join(' ');
-  let g='<svg viewBox="0 0 '+w+' '+h+'" class="mlsvg" role="img" aria-label="'+c.toUpperCase()+' price, last 90 minutes">';
-  g+='<polygon points="'+pl+','+(h-pb)+' '+line+' '+X(t1).toFixed(1)+','+(h-pb)+'" style="fill:var(--g);opacity:.07"/>';
-  pos.forEach(p=>{if(!p.strike)return;const col=mlWin(p,now)?'var(--g)':'var(--red)';let y=Y(p.strike),lab=String(p.side).toUpperCase()+' '+mlf(c,p.strike),off=false;
-    if(y<pt){y=pt+6;off=true;}if(y>h-pb){y=h-pb-6;off=true;}if(off)lab+=(p.strike>now?' ↑ ':' ↓ ')+mlf(c,Math.abs(p.strike-now));
-    g+='<line x1="'+pl+'" x2="'+(w-pr)+'" y1="'+y+'" y2="'+y+'" style="stroke:'+col+'" stroke-dasharray="4 4" stroke-width="1.2"/><text x="'+(w-pr+6)+'" y="'+(y+4)+'" style="fill:'+col+';font-family:var(--mono)" font-size="11">'+lab+'</text>';});
-  g+='<polyline points="'+line+'" fill="none" style="stroke:var(--g2)" stroke-width="1.8"/><circle cx="'+X(t1)+'" cy="'+Y(now)+'" r="3.5" style="fill:var(--tx)"/></svg>';return g;}
+function mlChart(c,P,pos){const pts=(P&&P.points)||[];if(pts.length<2)return '<p style="margin:0;color:var(--dim)">Waiting for prices</p>';
+  const w=720,h=190,pl=6,pr=118,pt=14,pb=22,id='hc'+c+Math.random().toString(36).slice(2,7);
+  let lo=Math.min(...pts.map(p=>p[1])),hi=Math.max(...pts.map(p=>p[1]));const sp=Math.max(hi-lo,c==='btc'?40:2),pad=sp*.22;lo-=pad;hi+=pad;
+  const t0=pts[0][0],t1=pts[pts.length-1][0],now=pts[pts.length-1][1],fm=v=>Number(v).toLocaleString('en-US',{maximumFractionDigits:c==='btc'?0:2});
+  const X=t=>pl+(t-t0)/Math.max(1,t1-t0)*(w-pl-pr),Y=v=>pt+(hi-v)/(hi-lo)*(h-pt-pb);
+  const xy=pts.map(p=>[X(p[0]),Y(p[1])]);let d='M'+xy[0][0].toFixed(1)+','+xy[0][1].toFixed(1);
+  for(let i=0;i<xy.length-1;i++){const p0=xy[i-1]||xy[i],p1=xy[i],p2=xy[i+1],p3=xy[i+2]||p2;
+    d+=' C'+(p1[0]+(p2[0]-p0[0])/6).toFixed(1)+','+(p1[1]+(p2[1]-p0[1])/6).toFixed(1)+' '+(p2[0]-(p3[0]-p1[0])/6).toFixed(1)+','+(p2[1]-(p3[1]-p1[1])/6).toFixed(1)+' '+p2[0].toFixed(1)+','+p2[1].toFixed(1);}
+  const up=now>=pts[0][1],lc=up?'var(--hcUp)':'var(--hcDn)';
+  let g='<svg viewBox="0 0 '+w+' '+h+'" class="hcsvg" data-hc="'+id+'" role="img" aria-label="'+c.toUpperCase()+' price, last 90 minutes"><defs>'+
+    '<linearGradient id="'+id+'f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:'+lc+';stop-opacity:.28"/><stop offset="1" style="stop-color:'+lc+';stop-opacity:0"/></linearGradient>'+
+    '<filter id="'+id+'g" x="-10%" y="-30%" width="120%" height="160%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+  for(let k=0;k<=3;k++){const v=lo+(hi-lo)*(pad/(hi-lo))+((hi-lo)-2*pad)*k/3,y=Y(v);
+    g+='<line x1="'+pl+'" x2="'+(w-pr)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" style="stroke:var(--hcGrid)" stroke-width="1"/><text x="'+(w-pr+8)+'" y="'+(y+3.5).toFixed(1)+'" class="hcax">'+Number(v).toLocaleString('en-US',{maximumFractionDigits:(c==='btc'||hi-lo>8)?0:1})+'</text>';}
+  [[0,'90m'],[1/3,'60m'],[2/3,'30m'],[1,'now']].forEach(([f,l])=>{const x=pl+f*(w-pl-pr);g+='<text x="'+x.toFixed(1)+'" y="'+(h-6)+'" class="hcax" text-anchor="'+(f===0?'start':(f===1?'end':'middle'))+'">'+l+'</text>';});
+  g+='<path d="'+d+' L'+xy[xy.length-1][0].toFixed(1)+','+(h-pb)+' L'+xy[0][0].toFixed(1)+','+(h-pb)+' Z" fill="url(#'+id+'f)"/>';
+  g+='<path d="'+d+'" fill="none" style="stroke:'+lc+'" stroke-width="2.2" stroke-linecap="round" filter="url(#'+id+'g)"/>';
+  pos.forEach(p=>{if(!p.strike)return;const win=p.side==='yes'?now>p.strike:now<=p.strike,col=win?'var(--hcUp)':'var(--hcDn)';
+    let y=Y(p.strike),off='';if(y<pt){y=pt+2;off=' ↑';}if(y>h-pb){y=h-pb-2;off=' ↓';}
+    const lab=String(p.side).toUpperCase()+' '+fm(p.strike)+off,tw=lab.length*6.4+14;
+    g+='<line x1="'+pl+'" x2="'+(w-pr)+'" y1="'+y.toFixed(1)+'" y2="'+y.toFixed(1)+'" style="stroke:'+col+'" stroke-opacity=".8" stroke-dasharray="5 5" stroke-width="1.2"/>'+
+       '<rect x="'+(w-pr+4)+'" y="'+(y-9).toFixed(1)+'" width="'+tw.toFixed(0)+'" height="18" rx="9" style="fill:'+col+'" fill-opacity=".16"/><rect x="'+(w-pr+4)+'" y="'+(y-9).toFixed(1)+'" width="'+tw.toFixed(0)+'" height="18" rx="9" fill="none" style="stroke:'+col+'" stroke-opacity=".7"/>'+
+       '<text x="'+(w-pr+11)+'" y="'+(y+3.8).toFixed(1)+'" class="hcpl" style="fill:'+col+'">'+lab+'</text>';});
+  const ex=xy[xy.length-1][0],ey=xy[xy.length-1][1];
+  g+='<circle cx="'+ex.toFixed(1)+'" cy="'+ey.toFixed(1)+'" r="9" class="hcpulse" style="fill:'+lc+'"/><circle cx="'+ex.toFixed(1)+'" cy="'+ey.toFixed(1)+'" r="4" style="fill:var(--tx);stroke:'+lc+'" stroke-width="2"/>';
+  g+='<g class="hcx" style="display:none"><line y1="'+pt+'" y2="'+(h-pb)+'" style="stroke:var(--hcGrid2)" stroke-width="1"/><circle r="3.5" style="fill:var(--tx)"/><rect rx="6" height="20" style="fill:var(--hcTip)"/><text class="hcpl" style="fill:var(--tx)"></text></g>';
+  g+='<rect class="hchit" x="'+pl+'" y="0" width="'+(w-pl-pr)+'" height="'+h+'" fill="transparent"/></svg>';
+  setTimeout(()=>{const s=document.querySelector('svg[data-hc="'+id+'"]');if(!s)return;const gx=s.querySelector('.hcx'),hit=s.querySelector('.hchit');
+    const mv=e=>{const r=s.getBoundingClientRect(),cx=((e.touches?e.touches[0].clientX:e.clientX)-r.left)/r.width*w;let i=Math.round((cx-pl)/(w-pl-pr)*(pts.length-1));i=Math.max(0,Math.min(pts.length-1,i));
+      const [x,y]=xy[i],ago=Math.round((t1-pts[i][0])/60),txt='$'+fm(pts[i][1])+' · '+(ago?ago+'m ago':'now'),tw=txt.length*6.4+14,tx=Math.min(Math.max(x-tw/2,pl),w-pr-tw);
+      gx.style.display='';gx.querySelector('line').setAttribute('x1',x);gx.querySelector('line').setAttribute('x2',x);const cc=gx.querySelector('circle');cc.setAttribute('cx',x);cc.setAttribute('cy',y);
+      const rr=gx.querySelector('rect');rr.setAttribute('x',tx);rr.setAttribute('y',2);rr.setAttribute('width',tw);const tt=gx.querySelector('text');tt.setAttribute('x',tx+7);tt.setAttribute('y',15.5);tt.textContent=txt;};
+    hit.addEventListener('mousemove',mv);hit.addEventListener('touchmove',mv,{passive:true});hit.addEventListener('touchstart',mv,{passive:true});
+    const out=()=>{gx.style.display='none';};hit.addEventListener('mouseleave',out);hit.addEventListener('touchend',()=>setTimeout(out,1500));},0);
+  return g;}
 function mlRest(s){if(s==null)return 'n/a';s=Math.max(0,s);return s>=3600?Math.floor(s/3600)+'h '+Math.floor(s%3600/60)+'m':Math.floor(s/60)+'m';}
 function mlDraw(){const el=$('#moLive'),sec=$('#moLiveS');if(!el||!ML)return;if(!ML.ok){if(sec)sec.style.display='none';return;}if(sec)sec.style.display='';
   const D=ML,C=(D.price&&D.price.coins)||{},T=D.total||{},L24=D.last24||{},jetzt=Date.now()/1000,bis=3600-(jetzt%3600);
@@ -1363,19 +1395,19 @@ function mlDraw(){const el=$('#moLive'),sec=$('#moLiveS');if(!el||!ML)return;if(
   h+='<div class="mlkpi">'+kpi('Kalshi cash',D.balance!=null?'$'+D.balance.toFixed(2):'n/a','')+kpi('In play','$'+(D.in_play||0).toFixed(2),(D.open||[]).length+' open')+
     kpi('Last 24h',mlm(L24.pnl),(L24.won||0)+' won · '+((L24.n||0)-(L24.won||0))+' lost',L24.pnl>0?'pos':(L24.pnl<0?'neg':''))+
     kpi('Since start',mlm(T.pnl),(T.n?Math.round(T.won/T.n*100)+'% hit · ':'')+(T.roi!=null?(T.roi>=0?'+':'')+(T.roi*100).toFixed(1)+'% ROI':''),T.pnl>0?'pos':(T.pnl<0?'neg':''))+
-    kpi('Next close',Math.floor(bis/60)+':'+String(Math.floor(bis%60)).padStart(2,'0'),'hourly markets')+'</div>';
+    kpi('Next close','<span id="mlCd">'+Math.floor(bis/60)+':'+String(Math.floor(bis%60)).padStart(2,'0')+'</span>','hourly markets')+'</div>';
   const op=D.open||[];
   h+='<div class="mlgrid">'+['btc','eth'].map(c=>{const P=C[c]||{};return '<div><div class="mll" style="margin-bottom:4px">'+c.toUpperCase()+(P.now!=null?' <b class="mono" style="color:var(--tx);font-size:13px">$'+mlf(c,P.now)+'</b>':'')+' · 90 min</div>'+mlChart(c,P,op.filter(p=>p.coin===c))+'</div>';}).join('')+'</div>';
-  if(op.length){h+='<div class="mlt"><table><tr><th>Open position</th><th>Paid</th><th>Price now</th><th>Distance</th><th>Closes in</th><th></th></tr>'+op.map(p=>{const now=(C[p.coin]||{}).now;const win=now!=null&&p.strike?mlWin(p,now):null;const dist=now!=null&&p.strike?now-p.strike:null;
-    return '<tr><td><b>'+E((p.coin||'').toUpperCase())+'</b> '+E(String(p.side).toUpperCase())+' above '+(p.strike?mlf(p.coin,p.strike):'?')+'</td><td>'+E(p.contracts)+' × '+Math.round((p.paid||0)*100)+'¢</td><td>'+(now!=null?'$'+mlf(p.coin,now):'n/a')+'</td><td>'+(dist==null?'n/a':(dist>=0?'+':'')+mlf(p.coin,dist))+'</td><td>'+mlRest(p.closes?p.closes-jetzt:null)+'</td><td><span class="mlc '+(win==null?'':(win?'w':'l'))+'">'+(win==null?'n/a':(win?'winning':'losing'))+'</span></td></tr>';}).join('')+'</table></div>';}
+  if(op.length){h+='<div class="mlt"><table><tr><th>Open position</th><th>Paid</th><th class="mh">Price now</th><th class="mh">Distance</th><th>Closes in</th><th></th></tr>'+op.map(p=>{const now=(C[p.coin]||{}).now;const win=now!=null&&p.strike?mlWin(p,now):null;const dist=now!=null&&p.strike?now-p.strike:null;
+    return '<tr><td><b>'+E((p.coin||'').toUpperCase())+'</b> '+E(String(p.side).toUpperCase())+' above '+(p.strike?mlf(p.coin,p.strike):'?')+'</td><td>'+E(p.contracts)+' × '+Math.round((p.paid||0)*100)+'¢</td><td class="mh">'+(now!=null?'$'+mlf(p.coin,now):'n/a')+'</td><td class="mh">'+(dist==null?'n/a':(dist>=0?'+':'')+mlf(p.coin,dist))+'</td><td>'+mlRest(p.closes?p.closes-jetzt:null)+'</td><td><span class="mlc '+(win==null?'':(win?'w':'l'))+'">'+(win==null?'n/a':(win?'winning':'losing'))+'</span></td></tr>';}).join('')+'</table></div>';}
   else h+='<p class="note" style="margin:6px 0 10px">No open positions right now. The engine buys the next call for you.</p>';
   const rc=D.recent||[];
-  if(rc.length)h+='<div class="mlt"><table><tr><th>Last results</th><th>Call</th><th>Paid</th><th>Result</th></tr>'+rc.map(p=>'<tr><td><b>'+E((p.coin||'').toUpperCase())+'</b> '+E(String(p.side).toUpperCase())+' above '+(p.strike?mlf(p.coin,p.strike):'?')+' <span class="note">'+(p.ts?new Date(p.ts*1000).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'')+'</span></td><td>'+(p.call!=null?Math.round(p.call*100)+'¢':'n/a')+'</td><td>'+E(p.contracts)+' × '+Math.round((p.paid||0)*100)+'¢</td><td><span class="mlc '+(p.won?'w':'l')+'">'+(p.won?'won ':'lost ')+mlm(p.pnl)+'</span></td></tr>').join('')+'</table></div>';
+  if(rc.length)h+='<div class="mlt"><table><tr><th>Last results</th><th class="mh">Call</th><th>Paid</th><th>Result</th></tr>'+rc.map(p=>'<tr><td><b>'+E((p.coin||'').toUpperCase())+'</b> '+E(String(p.side).toUpperCase())+' above '+(p.strike?mlf(p.coin,p.strike):'?')+' <span class="note mh">'+(p.ts?new Date(p.ts*1000).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'')+'</span></td><td class="mh">'+(p.call!=null?Math.round(p.call*100)+'¢':'n/a')+'</td><td>'+E(p.contracts)+' × '+Math.round((p.paid||0)*100)+'¢</td><td><span class="mlc '+(p.won?'w':'l')+'">'+(p.won?'won ':'lost ')+mlm(p.pnl)+'</span></td></tr>').join('')+'</table></div>';
   h+='<p class="note" style="margin-top:10px">Prices are the median of the big exchanges. Kalshi settles on its own index, close to this, not the same. Past results are no guarantee of future results.</p>';
   el.innerHTML=h;}
 async function moLiveLoad(){if(!$('#moLive'))return;try{ML=await api('/v1/engine/autotrade/live');}catch(e){return;}mlDraw();}
 setInterval(()=>{try{if(document.visibilityState==='visible'&&$('#moLive')&&ML&&ML.ok)moLiveLoad();}catch(e){}},10000);
-setInterval(()=>{try{if(document.visibilityState==='visible'&&$('#moLive')&&ML&&ML.ok)mlDraw();}catch(e){}},1000);
+setInterval(()=>{try{const c=$('#mlCd');if(c){const b=3600-(Date.now()/1000%3600);c.textContent=Math.floor(b/60)+':'+String(Math.floor(b%60)).padStart(2,'0');}}catch(e){}},1000);
 function sw(on,attr){return `<button class="sw ${on?'on':''}" ${attr} aria-pressed="${on?'true':'false'}" aria-label="Toggle"></button>`;}
 function soon(){
   const ai=TAB!=='engine';
