@@ -43,7 +43,7 @@ main{min-width:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minma
 .card::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(34,240,138,.14),transparent 60%);opacity:0;transition:opacity .25s;pointer-events:none}
 .card:hover{border-color:rgba(34,240,138,.45);transform:translateY(-2px)}.card:hover::before{opacity:1}
 .card b{display:block;font-family:var(--disp);font-size:13.5px;margin-bottom:6px}.card span{color:var(--dim);font-size:14px;line-height:1.5}
-.card i{font-style:normal;font-size:20px;display:block;margin-bottom:8px}
+.card i{font-style:normal;font-size:20px;display:block;margin-bottom:8px;color:#22f08a}.card i svg{display:block}
 .msg{font-family:var(--body);background:#182533;border:1px solid rgba(255,90,95,.35);border-radius:14px 14px 14px 4px;padding:12px 14px;margin:12px 0;font-size:14.5px;line-height:1.5;color:#e9f2ee;max-width:520px}
 .msg.ok{border-color:rgba(34,240,138,.4)}
 .rv{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}.rv.on{opacity:1;transform:none}
@@ -67,12 +67,12 @@ main{min-width:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minma
 
 <h2 id="engine" class="rv">What it does</h2>
 <div class="cards rv">
-<div class="card"><i>🔎</i><b>Scan any coin</b><span>Paste a contract, a chart link or a $ticker. Bundles, clusters, dev, locks, token forwards and a live holder map.</span></div>
-<div class="card"><i>📈</i><b>Read the chart</b><span>Trend, RSI, MACD, support and resistance from real candles. Facts, no guessing.</span></div>
-<div class="card"><i>🛡️</i><b>Wallet Guard</b><span>An alert in seconds when your wallet approves an unknown spender. Revoke in one tap.</span></div>
-<div class="card"><i>⚠️</i><b>Bag watch</b><span>Dev sells, wallet groups dumping, liquidity pulled, locks ending: on every coin you hold.</span></div>
-<div class="card"><i>☀️</i><b>Morning briefing</b><span>Weather, calendar, news, stocks and your coins in one message, at your time.</span></div>
-<div class="card"><i>💬</i><b>Ask anything</b><span>Every major AI model, images, voice notes, reminders, alerts, YouTube summaries.</span></div>
+<div class="card"><i><svg class="oi" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/></svg></i><b>Scan any coin</b><span>Paste a contract, a chart link or a $ticker. Bundles, clusters, dev, locks, token forwards and a live holder map.</span></div>
+<div class="card"><i><svg class="oi" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/></svg></i><b>Read the chart</b><span>Trend, RSI, MACD, support and resistance from real candles. Facts, no guessing.</span></div>
+<div class="card"><i><svg class="oi" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"/></svg></i><b>Wallet Guard</b><span>An alert in seconds when your wallet approves an unknown spender. Revoke in one tap.</span></div>
+<div class="card"><i><svg class="oi" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.5 20h19z"/><path d="M12 10v4"/><path d="M12 17v.01"/></svg></i><b>Bag watch</b><span>Dev sells, wallet groups dumping, liquidity pulled, locks ending: on every coin you hold.</span></div>
+<div class="card"><i><svg class="oi" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg></i><b>Morning briefing</b><span>Weather, calendar, news, stocks and your coins in one message, at your time.</span></div>
+<div class="card"><i><svg class="oi" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg></i><b>Ask anything</b><span>Every major AI model, images, voice notes, reminders, alerts, YouTube summaries.</span></div>
 </div>
 <p>Start in Telegram: open the bot, connect your wallet on engine.oddsengine.live once, and talk to it like a person. Your Engine never holds your keys. Anything that moves funds is signed by your own wallet.</p>
 
@@ -265,6 +265,35 @@ POST /v1/agents/key
 <p>Point Claude, Cursor or any MCP client at <code>https://api.oddsengine.live/mcp</code> with the header <code>Authorization: Bearer oe_live_...</code>. Tools: <code>list_models</code>, <code>estimate_cost</code>, <code>chat</code>, <code>compare</code>, <code>balance</code>.</p>
 <pre><code>{"mcpServers":{"oddsengine":{"type":"http","url":"https://api.oddsengine.live/mcp",
   "headers":{"Authorization":"Bearer oe_live_..."}}}}</code></pre>
+<p>For apps that only take an address, the key can be part of it: <code>https://api.oddsengine.live/mcp/k/oe_live_...</code>. Treat that address like a password.</p>
+<h3>Safety tools for agents</h3>
+<p>The same checks Your Engine runs, as MCP tools. They only read the chain and never move funds.</p>
+<div class="tw"><table>
+<tr><th>Tool</th><th>Arguments</th><th>What it answers</th></tr>
+<tr><td style="white-space:nowrap"><code style="word-break:normal">scan_token</code></td><td><code>token</code></td><td>Safety and market facts for a token before buying. Takes a contract address, a chart link or a $TICKER.</td></tr>
+<tr><td style="white-space:nowrap"><code style="word-break:normal">check_before_sign</code></td><td><code>raw</code>, <code>chain</code>, <code>method</code>, <code>spender</code>, <code>token</code>, <code>amount</code>, <code>site</code>, <code>to</code>, <code>allow</code>, <code>cap_usd</code>, <code>memo</code></td><td>What a signature or payment really does. Returns DO NOT SIGN, CAREFUL or LOOKS NORMAL with reasons.</td></tr>
+<tr><td style="white-space:nowrap"><code style="word-break:normal">wallet_approvals</code></td><td><code>wallet</code></td><td>Open approvals and delegates with the risk per spender.</td></tr>
+<tr><td style="white-space:nowrap"><code style="word-break:normal">trace_wallet</code></td><td><code>address</code>, <code>chain</code></td><td>Who is behind a wallet: funder, biggest inflows, labels, age.</td></tr>
+<tr><td style="white-space:nowrap"><code style="word-break:normal">money_out</code></td><td><code>address</code>, <code>chain</code></td><td>Where the funds of a wallet went.</td></tr>
+<tr><td style="white-space:nowrap"><code style="word-break:normal">drain_report</code></td><td><code>hash</code>, <code>wallet</code>, <code>chain</code></td><td>Who took the funds after a drain and where they went.</td></tr>
+</table></div>
+<h3>Check a payment before your agent sends it</h3>
+<p>Pass the recipient as <code>to</code>. Optional: <code>allow</code> (your approved payees, comma separated), <code>cap_usd</code> (your limit per payment), <code>amount</code> and <code>memo</code>.</p>
+<pre><code>{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"check_before_sign","arguments":{
+  "to":"0xRECIPIENT","allow":"0xSUPPLIER_A,0xSUPPLIER_B","cap_usd":50,"amount":"38.50","memo":"INV-2291"}}}</code></pre>
+<ul>
+<li><b>DO NOT SIGN</b>: the recipient is not on your list, the amount is over your limit, the address is a look-alike of an approved payee, it is in our records for draining wallets, or it was funded by one.</li>
+<li><b>CAREFUL</b>: the recipient is brand new or has no history, or the memo names a different address than the one being paid.</li>
+<li><b>LOOKS NORMAL</b>: nothing found. This is not a guarantee.</li>
+</ul>
+<p>The answer has <code>verdict</code>, <code>reasons</code>, <code>payment</code> and <code>recipient</code> (kind, name, first seen, flags with proof links). The recipient checks also run with <code>to</code> alone, without a list. Your agent should stop on DO NOT SIGN and ask its owner on CAREFUL.</p>
+<h3>Price and access</h3>
+<ul>
+<li>Each safety tool call costs $0.02 from your balance. A call that fails on our side is not charged.</li>
+<li>AI tools (<code>chat</code>, <code>compare</code>) are priced per model. Holders pay a lower fee on them.</li>
+<li>MCP needs a wallet that holds 250,000 $ODDS or more, linked wallets count. Users who come through the link of a partner app get access without holding.</li>
+<li>There is a daily limit of safety calls per wallet. It resets at 00:00 UTC.</li>
+</ul>
 </section>
 <h2 id="images">Images</h2>
 <h3>Send an image</h3>

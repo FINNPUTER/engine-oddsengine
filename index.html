@@ -592,6 +592,7 @@ body.chatmode .chead{background:rgba(8,14,11,.55)}
 @keyframes moIn{from{opacity:0;transform:translateY(6px)}}
 .mo-hi{color:var(--dim);font-size:14.5px;margin:auto 0}
 .mo-sug{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.oi{display:inline-block;vertical-align:-3px;margin-right:6px;color:#22f08a;flex:0 0 auto}
 .mo-sug button b{font-weight:600;margin-right:2px}
 .mo-quick{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 10px;margin:0 0 2px;max-width:100%;-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent)}
 .mo-quick::-webkit-scrollbar{display:none}
@@ -1207,6 +1208,9 @@ html.pwa footer.wrap{display:none}
 
 <script>
 const API=window.ODDSENGINE_API||'';
+/* eigene Icons statt Emojis (seit 2.84.28) */
+const OI={"search": "<circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M16.5 16.5 21 21\"/>", "chart": "<path d=\"M3 17l6-6 4 4 8-9\"/><path d=\"M15 6h6v6\"/>", "shield": "<path d=\"M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z\"/>", "alert": "<path d=\"M12 4 2.5 20h19z\"/><path d=\"M12 10v4\"/><path d=\"M12 17v.01\"/>", "sun": "<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19\"/>", "chat": "<path d=\"M4 5h16v11H9l-5 4z\"/>", "mic": "<rect x=\"9\" y=\"3\" width=\"6\" height=\"11\" rx=\"3\"/><path d=\"M5 11a7 7 0 0 0 14 0\"/><path d=\"M12 18v3\"/>", "radar": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><path d=\"M12 12 18.5 5.5\"/>", "calendar": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 10h18M8 3v4M16 3v4\"/>", "target": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"5\"/><circle cx=\"12\" cy=\"12\" r=\"1\"/>", "compass": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M15.5 8.5l-2 5-5 2 2-5z\"/>", "film": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M8 4v16M16 4v16M3 12h18\"/>", "flame": "<path d=\"M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z\"/>", "image": "<rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><circle cx=\"8.5\" cy=\"9.5\" r=\"1.5\"/><path d=\"M21 16l-5-5L6 20\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3.5 2\"/>", "eye": "<path d=\"M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><path d=\"M7.5 8.5v.01\"/>", "droplet": "<path d=\"M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z\"/>", "lock": "<rect x=\"5\" y=\"11\" width=\"14\" height=\"10\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 0 1 8 0v3\"/>", "cap": "<path d=\"M2 9l10-5 10 5-10 5z\"/><path d=\"M6 11.5V16c2 2 10 2 12 0v-4.5\"/>", "dna": "<path d=\"M8 3c0 5 8 5 8 9s-8 4-8 9\"/><path d=\"M16 3c0 5-8 5-8 9s8 4 8 9\"/><path d=\"M9.5 7h5M9.5 17h5\"/>", "users": "<circle cx=\"9\" cy=\"8\" r=\"3\"/><path d=\"M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6\"/><circle cx=\"17\" cy=\"9\" r=\"2.5\"/><path d=\"M16 14.5c3 0 5 2.2 5 5.5\"/>", "copy": "<rect x=\"8\" y=\"8\" width=\"12\" height=\"12\" rx=\"2\"/><path d=\"M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2\"/>", "megaphone": "<path d=\"M4 10v4h3l8 4V6l-8 4z\"/><path d=\"M18 9a4 4 0 0 1 0 6\"/>", "bell": "<path d=\"M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z\"/><path d=\"M10 20a2 2 0 0 0 4 0\"/>"};
+function oi(n){return OI[n]?`<svg class="oi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OI[n]}</svg>`:'';}
 /* Partner-Link (?ref=nomad): merken, beim ersten API-Key mitschicken */
 let REF='';try{const q=new URLSearchParams(location.search).get('ref');if(q&&/^[a-z0-9_-]{2,20}$/i.test(q)){REF=q.toLowerCase();localStorage.setItem('oe_ref',REF);}else{REF=localStorage.getItem('oe_ref')||'';}}catch(e){}
 const $=s=>document.querySelector(s);
@@ -2543,22 +2547,22 @@ const HRS=[...Array(24).keys()];
 function moTime(h){return (h%12||12)+(h<12?' am':' pm');}
 /* 2.69.0: klickbare Beispiele, zeigen in Sekunden, was geht. Ein Tippen fuellt das Feld, man kann noch anpassen. */
 function moSugs(){
-  const a=[['🔎 Scan a coin','Scan this coin: 0x…'],
-    ['🎙️ Trade by text or voice','Buy $5 of ODDS'],
-    ['📡 GTA radar','Tell me when new GTA coins launch'],
-    ['🗓️ Your own brief','Every Monday at 9:00 send me a brief: my holdings vs BTC, unlocks in the next 14 days and big holder changes'],
-    ['🎯 Take profit','Alert me when my ODDS bag hits 3x'],
-    ['🧭 Follow the money','Where did the money of this wallet come from: 0x…'],
-    ['🛡️ Wallet check','Check my wallet for risky approvals'],
-    ['🎬 AI video','Make a 5 second video of a neon robot walking through a rainy city at night'],
-    ['🔥 Burns','How much $ODDS and $TORCH is burned?'],
-    ['🖼️ Image','Make me an image of a neon robot reading a price chart'],
-    ['⏰ Reminder','Remind me tomorrow 9:00 to check the calls'],
-    ['👀 Watch a page','Watch this page for changes: https://…']];
-  if(typeof FEAT!=='undefined'&&FEAT.deals)a.splice(6,0,['🏷️ Deals','Find me a deal on AirPods Pro 3']);
+  const a=[['search','Scan a coin','Scan this coin: 0x…'],
+    ['mic','Trade by text or voice','Buy $5 of ODDS'],
+    ['radar','GTA radar','Tell me when new GTA coins launch'],
+    ['calendar','Your own brief','Every Monday at 9:00 send me a brief: my holdings vs BTC, unlocks in the next 14 days and big holder changes'],
+    ['target','Take profit','Alert me when my ODDS bag hits 3x'],
+    ['compass','Follow the money','Where did the money of this wallet come from: 0x…'],
+    ['shield','Wallet check','Check my wallet for risky approvals'],
+    ['film','AI video','Make a 5 second video of a neon robot walking through a rainy city at night'],
+    ['flame','Burns','How much $ODDS and $TORCH is burned?'],
+    ['image','Image','Make me an image of a neon robot reading a price chart'],
+    ['clock','Reminder','Remind me tomorrow 9:00 to check the calls'],
+    ['eye','Watch a page','Watch this page for changes: https://…']];
+  if(typeof FEAT!=='undefined'&&FEAT.deals)a.splice(6,0,['tag','Deals','Find me a deal on AirPods Pro 3']);
   return a;}
 function moQuick(){const h=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]);if(!h.length||!moReady())return '';
-  return `<div class="mo-quick" role="list">${moSugs().slice(0,7).map(([l,t])=>`<button type="button" role="listitem" data-sug="${E(t)}">${E(l)}</button>`).join('')}</div>`;}
+  return `<div class="mo-quick" role="list">${moSugs().slice(0,7).map(([k,l,t])=>`<button type="button" role="listitem" data-sug="${E(t)}">${oi(k)}${E(l)}</button>`).join('')}</div>`;}
 /* 2.69.0: sichtbare Arbeitsschritte, live von /v1/engine/progress */
 let MO_STEPS=null,MO_POLL=null;
 function moStepsHtml(){if(!MO_STEPS||!MO_STEPS.steps)return '';
@@ -2570,7 +2574,7 @@ function moPollStop(){clearInterval(MO_POLL);MO_POLL=null;}
 function moMsgs(){
   const h=(MO_LOG.length?MO_LOG:(MO&&MO.history)||[]);
   if(!h.length)return `<div class="mo-hi">Ask me anything about the markets, a wallet, a token or the news. Try:
-    <div class="mo-sug">${moSugs().map(([l,t])=>`<button type="button" data-sug="${E(t)}"><b>${E(l)}</b> ${E(t)}</button>`).join('')}</div></div>`;
+    <div class="mo-sug">${moSugs().map(([k,l,t])=>`<button type="button" data-sug="${E(t)}">${oi(k)}<b>${E(l)}</b> ${E(t)}</button>`).join('')}</div></div>`;
   const sw_=MO&&MO.switches||{};
   return h.map((m,i)=>`${m.role!=='user'?moCards(m.cards):''}<div class="mo-m ${m.role==='user'?'u':'a'}">${m.role==='user'?E(m.content):(typeof md==='function'?md(m.content||''):E(m.content||''))}${moImgs(m.images)}${moData(m.data)}${m.role!=='user'&&sw_.voice&&m.content?`<button type="button" class="mo-say" data-say="${i}">▶ Listen</button>`:''}${m.cost!=null||m.secs?`<small>${m.secs?'Done in '+m.secs+' s'+(m.cost!=null?' · ':''):''}${m.cost!=null?(m.cost>0?usd(m.cost,m.cost<0.01?4:3):'free'):''}${m.tools&&m.tools.length?' · '+E(m.tools.join(', ')):''}</small>`:''}</div>`).join('')+(MO_BUSY?`<div class="mo-m a mo-busy">${MO_STEPS&&MO_STEPS.steps&&MO_STEPS.steps.length?moStepsHtml():'<span class="typing"><i></i><i></i><i></i></span>'}</div>`:'');
 }
@@ -3072,28 +3076,28 @@ function rpPulse(r){const m=r.market||{},ch=m.change||{},tx=m.txns||{},lp=r.lp||
   if(!z.length&&anteil==null&&lp.supply_pct==null&&!lp.positions_line)return '';
   return `<div class="rp-card o4"><h3>Market pulse</h3>${z.length?`<div class="rp-pulse">${z.map(([k,v])=>`<div><span>${k}</span><b class="${(+v||0)>=0?'up':'dn'}">${rpPct(v)}</b></div>`).join('')}</div>`:''}
   ${anteil!=null?`<div class="rp-bs"><div class="row"><span><b style="color:var(--g2)">${b}</b> buys</span><span>last hour</span><span><b style="color:#ff9aa4">${se}</b> sells</span></div><div class="t"><i style="width:${anteil}%"></i></div>${h24.buys!=null?`<p class="note" style="margin:8px 0 0">24h: ${h24.buys} buys / ${h24.sells} sells · volume ${rpUsd((m.vol||{}).h24)}</p>`:''}</div>`:''}
-  ${lp.supply_pct!=null?`<p class="rp-mini" style="margin-top:12px">💧 Pool holds <b>${rpN(lp.supply_pct)}%</b> of supply (${E({v2:'Uniswap V2',v3:'V3 pool',v4:'Uniswap V4'}[lp.kind]||'pool')})${lp.burned_pct!=null?` · <b>${rpN(lp.burned_pct)}%</b> of LP burned`:(lp.kind==='v3'||lp.kind==='v4')&&!lp.positions_line?' · positions are NFTs, no LP token':''}</p>`:''}
-  ${lp.positions_line?`<p class="rp-mini" style="margin-top:6px">🔐 ${E(lp.positions_line)}</p>`:''}
-  ${tt?`<p class="rp-mini">🎓 Torch: ${tt.graduated?'graduated':E(tt.progress_to_graduation_pct)+'% to graduation'}</p>`:''}</div>`;}
+  ${lp.supply_pct!=null?`<p class="rp-mini" style="margin-top:12px">${oi('droplet')} Pool holds <b>${rpN(lp.supply_pct)}%</b> of supply (${E({v2:'Uniswap V2',v3:'V3 pool',v4:'Uniswap V4'}[lp.kind]||'pool')})${lp.burned_pct!=null?` · <b>${rpN(lp.burned_pct)}%</b> of LP burned`:(lp.kind==='v3'||lp.kind==='v4')&&!lp.positions_line?' · positions are NFTs, no LP token':''}</p>`:''}
+  ${lp.positions_line?`<p class="rp-mini" style="margin-top:6px">${oi('lock')} ${E(lp.positions_line)}</p>`:''}
+  ${tt?`<p class="rp-mini">${oi('cap')} Torch: ${tt.graduated?'graduated':E(tt.progress_to_graduation_pct)+'% to graduation'}</p>`:''}</div>`;}
 function rpHist(r){const h=r.seen_before;if(!h||!h.known)return '';
   const coins=(h.top||[]).map(c=>`<span class="rp-coin ${c.dead?'dead':c.ran?'ran':''}">${E(c.coin)}<i>${c.wallets} wallet${c.wallets==1?'':'s'}</i></span>`).join('');
   const g=h.group;const st=(h.standouts||[]).map(x=>{const rolle=(x.here||[]).includes('dev')?'Dev':(x.here||[]).includes('top_holder')?'Top holder':'Got tokens from the dev';
     return `<li><b>${rolle}</b> <span class="mono">${E(rpShort(x.wallet))}</span> was in <b>${x.coins}</b> other coins (${E((x.examples||[]).join(', '))})${x.dead_after?`, <span style="color:#ff9aa4">${x.dead_after} now under 20% of peak</span>`:''}</li>`;}).join('');
-  return `<div class="rp-card rp-wh o5"><h3>🧬 Wallet history</h3>
+  return `<div class="rp-card rp-wh o5"><h3>${oi('dna')} Wallet history</h3>
   <div class="rp-big"><b>${h.known}</b><span>of this coin's wallets were already in<br><b style="color:var(--tx)">${h.coins}</b> other coin${h.coins==1?'':'s'} we checked</span></div>
   <div class="rp-coins">${coins}</div>
   <div class="rp-kpi"><div class="${h.sold_out_there?'bad':''}"><b>${h.sold_out_there||0}</b><span>sold everything there</span></div><div class="${h.coins_dead?'bad':''}"><b>${h.coins_dead||0}</b><span>coins now under 20% of peak</span></div><div class="${h.coins_ran?'good':''}"><b>${h.coins_ran||0}</b><span>coins ran 3x or more</span></div></div>
   ${h.hold_median_h!=null?`<p class="rp-mini" style="margin:0 0 10px">⏱ When they sold out in those coins: after a median of <b>${h.hold_median_h<1?Math.round(h.hold_median_h*60)+' min':h.hold_median_h<48?rpN(h.hold_median_h)+' h':rpN(h.hold_median_h/24)+' days'}</b> <span class="note">(${h.hold_samples} exits)</span></p>`:''}
-  ${g?`<div class="rp-group">👥 Same group: <b>${g.wallets} wallets</b> were in ${E((g.coins||[]).join(', '))} together too</div>`:''}
+  ${g?`<div class="rp-group">${oi('users')} Same group: <b>${g.wallets} wallets</b> were in ${E((g.coins||[]).join(', '))} together too</div>`:''}
   ${st?`<ul class="rp-ls">${st}</ul>`:''}</div>`;}
 function rpKette(r){const f=r.forwards||{};const ch=f.chains||[];if(!ch.length)return '';const exp=r.explorer_base||'';const ap=r.addr_path||'/address/';
   const lk=(a,c)=>`<a class="${c||''}" href="${E(exp+ap+a)}" target="_blank" rel="noopener">${E(rpShort(a))}</a>`;
   return `<div class="rp-card o7"><h3>Token trails</h3><p class="note" style="margin:-4px 0 10px">Tokens passed wallet to wallet without a sale, followed up to ${f.max_hops||ch[0].hops} stations. Hidden supply still held at the end: <b style="color:var(--tx)">${rpN(f.hidden_held_pct||0)}%</b></p>
   ${ch.slice(0,5).map(c=>`<div class="rp-chain">${c.path.map((a,i)=>lk(a,i==0?'src':i==c.path.length-1?'end':'')).join('<em>→</em>')}<span class="note">${E(c.src)} · ${c.hops} hops</span><span class="hold">${rpN(c.end_holds_pct)}%</span></div>`).join('')}</div>`;}
 function rpName(r){const tw=r.twins||{},nv=r.narrative,z=[];
-  if(tw.count)z.push(`<div><i>🪞</i><span>${tw.likely_copy?`<b style="color:#ff9aa4">Copycat:</b> ${tw.count} other $${E(r.symbol||'')}, ${tw.older} older and bigger`:`Same name: ${tw.count} other $${E(r.symbol||'')}${tw.same_chain?`, ${tw.same_chain} on this chain`:''}${!tw.older?'. This one is the oldest':''}`}</span></div>`);
-  if(nv)z.push(`<div><i>📣</i><span>Narrative <b>${E(nv.word)}</b>: ${nv.new} new coins in 3 days, ${nv.ran} running${nv.hot?' · <b style="color:var(--g2)">hot</b>':''}</span></div>`);
-  if(r.renamed)z.push(`<div><i>⚠️</i><span>Name on chain is "${E(r.renamed.onchain)}", listed as "${E(r.renamed.listed)}"</span></div>`);
+  if(tw.count)z.push(`<div><i>${oi('copy')}</i><span>${tw.likely_copy?`<b style="color:#ff9aa4">Copycat:</b> ${tw.count} other $${E(r.symbol||'')}, ${tw.older} older and bigger`:`Same name: ${tw.count} other $${E(r.symbol||'')}${tw.same_chain?`, ${tw.same_chain} on this chain`:''}${!tw.older?'. This one is the oldest':''}`}</span></div>`);
+  if(nv)z.push(`<div><i>${oi('megaphone')}</i><span>Narrative <b>${E(nv.word)}</b>: ${nv.new} new coins in 3 days, ${nv.ran} running${nv.hot?' · <b style="color:var(--g2)">hot</b>':''}</span></div>`);
+  if(r.renamed)z.push(`<div><i>${oi('alert')}</i><span>Name on chain is "${E(r.renamed.onchain)}", listed as "${E(r.renamed.listed)}"</span></div>`);
   return z.length?`<div class="rp-card o11"><h3>Name and narrative</h3><div class="rp-tw">${z.join('')}</div></div>`:'';}
 function rpFlags(r){const d=['top 10','largest wallet','fresh wallet','multiple minor','low mcap','price dropped','price rose'];return (r.notes||[]).filter(n=>!d.some(x=>n.toLowerCase().includes(x))).slice(0,5);}
 function rpBar(lbl,v,warn){if(v==null)return '';const p=Math.max(0,Math.min(100,+v));return `<div class="rp-bar ${p>=warn?'hot':''}"><div class="l"><span>${lbl}</span><b>${rpN(v)}%</b></div><div class="t"><i style="width:${p}%"></i></div></div>`;}
@@ -3149,7 +3153,7 @@ function rpDraw(keep){
       ${sp.top_note?`<p class="note">${E(sp.top_note)}</p>`:''}${rpFwd(r)}</div>
     <div class="rp-card o8"><h3>Dev</h3>${dv.address?`<p class="rp-dev"><a class="mono" href="${E(dv.explorer||exp+ap+dv.address)}" target="_blank" rel="noopener">${E(rpShort(dv.address))}</a>${dv.holds_pct!=null?` holds <b>${rpN(dv.holds_pct)}%</b>`:''}</p>
       ${dv.launches_seen?`<p class="rp-mini">Launched ${dv.launches_seen} other coin${dv.launches_seen==1?'':'s'} we saw${dv.launches_ran?`, <b>${dv.launches_ran}</b> ran`:dv.launches_ran===0?', none ran':''}</p>`:'<p class="rp-mini">No earlier launches we know of.</p>'}`:'<p class="note">Dev wallet not known for this coin.</p>'}
-      ${(r.deep||{}).state==='ready'&&(dv.address||sp.bundled_pct)?`<div id="rpCrew"><button class="btn btn-g btn-sm" data-rp="crew" style="margin-top:10px">👁 Track dev, bundles and side wallets</button><p class="note" style="margin:6px 0 0">Every move arrives in Telegram with a name: dev, bundle 1, dev side 1, trail 1.</p></div>`:''}
+      ${(r.deep||{}).state==='ready'&&(dv.address||sp.bundled_pct)?`<div id="rpCrew"><button class="btn btn-g btn-sm" data-rp="crew" style="margin-top:10px">${oi('eye')} Track dev, bundles and side wallets</button><p class="note" style="margin:6px 0 0">Every move arrives in Telegram with a name: dev, bundle 1, dev side 1, trail 1.</p></div>`:''}
       ${sm.checked?`<h3 style="margin-top:14px">Smart wallets</h3><p class="rp-mini"><b>${sm.found}</b> of the first ${sm.checked} buyers are wallets we score${sm.best?` · best score ${E(sm.best)}`:''}</p>`:''}
       ${rpFlags(r).length?`<h3 style="margin-top:14px">Flags</h3><ul class="rp-fl">${rpFlags(r).map(n=>`<li>${E(n)}</li>`).join('')}</ul>`:''}</div>
     <div class="rp-card rp-res o12" id="rpRes"><h3>Project research</h3><p class="note">Website and docs against the chain, X account and who is talking on X right now, Telegram, GitHub, paid visibility. Takes up to a minute, costs a little from your balance.</p><button class="btn btn-g" data-rp="research">Run research</button></div></div>
@@ -3225,7 +3229,7 @@ function rpFwd(r){const f=r.forwards;if(!f||!f.checked)return '';const exp=r.exp
   const kopf=`<p class="rp-mini"><b>${f.senders}</b> wallet${f.senders==1?'':'s'} sent tokens to <b>${f.receivers}</b> other${f.receivers==1?'':'s'} (${f.count} transfers)${f.to_fresh?` · <b>${f.to_fresh}</b> to fresh wallets`:''}${f.still_held_pct?` · receivers still hold <b>${rpN(f.still_held_pct)}%</b>`:''}${f.from_dev?` · <b class="rp-red">dev forwarded ${rpN(f.dev_forwarded_pct)}%</b>`:''}</p>`;
   const zeilen=(f.list||[]).slice(0,6).map(x=>`<li>${lk(x.from)} <span class="note">${E(x.src)}</span> → ${lk(x.to)}${x.fresh?' <span class="rp-tag">new</span>':''} <span class="note">${rpN(x.pct)}%${x.holds_pct!=null?' · holds '+rpN(x.holds_pct)+'%':''}</span></li>`).join('');
   const sam=(f.collectors||[]).filter(c=>c.other_tokens||c.from_wallets>1).slice(0,3).map(c=>`<li>${lk(c.wallet)} <span class="note">collected from ${c.from_wallets} wallet${c.from_wallets==1?'':'s'} here${c.other_tokens?`, also on ${c.other_tokens} other coin${c.other_tokens==1?'':'s'}`:''}</span></li>`).join('');
-  return `<h3 style="margin-top:14px">Token forwards</h3>${kopf}<ul class="rp-fw">${zeilen}</ul>${(f.list||[]).length>6?`<p class="note">+${f.list.length-6} more</p>`:''}<div id="rpFwW"><button class="btn btn-g btn-sm" data-rp="fwdwatch" style="margin-top:10px">🔔 Alert me when they sell or lock</button></div>${sam?`<h3 style="margin-top:12px">Collection wallets</h3><ul class="rp-fw">${sam}</ul>`:''}`;}
+  return `<h3 style="margin-top:14px">Token forwards</h3>${kopf}<ul class="rp-fw">${zeilen}</ul>${(f.list||[]).length>6?`<p class="note">+${f.list.length-6} more</p>`:''}<div id="rpFwW"><button class="btn btn-g btn-sm" data-rp="fwdwatch" style="margin-top:10px">${oi('bell')} Alert me when they sell or lock</button></div>${sam?`<h3 style="margin-top:12px">Collection wallets</h3><ul class="rp-fw">${sam}</ul>`:''}`;}
 function rpBind(){
   document.querySelectorAll('[data-rp]').forEach(b=>b.onclick=async()=>{
     const a=b.dataset.rp;
