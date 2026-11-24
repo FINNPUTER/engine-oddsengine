@@ -1119,6 +1119,12 @@ html.pwa footer.wrap{display:none}
 .vd-m:hover{transform:translateY(-1px);border-color:var(--line2)}
 .vd-m.on{border-color:var(--g);box-shadow:0 0 0 1px var(--g),0 0 26px rgba(34,240,138,.18)}
 .vd-m b{font-family:var(--disp);font-size:14px;color:var(--tx)}
+.ye-seg{display:flex;gap:6px;margin:4px auto 18px;max-width:640px;padding:5px;border-radius:999px;border:1px solid var(--line2);background:rgba(8,14,11,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:76px;z-index:20}
+.ye-seg button{all:unset;flex:1;text-align:center;padding:10px 4px;border-radius:999px;font-family:var(--disp);font-size:13px;letter-spacing:.04em;color:var(--dim);cursor:pointer;white-space:nowrap}
+.ye-seg button:hover{color:var(--ink,#fff)}
+.ye-seg button.on{background:var(--g);color:#03130a}
+@media (max-width:560px){.ye-seg button{font-size:11.5px;padding:9px 2px}}
+@media (max-width:440px){.ye-seg .segx{display:none}}
 .hubseg{display:none}
 @media (max-width:820px){.hubseg{display:flex;gap:6px;margin:6px auto 0;max-width:420px;padding:5px;border-radius:999px;border:1px solid var(--line2);background:rgba(8,14,11,.72);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:sticky;top:76px;z-index:20}
 .hubseg button{all:unset;flex:1;text-align:center;padding:9px 0;border-radius:999px;font-family:var(--disp);font-size:12px;letter-spacing:.04em;color:var(--dim);cursor:pointer}
@@ -2618,6 +2624,14 @@ function moList(){
     ...nw.map(x=>row('news',x.id,x.name,(x.mode==='briefing'?'News · in the briefing':'News · sent as it happens')+(x.keywords&&x.keywords.length?' · only '+x.keywords.join(', '):'')))];
   return all.length?all.join(''):'<div class="note">Nothing yet. Ask in the chat: "remind me…", "alert me when…", "watch this page…", "tell me when crowd and engine split on BTC", "I drive to the gym every weekday at 5".</div>';
 }
+/* Seit Site v28432: Your Engine in Reitern (Chat, Tools, Briefing, Settings), vorher alles auf einer Seite */
+let ENG_SEG='chat';try{ENG_SEG=localStorage.getItem('oe_seg')||'chat';}catch(e){}
+const ENG_SEGS=[['chat','Chat'],['tools','Tools'],['daily','Briefing<span class="segx"> &amp; alerts</span>'],['setup','Settings']];
+if(!ENG_SEGS.some(x=>x[0]===ENG_SEG))ENG_SEG='chat';
+function engSeg(){return `<nav class="ye-seg rv" aria-label="Your Engine">${ENG_SEGS.map(([k,l])=>`<button data-seg="${k}" class="${ENG_SEG===k?'on':''}">${l}</button>`).join('')}</nav>`;}
+function engSegGo(k,ziel){ENG_SEG=k;try{localStorage.setItem('oe_seg',k);}catch(e){}render();
+  setTimeout(()=>{const x=ziel&&document.getElementById(ziel);const n=document.querySelector('.ye-seg');(x||n||document.body).scrollIntoView({behavior:'smooth',block:'start'});},ziel?350:30);}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-seg]');if(!b)return;e.preventDefault();if(b.dataset.seg!==ENG_SEG)engSegGo(b.dataset.seg);});
 engineView=function(){
   const m=ME||{};const L=m.linked||{};const b=m.balance||{};
   const br=m.briefing||{parts:{}};const mem=m.memory||{cats:{},items:[]};
@@ -2640,9 +2654,16 @@ engineView=function(){
     </div>
     ${face('idle')}
   </section>
+  ${engSeg()}
+  ${ENG_SEG==='tools'?`
   ${MO&&MO.switches&&MO.switches.autotrade?'<section class="rv" id="moLiveS" style="display:none"><div class="card" id="moLive"></div></section>':''}
   ${axCard()}
-  ${yeDo()}
+  ${(MO&&MO.switches&&(MO.switches.autotrade||MO.switches.rotation))?`<section><div class="grid2">
+    ${MO.switches.autotrade?'<div class="card rv" id="moAuto"><h3>Auto mode</h3><p class="sub">Loading</p></div>':''}
+    ${MO.switches.rotation?'<div class="card rv" id="moRot"><h3>Meta Rotation</h3><p class="sub">Loading</p></div>':''}
+  </div></section>`:''}
+  ${yeDo()}`:''}
+  ${ENG_SEG==='chat'?`
   ${L.wallet&&L.telegram&&b.usd?'':`<section class="rv"><div class="card"><h3>Three steps and it is yours</h3><p class="sub">Takes about a minute. Your Engine only ever sees public addresses.</p>
     <div class="steps">
       <div class="step ${L.wallet?'done':''}"><div class="n">${L.wallet?'✓':'1'}</div><div><b>Connect your wallet</b><span>Sign one message. No transaction, no fee.</span>${L.wallet?'':'<div><button class="btn btn-g btn-sm" data-act="connect">Connect</button></div>'}</div></div>
@@ -2655,7 +2676,8 @@ engineView=function(){
     ${moBeta()?moNote():''}
     <div id="moQuick">${moQuick()}</div>
     <div class="mo-att" id="moAtt"></div><form class="mo-in" id="moForm"><label class="mo-clip ${moReady()?'':'off'}" title="Add a photo or screenshot" aria-label="Add a photo"><input type="file" id="moFile" accept="image/*" multiple hidden ${moReady()?'':'disabled'}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="11" r="2"/><path d="m21 16-5-5-7 7"/></svg></label><textarea id="moIn" rows="1" ${moReady()?'':'disabled'} placeholder="${moReady()?'Ask about a wallet, a token, burns, launches, the calls…':moWhy()}" aria-label="Message"></textarea><button class="btn btn-g" type="submit" ${MO_BUSY||!moReady()?'disabled':''}>Send</button></form>
-  </div></section>
+  </div></section>`:''}
+  ${ENG_SEG==='daily'?`
   <section><div class="grid2">
     <div class="card rv d1"><h3>Morning briefing</h3><p class="sub">One message in your Telegram at your hour, on its own: weather, traffic on your trips, headlines, Torch rewards to claim, the calls, your bags. Included while you have a balance.</p>
       <div class="row"><div class="l"><b>Briefing</b><span>One message every morning</span></div>${sw(br.on!==false,'data-br="on"')}</div>
@@ -2685,8 +2707,6 @@ engineView=function(){
     <div class="card rv"><h3>News</h3><p class="sub">Pick your sources. Each one comes straight to your Telegram as it happens, or collected in your morning briefing.</p>
       ${moNews()}
       <div class="mo-mail" style="margin-top:10px"><input id="moNewsAdd" maxlength="200" placeholder="Any public Telegram channel (@name) or RSS link" aria-label="Add a news source"><button class="btn btn-g btn-sm" data-act="newsadd">Add</button></div></div>
-    ${MO&&MO.switches&&MO.switches.rotation?'<div class="card rv" id="moRot"><h3>Meta Rotation</h3><p class="sub">Loading</p></div>':''}
-    ${MO&&MO.switches&&MO.switches.autotrade?'<div class="card rv" id="moAuto"><h3>Auto mode</h3><p class="sub">Loading</p></div>':''}
     <div class="card rv"><h3>From OddsEngine</h3><p class="sub">What Your Engine sends you on its own. Switch off anything you do not want.</p>
       <div class="row"><div class="l"><b>OddsEngine news</b><span>What the team posts in the channel and on X, straight to your Telegram</span></div>${sw(!MO||MO.official_news!==false,'data-set="official_news"')}</div>
       <div class="row"><div class="l"><b>Check-ins</b><span>Asks how your training, meeting or appointment went</span></div>${sw(!MO||MO.check_ins!==false,'data-set="check_ins"')}</div>
@@ -2696,6 +2716,9 @@ engineView=function(){
       ${MO&&MO.switches&&MO.switches.voice?`<div class="row"><div class="l"><b>Voice replies</b><span>A voice note in Telegram gets a voice note back. Costs a little more than text</span></div>${sw(!!MO.voice_replies,'data-set="voice_replies"')}</div>`:''}
       ${MO&&MO.switches&&MO.switches.lang?`<div class="row"><div class="l"><b>Language</b><span>Answers, briefing, alerts and news in this language</span></div><select id="moLang" class="mo-sel mo-wide"><option value="auto">Like I write</option>${Object.entries(MO.languages||{}).map(([k,v])=>`<option value="${E(k)}" ${MO.language===k?'selected':''}>${E(v)}</option>`).join('')}</select></div>`:''}
     </div>
+  </div></section>`:''}
+  ${ENG_SEG==='setup'?`
+  <section><div class="grid2">
     ${moMailCard()}
     ${moModelCard()}
     <div class="card rv"><h3>Memory</h3><p class="sub">What Your Engine remembers about you. Delete anything, any time.</p>
@@ -2711,7 +2734,7 @@ engineView=function(){
       <div class="credit"><div class="big">${b.team?'No charge':usd(b.usd||0)}</div><span class="note">${b.odds_equiv?'≈ '+Number(b.odds_equiv).toLocaleString('en-US')+' $ODDS today':''}</span></div>
       <div style="margin-top:14px"><button class="btn btn-sm" data-act="toai">Top up</button></div>
     </div>
-  </div></section>`;
+  </div></section>`:''}`;
 };
 
 function moStk(l){const m={'^GSPC':'S&P 500','^IXIC':'Nasdaq','^DJI':'Dow','^GDAXI':'DAX','^N225':'Nikkei','^FTSE':'FTSE','GC=F':'Gold','CL=F':'Oil','^VIX':'VIX'};return l.map(x=>m[x]||x.replace('^','')).join(', ');}
@@ -2733,9 +2756,10 @@ function moShrink(file){return new Promise((ok,no)=>{const fr=new FileReader();f
 function moAttDraw(){const a=$('#moAtt');if(!a)return;a.innerHTML=MO_IMG.map((u,i)=>`<span><img src="${u}" alt=""><button type="button" data-rmimg="${i}" aria-label="Remove">×</button></span>`).join('');a.querySelectorAll('[data-rmimg]').forEach(b=>b.onclick=()=>{MO_IMG.splice(+b.dataset.rmimg,1);moAttDraw();});}
 async function moSend(t){
   if(MO_BUSY)return;if(!connected()){toast('Connect your wallet first');return;}
+  if(!$('#moLog')&&typeof ENG_SEG!=='undefined'&&TAB==='engine'){ENG_SEG='chat';try{localStorage.setItem('oe_seg','chat');}catch(e){}render();}
   if(!MO_LOG.length&&MO&&MO.history)MO_LOG=MO.history.slice();
   const imgs=MO_IMG.slice();MO_IMG=[];moAttDraw();
-  MO_LOG.push({role:'user',content:t,data:imgs});MO_BUSY=true;setRing('thinking');$('#moLog').innerHTML=moMsgs();moScroll();
+  MO_LOG.push({role:'user',content:t,data:imgs});MO_BUSY=true;setRing('thinking');{const l0=$('#moLog');if(l0)l0.innerHTML=moMsgs();}moScroll();
   const t0=performance.now();moPollStart();
   try{const r=await api('/v1/engine/ask',{method:'POST',body:JSON.stringify({text:t,images:imgs})});
     moPollStop();
@@ -3575,7 +3599,8 @@ async function axLoad(){
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-ax="auto"]');if(!b)return;
   const el=document.getElementById('moAuto');
   if(el){el.scrollIntoView({behavior:'smooth',block:'start'});return;}
-  if(typeof MB_TABS!=='undefined'&&MB_TABS.includes(TAB)&&typeof connected==='function'&&connected()&&MO&&MO.switches&&MO.switches.autotrade){TAB='engine';render();setTimeout(()=>{const x=document.getElementById('moAuto');if(x)x.scrollIntoView({behavior:'smooth',block:'start'});},350);return;}
+  if(TAB==='engine'&&MO&&MO.switches&&MO.switches.autotrade&&typeof engSegGo==='function'){engSegGo('tools','moAuto');return;}
+  if(typeof MB_TABS!=='undefined'&&MB_TABS.includes(TAB)&&typeof connected==='function'&&connected()&&MO&&MO.switches&&MO.switches.autotrade){TAB='engine';ENG_SEG='tools';render();setTimeout(()=>{const x=document.getElementById('moAuto');if(x)x.scrollIntoView({behavior:'smooth',block:'start'});},350);return;}
   window.open('https://oddsengine.live/#auto','_blank','noopener');});
 /* Seit 2.84.17: die Chains als Reihe unter dem Scan-Kopf. Ein Logo erscheint, sobald chain-<id>.svg im Repo liegt, sonst nur der Name. */
 function mbChains(){return `<div class="mb-chains rv d2">${[['solana','Solana'],['base','Base'],['ethereum','Ethereum'],['bsc','BNB Chain'],['arbitrum','Arbitrum'],['robinhood','Robinhood Chain'],['tron','TRON'],['ton','TON']].map(c=>`<span class="mb-chain${c[0]==='tron'||c[0]==='ton'?' new':''}"><img src="chain-${c[0]}.${c[0]==='tron'||c[0]==='ton'?'png':'svg'}" alt="" width="16" height="16" loading="lazy" onerror="this.remove()">${c[1]}${c[0]==='tron'||c[0]==='ton'?'<i>new</i>':''}</span>`).join('')}</div>`;}
