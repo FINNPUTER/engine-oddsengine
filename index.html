@@ -3084,6 +3084,14 @@ function rpResearch(d){
     if(d.same_site_as)it('bad','Same site text as '+d.same_site_as+' other coins we checked');}else it('bad','No website linked');
   (d.findings||[]).forEach(f=>it(f.level==='warn'?'bad':f.level==='ok'?'ok':'',f.text+(f.source?' ('+f.source+')':'')));
   (d.partners||[]).filter(p=>p.read).forEach(p=>it(p.names_back?'ok':'bad',p.host+(p.names_back?' names this project back':' does not mention this project')));
+  L.push('</ul><h4>Name history</h4><ul class="rp-rl">');
+  {const nh=d.name_history||{},nx=nh.x||{};
+   if(nh.website_renamed)it('bad','The site had other names before: '+(nh.website_titles||[]).map(t=>t.title+' ('+t.date.slice(0,7)+')').join(' → '));
+   else if(nh.website_first_seen)it('','Site in the web archive since '+nh.website_first_seen.slice(0,7));
+   if(nh.token_renamed)it('bad','Token name on chain is "'+nh.token_renamed.onchain+'", listed as "'+nh.token_renamed.listed+'"');
+   if((nx.old_handles||[]).length)it('bad','Same X account had other names: '+nx.old_handles.slice(0,5).map(o=>'@'+o.handle).join(', '));
+   if(nx.handle_changes)it(nx.handle_changes>=2?'bad':'','@name changed '+nx.handle_changes+' time'+(nx.handle_changes==1?'':'s')+(nx.last_handle_change?', last on '+nx.last_handle_change:''));}
+  if(!d.name_history)it('','No earlier names found');
   L.push('</ul><h4>X</h4><ul class="rp-rl">');const x=d.x||{};
   if(x.read)it('',`@${x.handle}: ${(+x.followers).toLocaleString('en-US')} followers · ${(+x.posts).toLocaleString('en-US')} posts`+(x.age_days!=null?` · ${x.age_days} days old`:''));else it(x.handle?'':'bad',x.handle?'@'+x.handle+' could not be read':'No X account linked');
   const xp=d.x_pulse||{};if(xp.text)L.push(`<li class="rp-xp">${E(xp.text)}${(xp.sources||[]).slice(0,4).map(q=>`<a href="${E(q.url)}" target="_blank" rel="noopener">post</a>`).join(' ')}</li>`);
