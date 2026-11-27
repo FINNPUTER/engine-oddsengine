@@ -1192,6 +1192,7 @@ html.pwa footer.wrap{display:none}
     <button role="tab" data-tab="chat">Chat</button>
     <button role="tab" data-tab="models">Models</button>
     <button role="tab" data-tab="video">Video</button>
+    <button role="tab" data-tab="3d">3D</button>
     <button role="tab" data-tab="ai">Account</button>
     <a class="gta-tab" href="/gta/">GTA VI</a>
     <a class="gta-tab lock-tab" href="/lock/" id="lockTab" style="display:none">Locker</a>
@@ -2037,7 +2038,8 @@ const MEDIA={intro:['media/intro.mp4',CDN+'e4d1c8ed-f6d5-4a5b-8e83-9bfcc2667380.
 function setSrc(v,list){v.innerHTML=list.map(u=>`<source src="${u}" type="video/mp4">`).join('');v.load();}
 if(location.hash==='#models')TAB='models';
 if(location.hash==='#video')TAB='video';
-const AI_TABS=['chat','models','video','ai'];
+if(location.hash==='#3d')TAB='3d';
+const AI_TABS=['chat','models','video','3d','ai'];
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const SMALL=()=>innerWidth<760;
 let QUOTE=null, QT_TIMER=null;
@@ -2096,7 +2098,7 @@ function introMaybe(){
 }
 
 /* ---------- tabs that exist for the public ---------- */
-function tabOpen(t){if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
+function tabOpen(t){if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(t==='3d')return !!(TD.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
 function soon(){
   return `<section class="soon">${face('idle')}
   <span class="eyebrow rv d1"><b>●</b> OddsEngine AI</span>
@@ -2119,11 +2121,12 @@ function render(){
   document.body.classList.toggle('aimode',open&&AI_TABS.includes(TAB));
   if(!chat){CH.drawer=false;document.body.classList.remove('cdr');}
   const keep=chat&&$('#cIn')?$('#cIn').value:null;
-  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='chat'?chatView():engineView()):soon();
+  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='3d'?tdView():TAB==='chat'?chatView():engineView()):soon();
   if(open&&AI_TABS.includes(TAB)){bgInit();bgShow(true);introMaybe();}else bgShow(false);
   if(open&&TAB==='models'){renderModels();cmpBar();countUp();}
   if(open&&TAB==='ai'&&QUOTE)quoteTick();
   if(open&&TAB==='video')vdBind();
+  if(open&&TAB==='3d')tdBind();
   if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();fitChat();}
   bind(); reveal(); spot();
   $('#walletBtn').textContent=connected()?(innerWidth<440?ME.address.slice(0,4)+'…'+ME.address.slice(-3):(ME.short||short(ME.address))):'Connect';
@@ -2181,7 +2184,7 @@ function vdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'
   if(st==='rendering')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Rendering, usually 1 to 5 minutes</div>${pr}</div>`;
   return `<div class="vd-j">${head}<p class="note">That one did not work${j.reason?': '+E(j.reason):''}. Nothing was charged.</p>${pr}</div>`;}
 function vdJobsHtml(){return VID.jobs.length?VID.jobs.map(vdJob).join(''):'<p class="note">Your videos show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
-function hubSeg(){const t=[['models','Models'],['video','Video'],['chat','Chat']].filter(([k])=>tabOpen(k));if(t.length<2)return '';
+function hubSeg(){const t=[['models','Models'],['video','Video'],['3d','3D'],['chat','Chat']].filter(([k])=>tabOpen(k));if(t.length<2)return '';
   return `<nav class="hubseg" aria-label="AI">${t.map(([k,l])=>`<button data-go="${k}" class="${TAB===k?'on':''}">${l}</button>`).join('')}</nav>`;}
 function videoView(){const m=vdM();const s=vdSecs(m);const foto=!!VID.img;
   const asp=m&&m.aspects.length&&!(foto&&/^(kling|seedance)/.test(m.id))?m.aspects:[];
@@ -2240,6 +2243,63 @@ function vdBind(){
       catch(e){toast(e.message||'Could not start');b.disabled=false;b.textContent='Start video';}}
   });
   vdPoll();
+}
+
+/* ---------- 2.82.171: 3D (fal.ai) ---------- */
+const TD={ok:false,models:[],jobs:[],bal:null,sel:'fast',prompt:'',img:null,q:null,busy:false,t:null};
+async function tdLoad(){try{const d=await api('/v1/ai/3d');TD.ok=!!d.available;TD.models=d.models||[];TD.jobs=d.jobs||[];TD.bal=d.balance_usd;}catch(e){TD.ok=false;}}
+function tdM(){return TD.models.find(m=>m.id===TD.sel)||TD.models[0]||null;}
+function tdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'3D model')}</b><span>${j.price_usd!=null?usd(j.price_usd):''}</span></div>`;
+  const pr=j.prompt?`<p class="pr">${E(j.prompt)}</p>`:'';
+  if(st==='completed'&&j.url)return `<div class="vd-j">${head}${j.thumb?`<img src="${E(j.thumb)}" alt="" style="width:100%;max-height:340px;object-fit:contain;border-radius:12px;background:#fff">`:''}<div class="vd-row">${j.view?`<a class="btn btn-sm btn-g" href="${E(j.view)}" target="_blank" rel="noopener">Spin it in 3D</a>`:''}<a class="btn btn-sm" href="${E(j.url)}" target="_blank" rel="noopener" download>Download GLB</a><span class="note">Link works for a few days, save the file to keep it.</span></div>${pr}</div>`;
+  if(st==='working')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Building, usually 1 to 3 minutes</div>${pr}</div>`;
+  return `<div class="vd-j">${head}<p class="note">That one did not work. Nothing was charged.</p>${pr}</div>`;}
+function tdJobsHtml(){return TD.jobs.length?TD.jobs.map(tdJob).join(''):'<p class="note">Your 3D models show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
+function tdView(){const foto=!!TD.img;
+  return `${hubSeg()}<section class="mhero">
+    <span class="eyebrow rv"><b>●</b> OddsEngine AI · 3D</span>
+    <h1 class="rv d1"><span class="shiny">Photo or text<br>to a real 3D model.</span></h1>
+    <p class="lead rv d2">Send a photo or describe it. You get a 3D file back that you can spin in your browser, drop into a game or print. You see the exact price before anything starts.</p>
+    <div class="payline rv d2"><span><i>✓</i>Price first</span><span><i>✓</i>No subscription</span><span><i>✓</i>Failed models cost nothing</span></div>
+  </section>
+  <section class="rv"><div class="card">
+    <span class="eyebrow">1 · Quality</span>
+    <div class="vd-grid" style="margin-top:10px">${TD.models.map(x=>`<button class="vd-m ${x.id===TD.sel?'on':''}" data-tm="${x.id}"><b>${E(x.id)} · ${E(x.name)}</b><span>${E(x.about)}</span><i class="vd-pr"><b>${usd(x.price_photo_usd)}</b> from a photo · ${usd(x.price_text_usd)} from text</i></button>`).join('')}</div>
+    <span class="eyebrow">2 · Your model</span>
+    <textarea class="vd-ta" id="tdP" style="margin-top:10px" maxlength="600" placeholder="${foto?'Optional: what is it? e.g. the robot':'Describe one object or character, e.g. a frog knight in gold armor'}">${E(TD.prompt)}</textarea>
+    <div class="vd-photo">${foto?`<img src="${TD.img}" alt="Photo"><button class="btn btn-sm" data-tact="nophoto">Remove photo</button><span class="note">The 3D model is built from this photo.</span>`:`<span class="btn btn-sm vd-up">Start from a photo<input type="file" id="tdF" accept="image/*"></span><span class="note">Best with one object on a calm background.</span>`}</div>
+    <div class="vd-row" style="margin-top:16px">${connected()?`<button class="btn btn-g" data-tact="quote" ${TD.busy?'disabled':''}>${TD.busy?'Getting the price…':'Get price'}</button>${TD.bal!=null?`<span class="note">Balance ${usd(TD.bal)}</span>`:''}`:`<button class="btn btn-g" data-tact="connect">Connect wallet</button><span class="note">3D models are paid from your Your Engine balance.</span>`}</div>
+    <div id="tdQ">${TD.q?tdQuoteHtml():''}</div>
+  </div></section>
+  <section style="margin-top:16px"><div class="card"><span class="eyebrow">Your 3D models</span><div class="vd-jobs" id="tdJ" style="margin-top:12px">${tdJobsHtml()}</div></div></section>`;}
+function tdQuoteHtml(){const q=TD.q;if(q.error)return `<div class="vd-q" style="border-color:var(--amber)"><p class="s" style="margin:0;color:var(--tx)">${E(q.error)}</p></div>`;
+  const low=TD.bal!=null&&TD.bal<q.price_usd;
+  return `<div class="vd-q"><div class="p">${usd(q.price_usd)}</div><div class="s">${E(q.model)} · ${q.from?'from '+E(q.from):''}. Paid from your balance only if it works.</div>
+    <div class="a">${low?`<button class="btn btn-g" data-go="ai">Top up first</button>`:`<button class="btn btn-g" data-tact="start">Build 3D model</button>`}<button class="btn" data-tact="change">Change</button></div></div>`;}
+function tdDraw(){const p=$('#tdP');if(p)TD.prompt=p.value;const y=scrollY;$('#view').innerHTML=tdView();document.querySelectorAll('#view .rv').forEach(e=>{e.style.transition='none';e.classList.add('in');});tdBind();bind();scrollTo(0,y);requestAnimationFrame(()=>document.querySelectorAll('#view .rv').forEach(e=>e.style.transition=''));}
+function tdPoll(){clearTimeout(TD.t);if(TAB!=='3d'||!TD.jobs.some(j=>j.status==='working'))return;
+  TD.t=setTimeout(async()=>{try{const d=await api('/v1/ai/3d');TD.jobs=d.jobs||[];TD.bal=d.balance_usd;const el=$('#tdJ');if(el)el.innerHTML=tdJobsHtml();}catch(e){}tdPoll();},6000);}
+function tdFoto(f){if(!f||!/^image\//.test(f.type)){toast('Pick a picture');return;}const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);TD.img=c.toDataURL('image/jpeg',.9);TD.q=null;tdDraw();};im.onerror=()=>toast('Could not read that picture');im.src=rd.result;};rd.readAsDataURL(f);}
+function tdBind(){
+  document.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{TD.sel=b.dataset.tm;TD.q=null;tdDraw();});
+  const p=$('#tdP');if(p)p.oninput=()=>{TD.prompt=p.value;if(TD.q){TD.q=null;$('#tdQ').innerHTML='';}};
+  const f=$('#tdF');if(f)f.onchange=()=>tdFoto(f.files&&f.files[0]);
+  document.querySelectorAll('[data-tact]').forEach(b=>b.onclick=async()=>{const a=b.dataset.tact;
+    if(a==='connect'){connect();return;}
+    if(a==='nophoto'){TD.img=null;TD.q=null;tdDraw();return;}
+    if(a==='change'){TD.q=null;$('#tdQ').innerHTML='';const t=$('#tdP');if(t)t.focus();return;}
+    if(a==='quote'){const t=$('#tdP');if(t)TD.prompt=t.value;if(!TD.prompt.trim()&&!TD.img){toast('Describe it or add a photo first');return;}
+      TD.busy=true;TD.q=null;tdDraw();
+      try{TD.q=await api('/v1/ai/3d/quote',{method:'POST',body:JSON.stringify({prompt:TD.prompt,model:TD.sel,image:TD.img||undefined})});}
+      catch(e){TD.q={error:e.status===401?'Connect your wallet again, the session ran out.':(e.message||'Could not get a price')};}
+      TD.busy=false;tdDraw();return;}
+    if(a==='start'){b.disabled=true;b.textContent='Starting…';
+      try{const r=await api('/v1/ai/3d/start',{method:'POST',body:'{}'});if(r.error){toast(r.error);b.disabled=false;b.textContent='Build 3D model';return;}
+        TD.q=null;toast('Building. It shows up below.');const d=await api('/v1/ai/3d');TD.jobs=d.jobs||[];TD.bal=d.balance_usd;tdDraw();tdPoll();
+        const el=$('#tdJ');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+      catch(e){toast(e.message||'Could not start');b.disabled=false;b.textContent='Build 3D model';}}
+  });
+  tdPoll();
 }
 
 function modelsView(){
@@ -3694,7 +3754,7 @@ let MB_CT=null;
 
 /* ---------- bottom bar ---------- */
 let MB_HUB='models';
-function mbActive(){if(['chat','models','video'].includes(TAB)){MB_HUB=TAB;return 'hub';}return TAB==='ai'?'wallet':TAB;}
+function mbActive(){if(['chat','models','video','3d'].includes(TAB)){MB_HUB=TAB;return 'hub';}return TAB==='ai'?'wallet':TAB;}
 function mbBar(){
   let b=$('#mbBar');
   /* 2.65: Video im Handy-Menue, sobald es fuer den Nutzer offen ist */
@@ -3703,7 +3763,7 @@ function mbBar(){
   if(b&&+b.dataset.n!==items.length){b.remove();b=null;}
   if(!b){b=document.createElement('nav');b.id='mbBar';b.className='mb-bar';b.setAttribute('aria-label','App');b.dataset.n=items.length;b.style.gridTemplateColumns=`repeat(${items.length},1fr)`;
     b.innerHTML=items.map(([k,l,d])=>`<button data-mbtab="${k}" aria-label="${l}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg><span>${l}</span></button>`).join('');
-    document.body.appendChild(b);b.querySelectorAll('[data-mbtab]').forEach(x=>x.onclick=()=>{if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}if(typeof rpClose==='function'&&$('#rp.show'))rpClose();const t=x.dataset.mbtab;go(t==='hub'?(['chat','models','video'].includes(TAB)?TAB:(tabOpen(MB_HUB)?MB_HUB:'models')):t);});}
+    document.body.appendChild(b);b.querySelectorAll('[data-mbtab]').forEach(x=>x.onclick=()=>{if(navigator.vibrate)try{navigator.vibrate(8)}catch(e){}if(typeof rpClose==='function'&&$('#rp.show'))rpClose();const t=x.dataset.mbtab;go(t==='hub'?(['chat','models','video','3d'].includes(TAB)?TAB:(tabOpen(MB_HUB)?MB_HUB:'models')):t);});}
   document.body.classList.toggle('has-ab',!!$('.admin-bar'));
   const a=mbActive();b.querySelectorAll('[data-mbtab]').forEach(x=>{x.classList.toggle('on',x.dataset.mbtab===a);x.setAttribute('aria-current',x.dataset.mbtab===a?'page':'false');});
 }
@@ -3837,6 +3897,7 @@ async function load(){
   if(ME&&ME.ai&&ME.ai.markup!=null)MARKUP=ME.ai.markup;
   if(pm)await pm;
   await vdLoad();
+  await tdLoad();
   if(!location.hash&&!FEAT.engine&&FEAT.ai&&TAB==='engine')TAB='models';
   if(ME&&!DEMO){await chatLoadList();}
   if(DEMO||PREVIEW)adminBar();

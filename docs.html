@@ -58,7 +58,7 @@ main{min-width:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minma
 <nav class="toc" aria-label="Contents">
   <a href="#engine">Your Engine</a><a href="#scan">Scans</a><a href="#chart">Charts and X</a><a href="#guard">Wallet Guard</a><a href="#bag">Bag watch</a><a href="#briefing">Briefing</a><a href="#groups">In your group</a><a href="#ai">OddsEngine AI</a>
   <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
-  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
+  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#three-d">3D models</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
 </nav>
 <main>
 <span class="eb">Docs</span>
@@ -305,6 +305,16 @@ POST /v1/agents/key
  "messages":[{"role":"user","content":"A green neon ring in the dark"}]}</code></pre>
 <p>The picture comes back in <code>choices[0].message.images[0].image_url.url</code> as a data URL.</p>
 
+<h2 id="three-d">3D models</h2>
+<p>Your Engine turns a photo or a short description into a real 3D model (a GLB file). Spin it in your browser, drop it into a game or 3D print it.</p>
+<ul>
+<li><b>In Telegram:</b> send a photo and write "make this 3D", or describe it, for example "a frog knight in gold armor as a 3D model". Your Engine tells you the price first and starts only after you say yes.</li>
+<li><b>On this site:</b> open the 3D tab, add a photo or a description, get the price, start.</li>
+<li><b>Three qualities:</b> fast (TRELLIS, from $0.10), standard (Hunyuan3D 2 with texture) and pro (Meshy 6, also as OBJ, FBX and USDZ). The exact price for each one is shown before you start, fee included.</li>
+<li>Paid from your balance, which you top up with $ODDS. A model that fails costs nothing.</li>
+<li>Best results: one object or character on a calm background. Download the file to keep it, the link works for a few days.</li>
+</ul>
+<p>All current prices in one list: <code>GET https://api.oddsengine.live/v1/prices</code></p>
 <h2 id="models">Models</h2>
 <p>Every model OpenRouter offers is available, including free ones, the cheaper batch versions and the <code>~maker/model-latest</code> names that always point to the newest version. <i>Picked for you</i> on the Models page shows the ones we use ourselves. New models appear on their own and get a NEW badge for three weeks. Model IDs are the usual <code>maker/model</code> format.</p>
 
