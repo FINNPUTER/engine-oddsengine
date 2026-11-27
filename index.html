@@ -1215,7 +1215,16 @@ html.pwa footer.wrap{display:none}
 .an-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}.an-list div{display:flex;gap:14px;align-items:baseline;font-size:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}.an-list span{opacity:.65;flex:1}.an-list a{color:var(--g,#22f08a)}
 @media(max-width:600px){.an-bar{grid-template-columns:100px 1fr 60px}}
 
+/* 2.82.175: GPU-Hilfe */
+.gh-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.gh-b{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:center;margin-top:10px}
+.gh-steps{display:grid;gap:14px}
+.gh-s{display:flex;gap:14px;align-items:flex-start}.gh-s h4{margin:2px 0 4px;font-size:16px}.gh-s p{margin:0;color:var(--dim);font-size:14.5px;line-height:1.5}
+.gh-n{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(34,240,138,.12);border:1px solid rgba(34,240,138,.45);color:var(--g);font-family:var(--mono);font-size:13px}
+.gh-art{width:100%;height:auto;display:block}
+@media (max-width:760px){.gh-b{grid-template-columns:1fr}.gh-art{max-width:320px;margin:0 auto}}
 /* 2.82.175: GPU-Karten markieren */
+.gal-del{color:var(--dim);border-color:transparent;background:transparent}.gal-del:hover{color:#ff7b86}
 .gp-dev{margin:4px 0 16px}.gp-dev summary{cursor:pointer;color:var(--dim);font-size:14px;padding:8px 0}.gp-dev summary:hover{color:var(--tx)}
 .gp-tag{align-self:flex-start;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;margin-bottom:6px}.gp-tag.ok{background:rgba(34,240,138,.14);color:var(--g);border:1px solid rgba(34,240,138,.4)}.gp-tag.dev{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--line2)}
 /* 2.82.175: Waehrungen beim Aufladen */
@@ -2271,7 +2280,7 @@ function vdM(){return VID.models.find(m=>m.id===VID.sel)||VID.models[0]||null;}
 function vdSecs(m){if(!m)return 5;let v=VID.sec==null?m.default:VID.sec;if(m.fixed)v=m.fixed.reduce((a,b)=>Math.abs(b-v)<Math.abs(a-v)?b:a);return Math.max(m.min,Math.min(m.max,v));}
 function vdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'Video')}</b><span>${j.seconds?j.seconds+' s':''}${j.price_usd!=null?' · '+usd(j.price_usd):''}</span></div>`;
   const pr=j.prompt?`<p class="pr">${E(j.prompt)}</p>`:'';
-  if(st==='completed'&&j.url)return `<div class="vd-j">${head}<video src="${E(j.url)}" controls playsinline preload="metadata"></video><div class="vd-row"><a class="btn btn-sm" href="${E(j.url)}" target="_blank" rel="noopener" download>Download</a><span class="note">Link works for 7 days, save it if you want to keep it.</span></div>${pr}</div>`;
+  if(st==='completed'&&j.url)return `<div class="vd-j">${head}<video src="${E(j.url)}" controls playsinline preload="metadata"></video><div class="vd-row"><a class="btn btn-sm" href="${E(j.url)}" target="_blank" rel="noopener" download>Download</a><span class="note">A copy is kept in your Gallery.</span></div>${pr}</div>`;
   if(st==='rendering')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Rendering, usually 1 to 5 minutes</div>${pr}</div>`;
   return `<div class="vd-j">${head}<p class="note">That one did not work${j.reason?': '+E(j.reason):''}. Nothing was charged.</p>${pr}</div>`;}
 function vdJobsHtml(){return VID.jobs.length?VID.jobs.map(vdJob).join(''):'<p class="note">Your videos show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
@@ -2344,7 +2353,7 @@ async function tdLoad(){try{const d=await api('/v1/ai/3d');TD.ok=!!d.available;T
 function tdM(){return TD.models.find(m=>m.id===TD.sel)||TD.models[0]||null;}
 function tdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'3D model')}</b><span>${j.price_usd!=null?usd(j.price_usd):''}</span></div>`;
   const pr=j.prompt?`<p class="pr">${E(j.prompt)}</p>`:'';
-  if(st==='completed'&&j.url)return `<div class="vd-j">${head}${j.thumb?`<img src="${E(j.thumb)}" alt="" style="width:100%;max-height:340px;object-fit:contain;border-radius:12px;background:#fff">`:''}<div class="vd-row">${j.view?`<a class="btn btn-sm btn-g" href="${E(j.view)}" target="_blank" rel="noopener">Spin it in 3D</a>`:''}<a class="btn btn-sm" href="${E(j.url)}" target="_blank" rel="noopener" download>Download GLB</a><span class="note">Link works for a few days, save the file to keep it.</span></div>${pr}</div>`;
+  if(st==='completed'&&j.url)return `<div class="vd-j">${head}${j.thumb?`<img src="${E(j.thumb)}" alt="" style="width:100%;max-height:340px;object-fit:contain;border-radius:12px;background:#fff">`:''}<div class="vd-row">${j.view?`<a class="btn btn-sm btn-g" href="${E(j.view)}" target="_blank" rel="noopener">Spin it in 3D</a>`:''}<a class="btn btn-sm" href="${E(j.url)}" target="_blank" rel="noopener" download>Download GLB</a><span class="note">A copy is kept in your Gallery.</span></div>${pr}</div>`;
   if(st==='working')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Building, usually 1 to 3 minutes</div>${pr}</div>`;
   return `<div class="vd-j">${head}<p class="note">That one did not work. Nothing was charged.</p>${pr}</div>`;}
 function tdJobsHtml(){return TD.jobs.length?TD.jobs.map(tdJob).join(''):'<p class="note">Your 3D models show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
@@ -2449,13 +2458,13 @@ function galItem(x){const done=x.status==='completed'&&x.url;const k={image:'Ima
   else if(x.kind==='3d'&&x.thumb)th=`<img src="${E(x.thumb)}" alt="" loading="lazy" style="object-fit:contain;background:#fff">`;
   else if(x.kind==='voice')th='<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/></svg>';
   else th=done?(MQ_IC[x.kind]||''):`<span class="vd-wait" style="font-size:12px"><i class="vd-spin"></i>${x.status==='failed'?'Did not work':'Working'}</span>`;
-  const acts=done?`${x.view?`<a class="btn btn-sm btn-g" href="${E(x.view)}" target="_blank" rel="noopener">Spin</a>`:''}<a class="btn btn-sm" href="${E(x.url)}" target="_blank" rel="noopener" download>Download</a>`:'';
+  const acts=(done?`${x.view?`<a class="btn btn-sm btn-g" href="${E(x.view)}" target="_blank" rel="noopener">Spin</a>`:''}<a class="btn btn-sm" href="${E(x.url)}" target="_blank" rel="noopener" download>Download</a>`:'')+(x.status!=='working'&&x.status!=='rendering'?`<button class="btn btn-sm gal-del" data-mdel="${E(x.id)}" aria-label="Delete">Delete</button>`:'');
   return `<div class="gal-i"><div class="th"><span class="k">${E(k)}</span>${th}</div>${x.kind==='voice'&&done?`<audio src="${E(x.url)}" controls preload="none"></audio>`:''}<div class="m"><b>${E(x.model||'')}</b><span>${x.price_usd!=null?usd(x.price_usd):''}</span></div>${x.prompt?`<p class="p">${E(x.prompt)}</p>`:''}<div class="a">${acts}</div></div>`;}
 function galView(){
   return `${hubSeg()}<section class="mhero">
     <span class="eyebrow rv"><b>●</b> OddsEngine AI · Gallery</span>
     <h1 class="rv d1"><span class="shiny">Everything you made.<br>In one place.</span></h1>
-    <p class="lead rv d2">Images, videos, voices and 3D models from the site, Telegram and your agents. Links last a few days, download what you want to keep.</p>
+    <p class="lead rv d2">Images, videos, voices and 3D models from the site, Telegram and your agents, saved in your account. Only you see them, and you can delete anything anytime.</p>
   </section>
   <section class="rv"><div class="card">
     <div class="gal-f">${GAL_K.map(([k,l])=>`<button class="vd-chip ${GAL.kind===k?'on':''}" data-mgal="${k}">${l}</button>`).join('')}</div>
@@ -2470,7 +2479,9 @@ async function galBind(){await galLoad();if(TAB==='gallery'){mdDraw();galPoll();
 document.addEventListener('input',e=>{const t=e.target;if(!t||!t.dataset)return;
   if(t.dataset.mfield==='img'){IMG.prompt=t.value;}
   if(t.dataset.mfield==='voc'){VOC.text=t.value;const c=$('#vcCnt');const pr=vcPrice();if(c)c.textContent=`${VOC.text.length.toLocaleString('en-US')} / ${MD.max.toLocaleString('en-US')} characters${pr!=null&&VOC.text.trim()?' · '+usd(pr):''}`;const b=document.querySelector('[data-mact="voc"]');if(b&&!VOC.busy)b.textContent=pr!=null&&VOC.text.trim()?'Make voice · '+usd(pr):'Make voice';}});
-document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-mimg],[data-mfmt],[data-mvm],[data-mvo],[data-mgal],[data-mact],[data-xact]');if(!b)return;const d=b.dataset;
+document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('[data-mimg],[data-mfmt],[data-mvm],[data-mvo],[data-mgal],[data-mact],[data-xact],[data-mdel]');if(!b)return;const d=b.dataset;
+  if(d.mdel){const ok=await ask('This removes it from your gallery and deletes the file. It cannot be undone.',{title:'Delete this?',ok:'Delete',danger:true});if(!ok)return;
+    try{await api('/v1/ai/gallery/delete',{method:'POST',body:JSON.stringify({id:d.mdel})});GAL.items=GAL.items.filter(x=>x.id!==d.mdel);mdDraw();toast('Deleted');}catch(er){toast(er.message||'Could not delete');}return;}
   if(d.mimg){IMG.sel=d.mimg;mdDraw();return;}
   if(d.mfmt){IMG.fmt=d.mfmt;mdDraw();return;}
   if(d.mvm){VOC.sel=d.mvm;VOC.voice='';mdDraw();return;}
@@ -2685,7 +2696,38 @@ function gpView(){const g=gpG();const est=g?g.price_hour_usd*GP.h:null;
     <div class="vd-row" style="margin-top:16px">${connected()?`<button class="btn btn-g" data-gact="quote" ${GP.busy?'disabled':''}>${GP.busy?'Getting the price…':'Get price'}</button>${GP.bal!=null?`<span class="note">Balance ${usd(GP.bal)}</span>`:''}`:`<button class="btn btn-g" data-gact="connect">Connect wallet</button><span class="note">GPUs are paid from your Your Engine balance.</span>`}</div>
     <div id="gpQ">${GP.q?gpQuoteHtml():''}</div>
   </div></section>
-  <section style="margin-top:16px"><div class="card"><span class="eyebrow">Your GPUs</span><div class="vd-jobs" id="gpJ" style="margin-top:12px">${GP.rentals.length?GP.rentals.map(gpRental).join(''):'<p class="note">Your machines show up here. In Telegram just tell Your Engine what you want, for example "rent me a GPU for ComfyUI".</p>'}</div></div></section>`;}
+  <section style="margin-top:16px"><div class="card"><span class="eyebrow">Your GPUs</span><div class="vd-jobs" id="gpJ" style="margin-top:12px">${GP.rentals.length?GP.rentals.map(gpRental).join(''):'<p class="note">Your machines show up here. In Telegram just tell Your Engine what you want, for example "rent me a GPU for ComfyUI".</p>'}</div></div></section>
+  ${gpHelp()}`;}
+const GPH={tab:'tg'};
+function gpHelp(){const tg=GPH.tab==='tg';
+  const step=(n,t,d)=>`<div class="gh-s"><b class="gh-n">${n}</b><div><h4>${t}</h4><p>${d}</p></div></div>`;
+  const tgSteps=step(1,'Rent it in Telegram','Open the bot menu, tap <b>Rent a GPU</b>, then <b>Unlimited images</b>. Say yes to the price.')
+   +step(2,'Wait for “ready”','The machine loads in 3 to 8 minutes. You get a message the moment it is ready.')
+   +step(3,'Just type what you want','Write for example <i>image on my GPU: a robot reading charts at night, neon light</i>. The picture comes back in the chat.')
+   +step(4,'As many as you want','Every image is free while the GPU runs. Say <i>stop my GPU</i> when you are done, the unused time comes back.');
+  const cuSteps=step(1,'Open the link','When the Open button appears, click it. You see a chain of boxes, the ready made workflow.')
+   +step(2,'Type your idea','In the box <b>CLIP Text Encode (Prompt)</b> at the top, replace the text with what you want to see, in English.')
+   +step(3,'Press Run','The blue <b>Run</b> button top right. The image shows in <b>Save Image</b> on the right, right click to save.')
+   +step(4,'Better images','About 5 minutes after start, open <b>Templates</b> and pick <b>Z-Image Turbo</b>. Its model is loaded for you.');
+  const tgArt=`<svg viewBox="0 0 280 200" class="gh-art" aria-hidden="true"><rect x="20" y="10" width="240" height="180" rx="18" fill="#0d1512" stroke="rgba(255,255,255,.12)"/>
+    <rect x="36" y="28" width="150" height="34" rx="12" fill="#1b2620"/><text x="48" y="50" fill="#9fb2a7" font-size="11" font-family="Inter,sans-serif">✅ Your RTX 4090 is ready</text>
+    <rect x="96" y="74" width="150" height="34" rx="12" fill="#22f08a"/><text x="106" y="95" fill="#03130a" font-size="10.5" font-weight="700" font-family="Inter,sans-serif">image on my GPU: a robot…</text>
+    <rect x="36" y="120" width="120" height="58" rx="12" fill="#1b2620"/><rect x="44" y="128" width="104" height="42" rx="8" fill="url(#ghg)"/>
+    <defs><linearGradient id="ghg" x1="0" x2="1"><stop offset="0" stop-color="#14c46f"/><stop offset="1" stop-color="#0b3b25"/></linearGradient></defs>
+    <text x="164" y="160" fill="#9fb2a7" font-size="10" font-family="Inter,sans-serif">free · unlimited</text></svg>`;
+  const cuArt=`<svg viewBox="0 0 280 200" class="gh-art" aria-hidden="true"><rect x="10" y="10" width="260" height="180" rx="14" fill="#0d1512" stroke="rgba(255,255,255,.12)"/>
+    <rect x="196" y="20" width="62" height="22" rx="7" fill="#3b82f6"/><text x="212" y="35" fill="#fff" font-size="11" font-weight="700" font-family="Inter,sans-serif">Run</text>
+    <rect x="22" y="56" width="60" height="40" rx="6" fill="#1b2620"/><text x="28" y="80" fill="#9fb2a7" font-size="8" font-family="Inter,sans-serif">Model</text>
+    <rect x="96" y="50" width="88" height="54" rx="6" fill="#1b2620" stroke="#22f08a" stroke-width="2"/><text x="102" y="66" fill="#22f08a" font-size="8" font-weight="700" font-family="Inter,sans-serif">Prompt</text><text x="102" y="82" fill="#ecf5ef" font-size="8" font-family="Inter,sans-serif">your idea here</text>
+    <rect x="96" y="114" width="88" height="36" rx="6" fill="#1b2620"/><text x="102" y="135" fill="#9fb2a7" font-size="8" font-family="Inter,sans-serif">Negative</text>
+    <rect x="198" y="62" width="60" height="96" rx="6" fill="#1b2620"/><text x="204" y="78" fill="#9fb2a7" font-size="8" font-family="Inter,sans-serif">Save Image</text><rect x="204" y="86" width="48" height="62" rx="4" fill="url(#ghg2)"/>
+    <defs><linearGradient id="ghg2" x1="0" x2="1"><stop offset="0" stop-color="#14c46f"/><stop offset="1" stop-color="#0b3b25"/></linearGradient></defs>
+    <path d="M82 76 H96 M184 77 H198 M184 132 Q192 132 192 110 V90 H198" stroke="#7dffbd" stroke-width="1.5" fill="none" opacity=".7"/>
+    <circle cx="140" cy="44" r="0"/><path d="M227 46 v10" stroke="#3b82f6" stroke-width="2"/></svg>`;
+  return `<section style="margin-top:16px"><div class="card gh"><span class="eyebrow">How to make images on your GPU</span>
+    <div class="gh-tabs"><button class="vd-chip ${tg?'on':''}" data-gh="tg">In Telegram (easiest)</button><button class="vd-chip ${tg?'':'on'}" data-gh="cu">In ComfyUI</button></div>
+    <div class="gh-b"><div class="gh-steps">${tg?tgSteps:cuSteps}</div>${tg?tgArt:cuArt}</div></div></section>`;}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-gh]');if(!b)return;GPH.tab=b.dataset.gh;const el=document.querySelector('.card.gh');if(el){const w=document.createElement('div');w.innerHTML=gpHelp();el.parentNode.replaceWith(w.firstElementChild);}});
 function gpQuoteHtml(){const q=GP.q;if(q.error)return `<div class="vd-q" style="border-color:var(--amber)"><p class="s" style="margin:0;color:var(--tx)">${E(q.error)}</p></div>`;
   const low=GP.bal!=null&&GP.bal<q.price_usd;
   return `<div class="vd-q"><div class="p">${usd(q.price_usd)}</div><div class="s">${E(q.setup)} on ${E(q.gpu)} · ${q.hours} h · ${usd(q.price_hour_usd)}/h. Paid up front, unused time comes back.</div>

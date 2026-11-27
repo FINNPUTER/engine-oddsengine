@@ -312,7 +312,7 @@ POST /v1/agents/key
 <li><b>On this site:</b> open the 3D tab, add a photo or a description, get the price, start.</li>
 <li><b>Three qualities:</b> fast (TRELLIS, from $0.10), standard (Hunyuan3D 2 with texture) and pro (Meshy 6, also as OBJ, FBX and USDZ). The exact price for each one is shown before you start, fee included.</li>
 <li>Paid from your balance, which you top up with $ODDS. A model that fails costs nothing.</li>
-<li>Best results: one object or character on a calm background. Download the file to keep it, the link works for a few days.</li>
+<li>Best results: one object or character on a calm background. A copy is kept in your Gallery.</li>
 </ul>
 <p>All current prices in one list: <code>GET https://api.oddsengine.live/v1/prices</code></p>
 <div data-feat="gpu" hidden>
@@ -333,7 +333,7 @@ POST /v1/agents/key
 <ul>
 <li><b>Image:</b> FLUX schnell (fast drafts), FLUX dev (more detail, better text in images) and FLUX 1.1 pro ultra (best quality). Square, wide or tall.</li>
 <li><b>Voice:</b> Kokoro (cheap, English) and ElevenLabs v2 (studio quality, 29 languages). Paid per character, up to 3,000 characters per request. In Telegram just ask Your Engine to read something out loud.</li>
-<li><b>Gallery:</b> every image, voice, video and 3D model you made, from the site, Telegram and your agents, in one place. Links last a few days, download what you want to keep.</li>
+<li><b>Gallery:</b> every image, voice, video and 3D model you made, from the site, Telegram and your agents, in one place and saved in your account. Only you see them, and you can delete anything anytime. Agents can delete with POST /v1/media/delete and {"id"}.</li>
 </ul>
 <h2 id="media-api">Media API for agents</h2>
 <p>Agents use the same things with an API key: <code>Authorization: Bearer oe_live_...</code>. Everything is paid from that wallet's balance.</p>
