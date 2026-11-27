@@ -1218,6 +1218,8 @@ html.pwa footer.wrap{display:none}
 /* 2.82.175: GPU-Karten markieren */
 .gp-dev{margin:4px 0 16px}.gp-dev summary{cursor:pointer;color:var(--dim);font-size:14px;padding:8px 0}.gp-dev summary:hover{color:var(--tx)}
 .gp-tag{align-self:flex-start;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;margin-bottom:6px}.gp-tag.ok{background:rgba(34,240,138,.14);color:var(--g);border:1px solid rgba(34,240,138,.4)}.gp-tag.dev{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--line2)}
+/* 2.82.175: Waehrungen beim Aufladen */
+.cur-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}.cur-tabs small{font-family:var(--mono);font-size:10px;opacity:.7;margin-left:4px}.amt.on{border-color:var(--g);color:var(--g)}
 /* 2.82.175: Aktion */
 .promo{display:flex;flex-direction:column;gap:3px;margin:8px 0 12px;padding:12px 14px;border-radius:14px;border:1px solid rgba(34,240,138,.45);background:linear-gradient(110deg,rgba(34,240,138,.14),rgba(34,240,138,.03));box-shadow:0 0 30px rgba(34,240,138,.12)}.promo b{font-family:var(--disp);font-size:13px;letter-spacing:.04em;color:var(--g)}.promo span{font-size:14px;color:var(--tx)}
 /* 2.82.175: Analytics im Terminal-Stil */
@@ -2487,6 +2489,53 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
     VOC.busy=false;mdDraw();const o=document.querySelector('.md-out');if(o)o.scrollIntoView({behavior:'smooth',block:'nearest'});return;}
 });
 
+
+/* ---------- 2.82.175: Aufladen mit ETH, USDC, USDG, $TORCH direkt aus der Wallet ---------- */
+const TX={cur:'ODDS',usd:10,ch:{},busy:false,msg:''};
+const CUR_L={ODDS:'$ODDS',ETH:'ETH',USDC:'USDC',USDG:'USDG',TORCH:'$TORCH'};
+function topxOn(){return !!(TOPX&&TOPX.available&&(TOPX.ways||[]).length);}
+function curTabs(){if(!topxOn())return '';const have=new Set(TOPX.ways.map(w=>w.asset));const cs=['ODDS',...['ETH','USDC','USDG','TORCH'].filter(c=>have.has(c))];
+  return `<div class="cur-tabs">${cs.map(c=>`<button class="vd-chip ${TX.cur===c?'on':''}" data-xact="cur" data-c="${c}">${CUR_L[c]}${c==='ODDS'?' <small>no fee</small>':''}</button>`).join('')}</div>`;}
+function txWays(){return (TOPX&&TOPX.ways||[]).filter(w=>w.asset===TX.cur);}
+function txWay(){const ws=txWays();return ws.find(w=>w.chain===TX.ch[TX.cur])||ws[0]||null;}
+function txPrice(){if(TX.cur==='ETH')return TOPX.eth_usd;if(TX.cur==='TORCH')return TOPX.torch_usd;return 1;}
+function txFee(){return TX.cur==='TORCH'?(TOPX.fee_torch??TOPX.fee):TOPX.fee;}
+function fmtAmt(a){return a>=1000?a.toLocaleString('en-US',{maximumFractionDigits:0}):a>=1?a.toLocaleString('en-US',{maximumFractionDigits:4}):a.toPrecision(4);}
+function otherPanel(){const w=txWay();if(!w)return '';const ws=txWays();const px=txPrice();const amt=px?TX.usd/px:null;const gut=TX.usd*(1-txFee());
+  const ch=(TOPX.chains||{})[w.chain]||{};const hasW=!!(window.OE_ETH||window.ethereum||(typeof OE_WALLETS!=='undefined'&&OE_WALLETS.length));
+  return `<p class="sub">Pay with ${CUR_L[TX.cur]} from your wallet. ${Math.round(txFee()*100)}% goes into $ODDS buybacks${TX.cur==='TORCH'?', $TORCH is counted at the live price':''}. $ODDS has no fee.</p>
+   ${ws.length>1?`<div class="vd-row"><label class="k">Network</label>${ws.map(x=>`<button class="vd-chip ${x.chain===w.chain?'on':''}" data-xact="ch" data-c="${x.chain}">${E(((TOPX.chains||{})[x.chain]||{}).name||x.chain)}</button>`).join('')}</div>`:`<p class="note" style="margin:6px 0 0">Network: ${E(ch.name||w.chain)}</p>`}
+   <div class="amts" style="margin-top:12px">${[5,10,25,50].map(v=>`<button class="amt ${TX.usd===v?'on':''}" data-xact="amt" data-v="${v}">$${v}</button>`).join('')}</div>
+   <div class="addrow"><input id="txUsd" inputmode="decimal" placeholder="Other amount in $" aria-label="Amount in dollars" value="${[5,10,25,50].includes(TX.usd)?'':TX.usd}"><button class="btn btn-sm" data-xact="amt" data-v="in">Use</button></div>
+   <div class="qbox" style="margin-top:12px">${amt?`<p>You send <b>${fmtAmt(amt)} ${CUR_L[TX.cur]}</b> on ${E(ch.name||w.chain)} and get <b>${usd(gut)}</b> on your balance.</p>`:`<p>No live ${CUR_L[TX.cur]} price right now. Try again in a minute or pick another way.</p>`}
+   ${amt&&hasW?`<button class="btn btn-g" data-xact="send" ${TX.busy?'disabled':''}>${TX.busy?'Waiting…':'Send with my wallet'}</button>`:''}
+   <div id="txMsg" class="note" style="margin-top:10px">${E(TX.msg)}</div></div>
+   <details class="qman"><summary>Send it by hand instead</summary><p class="note">Send ${CUR_L[TX.cur]} on ${E(ch.name||w.chain)} from ${E((ME&&ME.short)||'your wallet')} or a linked wallet to this address, then paste the transaction hash.</p>
+    <div class="addr"><code>${E(w.send_to)}</code><button class="copy" data-copy="${E(w.send_to)}">Copy</button></div>
+    <input class="tx-in" id="txIn" placeholder="0x… transaction hash" autocomplete="off" spellcheck="false" aria-label="Transaction hash" style="margin-top:8px">
+    <div class="vd-row" style="margin-top:10px"><button class="btn btn-sm btn-g" data-xact="claim">Credit my top up</button><span class="note">Min ${usd(TOPX.min_usd,0)}, max ${usd(TOPX.max_usd,0)} per transfer.</span></div></details>`;}
+function txDraw(){const el=$('#topup');if(el){el.innerHTML=topupBox();bind();}}
+function txUnits(amount,dec){const k=Math.min(dec,9);return BigInt(Math.ceil(amount*10**k))*(10n**BigInt(dec-k));}
+async function txSwitch(eth,chain){const c=(TOPX.chains||{})[chain];if(!c||!c.id_hex)return;
+  try{await eth.request({method:'wallet_switchEthereumChain',params:[{chainId:c.id_hex}]});}
+  catch(e){if(e&&(e.code===4902||/unrecognized|not been added/i.test(e.message||''))){
+    await eth.request({method:'wallet_addEthereumChain',params:[{chainId:c.id_hex,chainName:c.name,nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},rpcUrls:[c.rpc],blockExplorerUrls:c.explorer?[c.explorer]:[]}]});}
+    else throw e;}}
+async function txClaimLoop(tx,chain){TX.msg='Sent. Waiting for confirmations, usually under a minute.';txDraw();
+  for(let i=0;i<30;i++){await new Promise(r=>setTimeout(r,6000));
+    try{const r=await api('/v1/ai/topup/claim',{method:'POST',body:JSON.stringify({tx,chain})});
+      TX.busy=false;TX.msg=`Done. ${r.amount} ${CUR_L[r.asset]||r.asset} = ${usd(r.usd)}, ${usd(r.credited_usd)} credited.`;toast('Top up arrived: +'+usd(r.credited_usd));try{ME=await api('/v1/engine/me');}catch(e){}render();return;}
+    catch(e){if(e.status===425||e.status===404||e.status===503)continue;TX.busy=false;TX.msg=e.message||'Could not credit it.';txDraw();return;}}
+  TX.busy=false;TX.msg='Still not confirmed. Paste the transaction hash under "Send it by hand" and press Credit my top up.';txDraw();}
+async function txSend(){const w=txWay();const px=txPrice();if(!w||!px)return;const eth=window.OE_ETH||await oeWallet();if(!eth)return;
+  TX.busy=true;TX.msg='Confirm the transfer in your wallet.';txDraw();
+  try{const [from]=await eth.request({method:'eth_requestAccounts'});await txSwitch(eth,w.chain);
+    const units=txUnits(TX.usd/px,w.decimals||18);let p;
+    if(TX.cur==='ETH')p={from,to:w.send_to,value:'0x'+units.toString(16)};
+    else p={from,to:w.token,value:'0x0',data:'0xa9059cbb'+w.send_to.slice(2).toLowerCase().padStart(64,'0')+units.toString(16).padStart(64,'0')};
+    const tx=await eth.request({method:'eth_sendTransaction',params:[p]});await txClaimLoop(tx,w.chain);}
+  catch(e){TX.busy=false;TX.msg=e&&e.code===4001?'You cancelled the transfer.':'Could not send: '+((e&&e.message)||e);txDraw();}}
+
 /* ---------- 2.82.175: Aufladen mit ETH und USDC ---------- */
 let TOPX=null;
 async function topxLoad(){try{TOPX=await api('/v1/ai/topup');}catch(e){TOPX=null;}}
@@ -2501,9 +2550,12 @@ function topxBox(){const t=TOPX;if(!t||!t.available||!(t.ways||[]).length)return
     <div class="vd-row" style="margin-top:10px"><button class="btn btn-g btn-sm" data-xact="claim">Credit my top up</button><span class="note">Min ${usd(t.min_usd,0)}, max ${usd(t.max_usd,0)} per transfer.</span></div>
     <div id="txMsg" class="note" style="margin-top:8px"></div></details>`;}
 async function topxAct(b){const d=b.dataset;
-  if(d.xact==='ch'){TOPX.ch=d.c;document.querySelectorAll('[data-xact="ch"]').forEach(x=>x.classList.toggle('on',x===b));return;}
+  if(d.xact==='cur'){TX.cur=d.c;TX.msg='';txDraw();return;}
+  if(d.xact==='ch'){TX.ch[TX.cur]=d.c;TX.msg='';txDraw();return;}
+  if(d.xact==='amt'){const v=d.v==='in'?parseFloat((($('#txUsd')||{}).value||'').replace(',','.')):+d.v;if(!(v>=1)){toast('Pick at least $1');return;}TX.usd=Math.round(v*100)/100;TX.msg='';txDraw();return;}
+  if(d.xact==='send'){if(!TX.busy)txSend();return;}
   if(d.xact==='claim'){const tx=($('#txIn')||{}).value||'';const msg=$('#txMsg');if(!/^0x[0-9a-fA-F]{64}$/.test(tx.trim())){if(msg)msg.textContent='Paste the full transaction hash (0x and 64 characters).';return;}
-    const ch=TOPX.ch||(TOPX.ways[0]||{}).chain;b.disabled=true;b.textContent='Checking…';
+    const ch=(txWay()||TOPX.ways[0]||{}).chain;b.disabled=true;b.textContent='Checking…';
     try{const r=await api('/v1/ai/topup/claim',{method:'POST',body:JSON.stringify({tx:tx.trim(),chain:ch})});if(msg)msg.textContent=`Done. ${r.amount} ${r.asset} = ${usd(r.usd)}, ${usd(r.credited_usd)} credited.`;toast('Top up arrived: +'+usd(r.credited_usd));try{ME=await api('/v1/engine/me');}catch(e){}}
     catch(er){if(msg)msg.textContent=er.message||'Could not check that transaction.';}
     b.disabled=false;b.textContent='Credit my top up';}
@@ -2760,10 +2812,11 @@ function accountCard(){
 }
 function topupBox(){
   const m=ME;
+  if(TX.cur!=='ODDS'&&topxOn())return `<h3>Top up</h3>${curTabs()}${otherPanel()}${linkBox()}`;
   if(QUOTE){
     const left=Math.max(0,QUOTE.exp*1000-Date.now());const mm=Math.floor(left/60000),ss=Math.floor(left/1000)%60;
     const amt=Number(QUOTE.odds).toLocaleString('en-US',{maximumFractionDigits:2});
-    return `<h3>Top up ${usd(QUOTE.usd)}</h3>
+    return `<h3>Top up ${usd(QUOTE.usd)}</h3>${curTabs()}
      <div class="qbox">${left>0?`<p>Send exactly <b>${amt} $ODDS</b>. You get <b>${usd(QUOTE.usd)}</b>, price held for <b id="qLeft">${mm}:${String(ss).padStart(2,'0')}</b>.</p>`:'<p>This price ran out. Pick an amount again.</p>'}
      ${left>0&&(window.OE_ETH||window.ethereum||(typeof OE_WALLETS!=='undefined'&&OE_WALLETS.length))?`<button class="btn btn-g" data-act="qpay">Send with my wallet</button>`:''}
      ${left>0?`<details class="qman"${(window.OE_ETH||window.ethereum)?'':' open'}><summary>Send it by hand (Torch wallet)</summary>
@@ -2775,11 +2828,10 @@ function topupBox(){
      ${linkBox()}`;
   }
   const pr=TOPX&&TOPX.promo;
-  return `<h3>Top up with $ODDS</h3>${pr?`<div class="promo"><b>${E(pr.name)}</b><span>+${Math.round(pr.bonus*100)}% extra credit on every $ODDS top up, up to ${usd(pr.max_usd,0)} per wallet, until ${new Date(pr.ends*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})}.</span></div>`:''}<p class="sub">Pick an amount. We hold the price for 10 minutes, so you get exactly that much.</p>
+  return `<h3>Top up</h3>${curTabs()}${pr?`<div class="promo"><b>${E(pr.name)}</b><span>+${Math.round(pr.bonus*100)}% extra credit on every $ODDS top up, up to ${usd(pr.max_usd,0)} per wallet, until ${new Date(pr.ends*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'})}.</span></div>`:''}<p class="sub">Pick an amount. We hold the price for 10 minutes, so you get exactly that much.</p>
     <div class="amts">${[5,10,25,50].map(v=>`<button class="amt" data-amt="${v}">$${v}</button>`).join('')}</div>
     <form class="addrow" id="amtForm"><input id="amtIn" inputmode="decimal" placeholder="Other amount in $" aria-label="Amount in dollars"><button class="btn btn-g btn-sm" type="submit">Get price</button></form>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${m.chain&&m.chain.buy_url?`<a class="btn btn-sm" href="${E(m.chain.buy_url)}" target="_blank" rel="noopener">Get $ODDS on Torch</a>`:''}<button class="btn btn-sm" data-act="checkdep">Check for transfers</button></div>
-    ${topxBox()}
     <details class="qman"><summary>Just send any amount instead</summary><p class="note">Send $ODDS on Robinhood Chain from ${E(m.short)} or a linked wallet to this address. It is credited at the live price within a minute.</p><div class="addr"><code>${E(m.deposit||'')}</code><button class="copy" data-copy="${E(m.deposit||'')}">Copy</button></div></details>
     ${linkBox()}`;
 }
