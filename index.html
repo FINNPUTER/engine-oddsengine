@@ -1215,6 +1215,30 @@ html.pwa footer.wrap{display:none}
 .an-list{margin-top:16px;display:flex;flex-direction:column;gap:8px}.an-list div{display:flex;gap:14px;align-items:baseline;font-size:14px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}.an-list span{opacity:.65;flex:1}.an-list a{color:var(--g,#22f08a)}
 @media(max-width:600px){.an-bar{grid-template-columns:100px 1fr 60px}}
 
+
+/* 2.82.178: Torch codes */.ck-t{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.ck-t div{position:relative;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:16px;padding:16px;background:rgba(255,255,255,.02)}
+.ck-t div.on{border-color:#22f08a;background:rgba(34,240,138,.08);box-shadow:0 0 30px rgba(34,240,138,.12)}
+.ck-t small{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;letter-spacing:.1em;color:#22f08a;text-transform:uppercase}
+.ck-t b{display:block;font-size:22px;margin:6px 0 4px}.ck-t span{font-size:13px;color:var(--mut,#9fb2a7)}
+.ck-t em{position:absolute;right:12px;top:12px;font-style:normal;font-size:11px;font-weight:700;color:#03130a;background:#22f08a;border-radius:99px;padding:3px 9px}
+.ck-me{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 2px 18px;color:var(--mut,#c9d8cf)}.ck-me span{flex:1;min-width:220px}.ck-me b{color:#ecf5ef}
+.ck-p code i{font-style:normal;filter:blur(6px);user-select:none}.ck-o{font-size:13px;color:#22f08a;font-weight:600}
+@media(max-width:760px){.ck-t{grid-template-columns:1fr;gap:8px}.ck-t div{padding:12px 14px}.ck-t b{font-size:18px}}
+
+.ck-st{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.ck-st div{border:1px solid var(--line,rgba(255,255,255,.1));border-radius:14px;padding:14px 16px;background:rgba(255,255,255,.02)}
+.ck-st b{display:block;font-size:26px;font-weight:800;color:#22f08a}.ck-st span{font-size:13px;color:var(--mut,#9fb2a7)}
+.ck-list{display:grid;gap:10px}
+.ck-c{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:14px;padding:12px 16px;background:rgba(255,255,255,.02)}
+.ck-c code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:20px;letter-spacing:.06em;color:#ecf5ef}
+.ck-s{font-size:13px;color:var(--mut,#9fb2a7);flex:1;min-width:120px}
+.ck-a{display:flex;gap:10px;align-items:center}.ck-a a{font-size:13px;color:#22f08a}
+.ck-lock{filter:blur(7px);opacity:.55;pointer-events:none;user-select:none}
+.ck-wrap{position:relative;min-height:300px}.ck-gate{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:20px;background:radial-gradient(closest-side,rgba(3,6,5,.85),rgba(3,6,5,.2))}
+.ck-gate b{font-size:20px}.ck-gate span{color:var(--mut,#9fb2a7);max-width:420px}
+.ck-bar{width:min(320px,100%);height:8px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}.ck-bar i{display:block;height:100%;background:#22f08a}
+@media(max-width:760px){.ck-st{grid-template-columns:1fr 1fr 1fr;gap:8px}.ck-st b{font-size:19px}.ck-st div{padding:10px}.ck-c code{font-size:17px}}
 /* 2.82.175: GPU-Hilfe */
 .gh-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
 .gh-b{display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:center;margin-top:10px}
@@ -1281,6 +1305,7 @@ html.pwa footer.wrap{display:none}
     <button role="tab" data-tab="models">Models</button>
     <button role="tab" data-tab="studio">Studio</button>
     <button role="tab" data-tab="gpu">GPU</button>
+    <button role="tab" data-tab="codes">Codes</button>
     <button role="tab" data-tab="ai">Account</button>
     <button role="tab" data-tab="analytics">Analytics</button>
     <a class="gta-tab" href="/gta/" id="gtaTab" style="display:none">GTA VI</a>
@@ -2134,6 +2159,7 @@ if(location.hash==='#analytics')TAB='analytics';
 if(location.hash==='#image')TAB='image';
 if(location.hash==='#voice')TAB='voice';
 if(location.hash==='#gallery')TAB='gallery';
+if(location.hash==='#codes')TAB='codes';
 const STUDIO=['image','video','voice','3d','gallery'];
 const AI_TABS=['chat','models','video','3d','gpu','image','voice','gallery','ai'];
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2194,7 +2220,7 @@ function introMaybe(){
 }
 
 /* ---------- tabs that exist for the public ---------- */
-function tabOpen(t){if(t==='studio')return STUDIO.some(x=>tabOpen(x));if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(t==='analytics')return true;if(t==='3d')return !!(TD.ok||DEMO||PREVIEW);if(t==='gpu')return !!(GP.ok||DEMO||PREVIEW);if(t==='image'||t==='voice')return !!(MD.ok||DEMO||PREVIEW);if(t==='gallery')return !!(MD.ok||TD.ok||VID.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
+function tabOpen(t){if(t==='codes')return !!(CK.on||PREVIEW);if(t==='studio')return STUDIO.some(x=>tabOpen(x));if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(t==='analytics')return true;if(t==='3d')return !!(TD.ok||DEMO||PREVIEW);if(t==='gpu')return !!(GP.ok||DEMO||PREVIEW);if(t==='image'||t==='voice')return !!(MD.ok||DEMO||PREVIEW);if(t==='gallery')return !!(MD.ok||TD.ok||VID.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
 function soon(){
   return `<section class="soon">${face('idle')}
   <span class="eyebrow rv d1"><b>●</b> OddsEngine AI</span>
@@ -2217,7 +2243,7 @@ function render(){
   document.body.classList.toggle('aimode',open&&AI_TABS.includes(TAB));
   if(!chat){CH.drawer=false;document.body.classList.remove('cdr');}
   const keep=chat&&$('#cIn')?$('#cIn').value:null;
-  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='3d'?tdView():TAB==='gpu'?gpView():TAB==='image'?imgView():TAB==='voice'?vcView():TAB==='gallery'?galView():TAB==='analytics'?anView():TAB==='chat'?chatView():engineView()):soon();
+  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='3d'?tdView():TAB==='gpu'?gpView():TAB==='image'?imgView():TAB==='voice'?vcView():TAB==='gallery'?galView():TAB==='analytics'?anView():TAB==='codes'?ckView():TAB==='chat'?chatView():engineView()):soon();
   if(open&&AI_TABS.includes(TAB)){bgInit();bgShow(true);introMaybe();}else bgShow(false);
   if(open&&TAB==='models'){renderModels();cmpBar();countUp();}
   if(open&&TAB==='ai'&&QUOTE)quoteTick();
@@ -2226,6 +2252,7 @@ function render(){
   if(open&&TAB==='gpu')gpBind();
   if(open&&TAB==='gallery')galBind();
   if(open&&TAB==='analytics')anBind();
+  if(open&&TAB==='codes')ckBind();
   if(open)setTimeout(engCount,250);
   if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();fitChat();}
   bind(); reveal(); spot();
@@ -2284,7 +2311,7 @@ function vdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'
   if(st==='rendering')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Rendering, usually 1 to 5 minutes</div>${pr}</div>`;
   return `<div class="vd-j">${head}<p class="note">That one did not work${j.reason?': '+E(j.reason):''}. Nothing was charged.</p>${pr}</div>`;}
 function vdJobsHtml(){return VID.jobs.length?VID.jobs.map(vdJob).join(''):'<p class="note">Your videos show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
-function hubSeg(){const t=[['models','Models'],['chat','Chat'],['image','Image'],['video','Video'],['voice','Voice'],['3d','3D'],['gpu','GPU'],['gallery','Gallery']].filter(([k])=>tabOpen(k));if(t.length<2)return stSeg();
+function hubSeg(){const t=[['models','Models'],['chat','Chat'],['image','Image'],['video','Video'],['voice','Voice'],['3d','3D'],['gpu','GPU'],['gallery','Gallery'],['codes','Codes']].filter(([k])=>tabOpen(k));if(t.length<2)return stSeg();
   return `<nav class="hubseg" aria-label="AI">${t.map(([k,l])=>`<button data-go="${k}" class="${TAB===k?'on':''}">${l}</button>`).join('')}</nav>${stSeg()}`;}
 function stSeg(){if(!STUDIO.includes(TAB))return '';const t=[['image','Image'],['video','Video'],['voice','Voice'],['3d','3D'],['gallery','Gallery']].filter(([k])=>tabOpen(k));if(t.length<2)return '';
   return `<nav class="stseg" aria-label="Studio">${t.map(([k,l])=>`<button data-go="${k}" class="${TAB===k?'on':''}">${l}</button>`).join('')}</nav>`;}
@@ -2676,6 +2703,30 @@ function gpG(){return GP.gpus.find(g=>g.id===GP.gpu)||GP.gpus[0]||null;}
 function gpLeft(r){const s=Math.max(0,Math.round((r.end*1000-Date.now())/60000));return s>=60?Math.floor(s/60)+' h '+(s%60)+' min':s+' min';}
 function gpRental(r){const run=r.status==='starting'||r.status==='running';
   return `<div class="vd-j"><div class="h"><b>${E(r.gpu)} · ${E(r.setup_name||'')}</b><span>${usd(r.price_usd)}</span></div>${run?`<div class="vd-row">${r.status==='starting'?`<span class="btn btn-sm" style="opacity:.75;cursor:default"><i class="vd-spin"></i>Getting ready</span>`:`<a class="btn btn-sm btn-g" href="${E(r.url)}" target="_blank" rel="noopener">Open</a>`}${r.password?`<span class="note">Password: <code>${E(r.password)}</code></span>`:''}<span class="note">${r.status==='starting'?'Loading the machine and the model, usually 3 to 8 minutes. The Open button and a Telegram message come when it is ready · ':''}${gpLeft(r)} left</span><button class="btn btn-sm" data-gact="stop" data-gid="${E(r.id)}">Stop and get the rest back</button></div><p class="note">The machine is deleted at the end. Download what you want to keep.</p>`:`<p class="note">${r.status==='stopped'?'Stopped'+(r.refund_usd?', '+usd(r.refund_usd)+' back on your balance':''):'Ended and deleted'}.</p>`}</div>`;}
+
+/* ---------- 2.82.178: Torch codes, only for big $ODDS holders ---------- */
+let CK={on:false,d:null,who:null,busy:false};
+async function ckLoad(){CK.busy=true;try{CK.d=await api('/v1/torch-codes');CK.who=connected()?ME.address:null;}catch(e){}CK.busy=false;}
+function ckFmt(n){return n>=1e6?(n/1e6).toLocaleString('en-US',{maximumFractionDigits:1})+'M':Math.round(n).toLocaleString('en-US');}
+function ckAgo(ts){if(!ts)return '';const m=Math.max(0,(Date.now()/1000-ts)/60);return m<60?Math.round(m)+' min ago':m<1440?Math.round(m/60)+' h ago':Math.round(m/1440)+' d ago';}
+function ckWait(sec){const m=Math.ceil(sec/60);return m<60?m+' min':Math.ceil(m/60)+' h';}
+function ckView(){const d=CK.d||{},n=d.count||0,T=d.tiers||[{id:'instant',min_odds:1e7,delay_sec:0},{id:'hour',min_odds:1e6,delay_sec:3600},{id:'public',min_odds:0,delay_sec:86400}];
+  const L={instant:['Instantly','plus a Telegram alert the second it drops'],hour:['After 1 hour','on this page'],public:['After 24 hours','on this page']};
+  const me=d.connected?d.tier:null,bal=d.balance||0;
+  const head=`${hubSeg()}<section class="mhero"><span class="eyebrow rv"><b>●</b> For $ODDS holders · Torch codes</span>
+    <h1 class="rv d1"><span class="shiny">Every Torch code.<br>Holders get it first.</span></h1>
+    <p class="lead rv d2">Torch and mlog hide collect codes in their posts. Your Engine picks up every new one automatically. The more $ODDS you hold, the sooner you see it.</p></section>`;
+  const tiers=`<div class="ck-t">${T.map(t=>`<div class="${me===t.id?'on':''}">${me===t.id?'<em>You</em>':''}<small>${t.min_odds?ckFmt(t.min_odds)+'+ $ODDS':'Everyone'}</small><b>${L[t.id]?L[t.id][0]:''}</b><span>${L[t.id]?L[t.id][1]:''}</span></div>`).join('')}</div>`;
+  let who;
+  if(!connected())who=`<div class="ck-me"><span>Connect the wallet that holds your $ODDS to see codes sooner. Linked wallets count too.</span><button class="btn btn-g btn-sm" data-act="connect">Connect wallet</button></div>`;
+  else{const nx=me==='instant'?null:T.find(t=>t.id===(me==='public'?'hour':'instant'));
+    who=`<div class="ck-me"><span>You hold <b>${ckFmt(bal)} $ODDS</b>. ${me==='instant'?'You see every code the moment it drops.':`${ckFmt(nx.min_odds-bal)} more and you see codes ${nx.id==='instant'?'instantly':'after 1 hour'}.`}</span>${me==='instant'?'':`<div class="ck-bar"><i style="width:${Math.min(100,bal/nx.min_odds*100)}%"></i></div><a class="btn btn-g btn-sm" href="https://app.torchpad.fun/trade/robinhood/0x9c87B4cfa21266d1638f437c96dBe1012CB81111" target="_blank" rel="noopener">Get $ODDS</a>`}</div>`;}
+  const list=CK.busy&&!CK.d?`<div class="vd-wait"><i class="vd-spin"></i>Loading</div>`:`<div class="ck-list">${(d.codes||[]).map(c=>c.code?`<div class="ck-c"><code>${E(c.code)}</code><span class="ck-s">${E(c.source||'')}${c.ts?' · '+ckAgo(c.ts):''}</span><span class="ck-a">${c.url?`<a href="${E(c.url)}" target="_blank" rel="noopener">Post</a>`:''}<button class="btn btn-sm" data-ckcopy="${E(c.code)}">Copy</button></span></div>`:
+    `<div class="ck-c ck-p"><code><i>XXXX-XXXX-XXXX</i></code><span class="ck-s">New · ${ckAgo(c.ts)} · big holders already have it</span><span class="ck-a"><span class="ck-o">Opens for you in ${ckWait(c.opens_in)}</span></span></div>`).join('')}</div>`;
+  const stat=`<div class="ck-st"><div><b class="eng-n" data-n="${n}">${n}</b><span>codes saved</span></div><div><b>${d.latest?ckAgo(d.latest):'n/a'}</b><span>newest code</span></div><div><b>15 min</b><span>how often we check</span></div></div>`;
+  return head+`<section class="rv"><div class="card">${tiers}${who}${stat}${list}</div></section>`;}
+function ckBind(){const want=connected()?ME.address:null;if(!CK.d||CK.who!==want){if(!CK.busy)ckLoad().then(()=>{if(TAB==='codes'){$('#view').innerHTML=ckView();document.querySelectorAll('#view .rv').forEach(e=>e.classList.add('in'));ckBind();bind();}});}
+  document.querySelectorAll('[data-ckcopy]').forEach(b=>b.onclick=()=>{try{navigator.clipboard.writeText(b.dataset.ckcopy);toast('Copied '+b.dataset.ckcopy);}catch(e){toast(b.dataset.ckcopy);}});}
 function gpView(){const g=gpG();const est=g?g.price_hour_usd*GP.h:null;
   return `${hubSeg()}<section class="mhero">
     <span class="eyebrow rv"><b>●</b> OddsEngine AI · GPU</span>
@@ -4344,7 +4395,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);FEAT.options=!!(d.features&&d.features.options);FEAT.autotrade=!!(d.features&&d.features.options_autotrade);if(FEAT.options)axLoad();if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const gon=!!(d.features&&d.features.radar)||(PREVIEW&&ADMIN);const gt=document.getElementById('gtaTab');if(gt)gt.style.display=gon?'':'none';const gp=document.getElementById('gtaPill');if(gp)gp.hidden=!gon;}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);FEAT.options=!!(d.features&&d.features.options);FEAT.autotrade=!!(d.features&&d.features.options_autotrade);CK.on=!!(d.features&&d.features.torchcodes);if(FEAT.options)axLoad();if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const gon=!!(d.features&&d.features.radar)||(PREVIEW&&ADMIN);const gt=document.getElementById('gtaTab');if(gt)gt.style.display=gon?'':'none';const gp=document.getElementById('gtaPill');if(gp)gp.hidden=!gon;}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
