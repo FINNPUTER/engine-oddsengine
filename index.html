@@ -2310,7 +2310,7 @@ function tdBind(){
 let ENGW=null;
 async function engLoad(){try{ENGW=await api('/v1/stats/engine');}catch(e){ENGW=null;}}
 function engLive(){const d=ENGW;if(!d)return '';
-  const it=[['launches_tracked','launches tracked'],['red_flags_found','red flags found'],['coins_known','coins checked'],['wallets_mapped','wallets mapped'],['calls_made','calls made'],['ai_requests','AI requests'],['odds_burned','$ODDS burned']].filter(([k])=>d[k]>0);
+  const it=[['launches_tracked','launches tracked'],['red_flags_found','red flags found'],['coins_known','coins checked'],['wallets_mapped','wallets mapped'],['calls_made','calls made'],['ai_requests','AI requests'],['odds_burned_from_usage','$ODDS burned by usage'],['odds_burned','$ODDS burned in total']].filter(([k])=>d[k]>0);
   if(it.length<3)return '';
   return `<section class="rv" style="margin-bottom:16px"><div class="card"><span class="eyebrow"><b style="color:var(--g)">●</b> Engine live · real work, counted</span>
    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:18px;margin-top:14px">${it.map(([k,l])=>`<div><b class="eng-n" data-n="${d[k]}" style="font-size:30px;font-variant-numeric:tabular-nums">0</b><div class="note">${l}</div></div>`).join('')}</div></div></section>`;}
