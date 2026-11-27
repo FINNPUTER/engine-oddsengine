@@ -58,7 +58,7 @@ main{min-width:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minma
 <nav class="toc" aria-label="Contents">
   <a href="#engine">Your Engine</a><a href="#scan">Scans</a><a href="#chart">Charts and X</a><a href="#guard">Wallet Guard</a><a href="#bag">Bag watch</a><a href="#briefing">Briefing</a><a href="#groups">In your group</a><a href="#ai">OddsEngine AI</a>
   <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
-  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#three-d">3D models</a><a href="#gpu" data-feat-link="gpu" hidden>Rent a GPU</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
+  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#three-d">3D models</a><a href="#gpu" data-feat-link="gpu" hidden>Rent a GPU</a><a href="#studio" data-feat-link="media" hidden>Image, voice, gallery</a><a href="#media-api" data-feat-link="media" hidden>Media API for agents</a><a href="#topup-more" data-feat-link="topup" hidden>Top up with other tokens</a><a href="#receipts">Hourly receipts</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
 </nav>
 <main>
 <span class="eb">Docs</span>
@@ -327,6 +327,46 @@ POST /v1/agents/key
 <li><b>Important:</b> the machine is deleted at the end of the block. Download what you want to keep. You get a warning 10 minutes before.</li>
 </ul>
 </div>
+<div data-feat="media" hidden>
+<h2 id="studio">Image, voice and your gallery</h2>
+<p>Open Studio on engine.oddsengine.live. Everything is paid from your balance, the price is on every button, and anything that fails costs nothing.</p>
+<ul>
+<li><b>Image:</b> FLUX schnell (fast drafts), FLUX dev (more detail, better text in images) and FLUX 1.1 pro ultra (best quality). Square, wide or tall.</li>
+<li><b>Voice:</b> Kokoro (cheap, English) and ElevenLabs v2 (studio quality, 29 languages). Paid per character, up to 3,000 characters per request. In Telegram just ask Your Engine to read something out loud.</li>
+<li><b>Gallery:</b> every image, voice, video and 3D model you made, from the site, Telegram and your agents, in one place. Links last a few days, download what you want to keep.</li>
+</ul>
+<h2 id="media-api">Media API for agents</h2>
+<p>Agents use the same things with an API key: <code>Authorization: Bearer oe_live_...</code>. Everything is paid from that wallet's balance.</p>
+<div class="tw"><table>
+<tr><th>Call</th><th>Body</th></tr>
+<tr><td><code>GET /v1/media</code></td><td>Everything available with its price</td></tr>
+<tr><td><code>POST /v1/media/image</code></td><td><code>{"prompt", "model": "fast|standard|pro", "format": "square|landscape|portrait"}</code>, answers with the image URL</td></tr>
+<tr><td><code>POST /v1/media/voice</code></td><td><code>{"text", "model": "standard|pro", "voice"}</code>, answers with the audio URL</td></tr>
+<tr><td><code>POST /v1/media/3d</code></td><td><code>{"prompt" or "image" (data URL), "model", "confirm"}</code>. Without confirm you get the price, with <code>"confirm": true</code> it starts</td></tr>
+<tr><td><code>POST /v1/media/video</code></td><td><code>{"prompt", "model", "seconds", "aspect", "image", "confirm"}</code>, same two steps</td></tr>
+<tr><td><code>POST /v1/media/gpu</code></td><td><code>{"setup": "comfyui|chat|jupyter", "gpu", "hours", "confirm"}</code>, same two steps, answers with the link</td></tr>
+<tr><td><code>POST /v1/media/gpu/stop</code></td><td><code>{"id"}</code>, unused time goes back</td></tr>
+<tr><td><code>GET /v1/media/jobs</code></td><td>Everything you made, with status and links. Poll this for 3D and video.</td></tr>
+</table></div>
+<p>Over MCP the same tools are called <code>make_image</code>, <code>make_voice</code>, <code>make_3d</code>, <code>make_video</code>, <code>media_jobs</code>, <code>rent_gpu</code> and <code>stop_gpu</code>.</p>
+</div>
+<div data-feat="topup" hidden>
+<h2 id="topup-more">Top up with ETH, USDC, USDG or $TORCH</h2>
+<p>$ODDS is the main way and has no fee. You can also send ETH, USDG or $TORCH on Robinhood Chain, or ETH or USDC on Base, from your own wallet. The addresses are in Account, under Top up with ETH, USDC, USDG or $TORCH.</p>
+<ul>
+<li>Send from the wallet you signed in with, or one you linked.</li>
+<li>Paste the transaction hash and press Credit my top up. We check it on the chain and credit the dollar value right away.</li>
+<li>A 5% fee is kept on these. It goes into $ODDS buybacks. $TORCH is counted at the live market price.</li>
+<li>Each transaction can be used once.</li>
+</ul>
+</div>
+<h2 id="receipts">Hourly receipts</h2>
+<p>Every hour the paid usage of that hour (request number, time, type and price, no wallets) is hashed with SHA-256 and the hash is written to Robinhood Chain. Anyone can check it:</p>
+<ol>
+<li><code>GET https://api.oddsengine.live/v1/stats/receipts</code> lists the hours with their hash and transaction.</li>
+<li><code>GET https://api.oddsengine.live/v1/stats/receipts/2026-11-27T13:00:00Z</code> gives the lines of that hour.</li>
+<li>Join the lines with a newline, take the SHA-256, and compare it with the hash. The transaction data on Robinhood Chain is <code>0x4f4531</code> followed by that hash.</li>
+</ol>
 <h2 id="models">Models</h2>
 <p>Every model OpenRouter offers is available, including free ones, the cheaper batch versions and the <code>~maker/model-latest</code> names that always point to the newest version. <i>Picked for you</i> on the Models page shows the ones we use ourselves. New models appear on their own and get a NEW badge for three weeks. Model IDs are the usual <code>maker/model</code> format.</p>
 
@@ -364,7 +404,7 @@ var f=d.features||{};function sh(c,ok){if(ok||d.admin){document.querySelectorAll
 </script>
 <script>
 /* Abschnitte erst zeigen, wenn der Schalter in admin.html an ist (data-feat="gpu" oder "3d") */
-(function(){var w={gpu:'/v1/ai/gpu','3d':'/v1/ai/3d'};document.querySelectorAll('[data-feat]').forEach(function(el){var u=w[el.getAttribute('data-feat')];if(!u)return;
+(function(){var w={gpu:'/v1/ai/gpu','3d':'/v1/ai/3d',media:'/v1/ai/media',topup:'/v1/ai/topup'};document.querySelectorAll('[data-feat]').forEach(function(el){var u=w[el.getAttribute('data-feat')];if(!u)return;
 fetch('https://api.oddsengine.live'+u).then(function(r){return r.json()}).then(function(d){if(d&&d.available){el.hidden=false;var l=document.querySelector('[data-feat-link="'+el.getAttribute('data-feat')+'"]');if(l)l.hidden=false;}}).catch(function(){});});})();
 </script>
 </body>
