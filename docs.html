@@ -58,7 +58,7 @@ main{min-width:0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minma
 <nav class="toc" aria-label="Contents">
   <a href="#engine">Your Engine</a><a href="#scan">Scans</a><a href="#chart">Charts and X</a><a href="#guard">Wallet Guard</a><a href="#bag">Bag watch</a><a href="#briefing">Briefing</a><a href="#groups">In your group</a><a href="#ai">OddsEngine AI</a>
   <a href="#start">Start</a><a href="#chat">The chat</a><a href="#money">Prices and fees</a><a href="#topup">Top up</a><a href="#torch">Torch wallets</a>
-  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#three-d">3D models</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
+  <a href="#api">API quickstart</a><a href="#x402" class="feat-x402" hidden>For agents (x402)</a><a href="#agents" class="feat-agents" hidden>Agent keys, MCP</a><a href="#images">Images</a><a href="#three-d">3D models</a><a href="#gpu" data-feat-link="gpu" hidden>Rent a GPU</a><a href="#models">Models</a><a href="#errors">Errors and limits</a><a href="#data">Your data</a><a href="#openrouter">From OpenRouter</a>
 </nav>
 <main>
 <span class="eb">Docs</span>
@@ -315,6 +315,18 @@ POST /v1/agents/key
 <li>Best results: one object or character on a calm background. Download the file to keep it, the link works for a few days.</li>
 </ul>
 <p>All current prices in one list: <code>GET https://api.oddsengine.live/v1/prices</code></p>
+<div data-feat="gpu" hidden>
+<h2 id="gpu">Rent a GPU</h2>
+<p>Rent a ready set up GPU machine, from an RTX 4090 up to H100, H200 and B200. Pick what you want to do, Your Engine starts the machine and sends you the link.</p>
+<ul>
+<li><b>Images and video with no limits:</b> ComfyUI, usually on an RTX 4090.</li>
+<li><b>Your own private AI chat:</b> Open WebUI with open models like Llama, usually on an A100 or H100. You create your login the first time you open it.</li>
+<li><b>Developers, training, your mascot:</b> Jupyter Lab with Python and PyTorch, on any GPU.</li>
+<li><b>In Telegram:</b> tell Your Engine what you want, for example "rent me a GPU for ComfyUI for 2 hours". <b>On this site:</b> open the GPU tab.</li>
+<li><b>Paying:</b> you pay the block (1, 2, 4 or 8 hours) up front from your balance, which you top up with $ODDS. The price per hour is shown before you start, fee included. Stop early and the unused minutes come back.</li>
+<li><b>Important:</b> the machine is deleted at the end of the block. Download what you want to keep. You get a warning 10 minutes before.</li>
+</ul>
+</div>
 <h2 id="models">Models</h2>
 <p>Every model OpenRouter offers is available, including free ones, the cheaper batch versions and the <code>~maker/model-latest</code> names that always point to the newest version. <i>Picked for you</i> on the Models page shows the ones we use ourselves. New models appear on their own and get a NEW badge for three weeks. Model IDs are the usual <code>maker/model</code> format.</p>
 
@@ -349,6 +361,11 @@ document.querySelectorAll('.card').forEach(function(c){c.addEventListener('point
 (function(){var h={};try{var a=localStorage.getItem('oe_admin');if(a)h['X-OddsEngine-Admin']=a;}catch(e){}
 fetch('https://web-production-6b61c.up.railway.app/v1/features',{headers:h}).then(function(r){return r.json()}).then(function(d){
 var f=d.features||{};function sh(c,ok){if(ok||d.admin){document.querySelectorAll(c).forEach(function(e){e.hidden=false});}}sh('.feat-agents',f.agents&&f.ai);sh('.feat-x402',f.x402&&f.ai);sh('.feat-usdc',f.x402usdc&&f.x402&&f.ai);if(location.hash){var t=document.getElementById(location.hash.slice(1));if(t)t.scrollIntoView();}}).catch(function(){});})();
+</script>
+<script>
+/* Abschnitte erst zeigen, wenn der Schalter in admin.html an ist (data-feat="gpu" oder "3d") */
+(function(){var w={gpu:'/v1/ai/gpu','3d':'/v1/ai/3d'};document.querySelectorAll('[data-feat]').forEach(function(el){var u=w[el.getAttribute('data-feat')];if(!u)return;
+fetch('https://api.oddsengine.live'+u).then(function(r){return r.json()}).then(function(d){if(d&&d.available){el.hidden=false;var l=document.querySelector('[data-feat-link="'+el.getAttribute('data-feat')+'"]');if(l)l.hidden=false;}}).catch(function(){});});})();
 </script>
 </body>
 </html>
