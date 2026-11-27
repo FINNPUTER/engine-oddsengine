@@ -1216,6 +1216,7 @@ html.pwa footer.wrap{display:none}
 @media(max-width:600px){.an-bar{grid-template-columns:100px 1fr 60px}}
 
 /* 2.82.175: GPU-Karten markieren */
+.gp-dev{margin:4px 0 16px}.gp-dev summary{cursor:pointer;color:var(--dim);font-size:14px;padding:8px 0}.gp-dev summary:hover{color:var(--tx)}
 .gp-tag{align-self:flex-start;font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:999px;margin-bottom:6px}.gp-tag.ok{background:rgba(34,240,138,.14);color:var(--g);border:1px solid rgba(34,240,138,.4)}.gp-tag.dev{background:rgba(255,255,255,.05);color:var(--dim);border:1px solid var(--line2)}
 /* 2.82.175: Aktion */
 .promo{display:flex;flex-direction:column;gap:3px;margin:8px 0 12px;padding:12px 14px;border-radius:14px;border:1px solid rgba(34,240,138,.45);background:linear-gradient(110deg,rgba(34,240,138,.14),rgba(34,240,138,.03));box-shadow:0 0 30px rgba(34,240,138,.12)}.promo b{font-family:var(--disp);font-size:13px;letter-spacing:.04em;color:var(--g)}.promo span{font-size:14px;color:var(--tx)}
@@ -2598,7 +2599,7 @@ async function anBind(){if(!AN.ok){await anLoad();if(TAB==='analytics'){$('#view
 /* ---------- 2.82.172: GPU (RunPod) ---------- */
 const GP={ok:false,gpus:[],setups:[],hours:[1,2,4,8],rentals:[],bal:null,setup:'comfyui',gpu:'rtx4090',h:1,q:null,busy:false,t:null};
 const GP_USES=[
- ['IMAGES AND VIDEO','Make images and videos with no limits','comfyui','rtx4090'],
+ ['IMAGES','Make as many images as you want, no limits','comfyui','rtx4090'],
  ['YOUR OWN AI','Run your own private AI chat, no filters','chat','a100'],
  ['YOUR MASCOT','Train your character so it looks the same in every post','jupyter','rtx4090'],
  ['TRAIN MODELS','Teach a model your style, data or niche','jupyter','h100'],
@@ -2621,7 +2622,9 @@ function gpView(){const g=gpG();const est=g?g.price_hour_usd*GP.h:null;
   </section>
   ${marquee()}${engLive()}${gpStats()}<section class="rv"><div class="card">
     <span class="eyebrow">1 · What do you want to do?</span>
-    <div class="vd-grid" style="margin-top:10px">${GP_USES.map(u=>`<button class="vd-m ${u[2]===GP.setup&&u[3]===GP.gpu?'on':''}" data-gu="${u[2]}|${u[3]}"><em class="gp-tag ${u[2]==='jupyter'?'dev':'ok'}">${u[2]==='jupyter'?'Needs code':'Ready to use'}</em><b>${E(u[1])}</b><span>${E(u[0].toLowerCase())}</span>${(GP.gpus.find(x=>x.id===u[3])||{}).price_hour_usd?`<i class="vd-pr">${E((GP.gpus.find(x=>x.id===u[3])||{}).name)} · <b>${usd((GP.gpus.find(x=>x.id===u[3])||{}).price_hour_usd)}</b>/h</i>`:''}</button>`).join('')}</div>
+    ${(()=>{const C=u=>`<button class="vd-m ${u[2]===GP.setup&&u[3]===GP.gpu?'on':''}" data-gu="${u[2]}|${u[3]}"><em class="gp-tag ${u[2]==='jupyter'?'dev':'ok'}">${u[2]==='jupyter'?'Needs code':'Ready to use'}</em><b>${E(u[1])}</b><span>${E(u[0].toLowerCase())}</span>${(GP.gpus.find(x=>x.id===u[3])||{}).price_hour_usd?`<i class="vd-pr">${E((GP.gpus.find(x=>x.id===u[3])||{}).name)} · <b>${usd((GP.gpus.find(x=>x.id===u[3])||{}).price_hour_usd)}</b>/h</i>`:''}</button>`;const fertig=GP_USES.filter(u=>u[2]!=='jupyter'),dev=GP_USES.filter(u=>u[2]==='jupyter');const devOn=dev.some(u=>u[2]===GP.setup);
+  return `<div class="vd-grid" style="margin-top:10px">${fertig.map(C).join('')}</div>
+  <details class="gp-dev"${devOn?' open':''}><summary>For developers: an empty machine with Python for your own code</summary><p class="note" style="margin:8px 0 0">You get a Jupyter notebook on the GPU. Useful if you already know how to train or run models yourself. Everything else on this page works without code.</p><div class="vd-grid" style="margin-top:10px">${dev.map(C).join('')}</div></details>`;})()}
     <span class="eyebrow">2 · GPU</span>
     <div class="vd-row" style="margin-top:10px;flex-wrap:wrap">${GP.gpus.map(x=>`<button class="vd-chip ${x.id===GP.gpu?'on':''}" data-gg="${x.id}">${E(x.name)} · ${x.memory_gb} GB · ${usd(x.price_hour_usd)}/h</button>`).join('')}</div>
     <div class="vd-row"><label class="k">Setup</label>${GP.setups.map(x=>`<button class="vd-chip ${x.id===GP.setup?'on':''}" data-gs="${x.id}">${E(x.name)}</button>`).join('')}</div>
