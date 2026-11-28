@@ -1216,6 +1216,32 @@ html.pwa footer.wrap{display:none}
 @media(max-width:600px){.an-bar{grid-template-columns:100px 1fr 60px}}
 
 
+
+/* 2.82.182: Clips */
+.cl-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:1.5px dashed rgba(34,240,138,.45);border-radius:18px;background:rgba(34,240,138,.04);cursor:pointer;text-align:center;padding:20px;margin:14px 0 6px;transition:background .2s,border-color .2s}
+.cl-drop.on,.cl-drop:hover{background:rgba(34,240,138,.1);border-color:#22f08a}
+.cl-drop b{font-size:18px}.cl-drop span{font-size:13px;color:var(--mut,#9fb2a7)}
+.cl-h{font-size:15px;margin:22px 0 10px;color:var(--mut,#c9d8cf);font-weight:600}
+.cl-ns{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.cl-n{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.02)}
+.cl-n span{font-size:14px;color:var(--mut,#c9d8cf)}.cl-n span b{color:#ecf5ef;font-size:17px}
+.cl-st{display:flex;align-items:center;gap:10px}.cl-st b{min-width:18px;text-align:center;font-size:18px}
+.cl-row{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.cl-tog{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut,#c9d8cf)}.cl-tog input{accent-color:#22f08a;width:17px;height:17px}
+.cl-r{margin-top:14px}
+.inp{width:100%;box-sizing:border-box;border-radius:14px;border:1px solid var(--line2);background:rgba(0,0,0,.25);color:var(--tx);padding:12px 14px;font:inherit;font-size:15px;margin:14px 0 6px}
+.inp-sm{padding:6px 10px;font-size:14px;width:auto;margin:0}
+.cl-buy{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:20px 0 8px;padding:16px;border-radius:16px;border:1px solid rgba(34,240,138,.35);background:rgba(34,240,138,.06)}
+.cl-p{display:block;font-size:22px;margin-top:2px}.cl-p s{color:var(--mut,#9fb2a7);font-size:15px;font-weight:500;margin-left:6px}.cl-p em{font-style:normal;font-size:13px;color:#22f08a;margin-left:6px}
+.cl-job{border-top:1px solid var(--line,rgba(255,255,255,.08));padding:14px 0}
+.cl-jh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.cl-jh b{word-break:break-all}
+.cl-s{font-size:13px;font-weight:600;color:#22f08a;display:flex;gap:6px;align-items:center}.cl-s.failed{color:#ff6b6b}
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:10px}
+.cl-c{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:14px;padding:8px;background:rgba(255,255,255,.02)}
+.cl-c video{width:100%;aspect-ratio:9/16;object-fit:contain;background:#000;border-radius:10px}
+.cl-c b{font-size:14px}.cl-c span{font-size:12px;color:var(--mut,#9fb2a7)}.cl-c .btn{align-self:flex-start}
+.cl-tg{aspect-ratio:9/16;display:flex;align-items:center;justify-content:center;border-radius:10px;background:rgba(255,255,255,.04);font-size:13px;color:var(--mut,#9fb2a7);text-align:center;padding:10px}
+@media(max-width:760px){.cl-ns{grid-template-columns:1fr}.cl-grid{grid-template-columns:1fr 1fr;gap:8px}.cl-buy{flex-direction:column;align-items:stretch}.cl-buy .btn{width:100%}}
 /* 2.82.178: Torch codes */.ck-t{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
 .ck-t div{position:relative;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:16px;padding:16px;background:rgba(255,255,255,.02)}
 .ck-t div.on{border-color:#22f08a;background:rgba(34,240,138,.08);box-shadow:0 0 30px rgba(34,240,138,.12)}
@@ -1305,6 +1331,7 @@ html.pwa footer.wrap{display:none}
     <button role="tab" data-tab="models">Models</button>
     <button role="tab" data-tab="studio">Studio</button>
     <button role="tab" data-tab="gpu">GPU</button>
+    <button role="tab" data-tab="clips">Clips</button>
     <button role="tab" data-tab="codes">Codes</button>
     <button role="tab" data-tab="ai">Account</button>
     <button role="tab" data-tab="analytics">Analytics</button>
@@ -2160,6 +2187,7 @@ if(location.hash==='#image')TAB='image';
 if(location.hash==='#voice')TAB='voice';
 if(location.hash==='#gallery')TAB='gallery';
 if(location.hash==='#codes')TAB='codes';
+if(location.hash==='#clips')TAB='clips';
 const STUDIO=['image','video','voice','3d','gallery'];
 const AI_TABS=['chat','models','video','3d','gpu','image','voice','gallery','ai'];
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2220,7 +2248,7 @@ function introMaybe(){
 }
 
 /* ---------- tabs that exist for the public ---------- */
-function tabOpen(t){if(t==='codes')return !!(CK.on||PREVIEW);if(t==='studio')return STUDIO.some(x=>tabOpen(x));if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(t==='analytics')return true;if(t==='3d')return !!(TD.ok||DEMO||PREVIEW);if(t==='gpu')return !!(GP.ok||DEMO||PREVIEW);if(t==='image'||t==='voice')return !!(MD.ok||DEMO||PREVIEW);if(t==='gallery')return !!(MD.ok||TD.ok||VID.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
+function tabOpen(t){if(t==='clips')return !!(CL.on||PREVIEW);if(t==='codes')return !!(CK.on||PREVIEW);if(t==='studio')return STUDIO.some(x=>tabOpen(x));if(t==='engine')return !!FEAT.engine||DEMO;if(t==='video')return !!(VID.ok||DEMO||PREVIEW);if(t==='analytics')return true;if(t==='3d')return !!(TD.ok||DEMO||PREVIEW);if(t==='gpu')return !!(GP.ok||DEMO||PREVIEW);if(t==='image'||t==='voice')return !!(MD.ok||DEMO||PREVIEW);if(t==='gallery')return !!(MD.ok||TD.ok||VID.ok||DEMO||PREVIEW);if(DEMO||PREVIEW)return true;return FEAT.ai;}
 function soon(){
   return `<section class="soon">${face('idle')}
   <span class="eyebrow rv d1"><b>●</b> OddsEngine AI</span>
@@ -2243,7 +2271,7 @@ function render(){
   document.body.classList.toggle('aimode',open&&AI_TABS.includes(TAB));
   if(!chat){CH.drawer=false;document.body.classList.remove('cdr');}
   const keep=chat&&$('#cIn')?$('#cIn').value:null;
-  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='3d'?tdView():TAB==='gpu'?gpView():TAB==='image'?imgView():TAB==='voice'?vcView():TAB==='gallery'?galView():TAB==='analytics'?anView():TAB==='codes'?ckView():TAB==='chat'?chatView():engineView()):soon();
+  $('#view').innerHTML=open?(TAB==='ai'?accountView():TAB==='models'?modelsView():TAB==='video'?videoView():TAB==='3d'?tdView():TAB==='gpu'?gpView():TAB==='image'?imgView():TAB==='voice'?vcView():TAB==='gallery'?galView():TAB==='analytics'?anView():TAB==='codes'?ckView():TAB==='clips'?clView():TAB==='chat'?chatView():engineView()):soon();
   if(open&&AI_TABS.includes(TAB)){bgInit();bgShow(true);introMaybe();}else bgShow(false);
   if(open&&TAB==='models'){renderModels();cmpBar();countUp();}
   if(open&&TAB==='ai'&&QUOTE)quoteTick();
@@ -2253,6 +2281,7 @@ function render(){
   if(open&&TAB==='gallery')galBind();
   if(open&&TAB==='analytics')anBind();
   if(open&&TAB==='codes')ckBind();
+  if(open&&TAB==='clips')clBind();
   if(open)setTimeout(engCount,250);
   if(chat){const ta=$('#cIn');if(ta&&keep){ta.value=keep;}chatBind();fitChat();}
   bind(); reveal(); spot();
@@ -2311,7 +2340,7 @@ function vdJob(j){const st=j.status;const head=`<div class="h"><b>${E(j.model||'
   if(st==='rendering')return `<div class="vd-j">${head}<div class="vd-wait"><i class="vd-spin"></i>Rendering, usually 1 to 5 minutes</div>${pr}</div>`;
   return `<div class="vd-j">${head}<p class="note">That one did not work${j.reason?': '+E(j.reason):''}. Nothing was charged.</p>${pr}</div>`;}
 function vdJobsHtml(){return VID.jobs.length?VID.jobs.map(vdJob).join(''):'<p class="note">Your videos show up here. They also arrive in Telegram when you ask Your Engine in the chat.</p>';}
-function hubSeg(){const t=[['models','Models'],['chat','Chat'],['image','Image'],['video','Video'],['voice','Voice'],['3d','3D'],['gpu','GPU'],['gallery','Gallery'],['codes','Codes']].filter(([k])=>tabOpen(k));if(t.length<2)return stSeg();
+function hubSeg(){const t=[['models','Models'],['chat','Chat'],['image','Image'],['video','Video'],['voice','Voice'],['3d','3D'],['gpu','GPU'],['clips','Clips'],['gallery','Gallery'],['codes','Codes']].filter(([k])=>tabOpen(k));if(t.length<2)return stSeg();
   return `<nav class="hubseg" aria-label="AI">${t.map(([k,l])=>`<button data-go="${k}" class="${TAB===k?'on':''}">${l}</button>`).join('')}</nav>${stSeg()}`;}
 function stSeg(){if(!STUDIO.includes(TAB))return '';const t=[['image','Image'],['video','Video'],['voice','Voice'],['3d','3D'],['gallery','Gallery']].filter(([k])=>tabOpen(k));if(t.length<2)return '';
   return `<nav class="stseg" aria-label="Studio">${t.map(([k,l])=>`<button data-go="${k}" class="${TAB===k?'on':''}">${l}</button>`).join('')}</nav>`;}
@@ -2530,16 +2559,23 @@ document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.c
 
 /* ---------- 2.82.175: Aufladen mit ETH, USDC, USDG, $TORCH direkt aus der Wallet ---------- */
 const TX={cur:'ODDS',usd:10,ch:{},busy:false,msg:''};
-const CUR_L={ODDS:'$ODDS',ETH:'ETH',USDC:'USDC',USDG:'USDG',TORCH:'$TORCH'};
+const CUR_L={ODDS:'$ODDS',CARD:'Card',ETH:'ETH',USDC:'USDC',USDG:'USDG',TORCH:'$TORCH'};
 function topxOn(){return !!(TOPX&&TOPX.available&&(TOPX.ways||[]).length);}
-function curTabs(){if(!topxOn())return '';const have=new Set(TOPX.ways.map(w=>w.asset));const cs=['ODDS',...['ETH','USDC','USDG','TORCH'].filter(c=>have.has(c))];
+function curTabs(){if(!topxOn())return '';const have=new Set(TOPX.ways.map(w=>w.asset));const cs=['ODDS',...(TOPX.card?['CARD']:[]),...['ETH','USDC','USDG','TORCH'].filter(c=>have.has(c))];
   return `<div class="cur-tabs">${cs.map(c=>`<button class="vd-chip ${TX.cur===c?'on':''}" data-xact="cur" data-c="${c}">${CUR_L[c]}${c==='ODDS'?' <small>no fee</small>':''}</button>`).join('')}</div>`;}
 function txWays(){return (TOPX&&TOPX.ways||[]).filter(w=>w.asset===TX.cur);}
 function txWay(){const ws=txWays();return ws.find(w=>w.chain===TX.ch[TX.cur])||ws[0]||null;}
 function txPrice(){if(TX.cur==='ETH')return TOPX.eth_usd;if(TX.cur==='TORCH')return TOPX.torch_usd;return 1;}
 function txFee(){return TX.cur==='TORCH'?(TOPX.fee_torch??TOPX.fee):TOPX.fee;}
 function fmtAmt(a){return a>=1000?a.toLocaleString('en-US',{maximumFractionDigits:0}):a>=1?a.toLocaleString('en-US',{maximumFractionDigits:4}):a.toPrecision(4);}
-function otherPanel(){const w=txWay();if(!w)return '';const ws=txWays();const px=txPrice();const amt=px?TX.usd/px:null;const gut=TX.usd*(1-txFee());
+function cardPanel(){const c=TOPX.card;const gut=TX.usd*(1-(c.card_fee||0));const ok=TX.usd>=(c.min_usd||5)&&TX.usd<=(c.max_usd||500);
+  return `<p class="sub">Pay with card, Apple Pay or Google Pay. No crypto needed. ${Math.round((c.card_fee||0)*100)}% covers the card fees.</p>
+   <div class="amts" style="margin-top:12px">${(c.packages||[5,10,25,50,100]).map(v=>`<button class="amt ${TX.usd===v?'on':''}" data-xact="amt" data-v="${v}">$${v}</button>`).join('')}</div>
+   <div class="qbox" style="margin-top:12px"><p>You pay <b>${usd(TX.usd)}</b> and get <b>${usd(gut)}</b> on your balance.</p></div>
+   <button class="btn btn-g" style="margin-top:12px" data-xact="cardpay" ${ok?'':'disabled'}>Pay ${usd(TX.usd)} by card</button>
+   ${ok?'':`<p class="note">Card top ups from ${usd(c.min_usd||5,0)} to ${usd(c.max_usd||500,0)}.</p>`}
+   <p class="note" style="margin-top:10px">Hold $ODDS for lower prices on everything. Top ups in $ODDS have no fee.</p>`;}
+function otherPanel(){if(TX.cur==='CARD')return cardPanel();const w=txWay();if(!w)return '';const ws=txWays();const px=txPrice();const amt=px?TX.usd/px:null;const gut=TX.usd*(1-txFee());
   const ch=(TOPX.chains||{})[w.chain]||{};const hasW=!!(window.OE_ETH||window.ethereum||(typeof OE_WALLETS!=='undefined'&&OE_WALLETS.length));
   return `<p class="sub">Pay with ${CUR_L[TX.cur]} from your wallet. ${Math.round(txFee()*100)}% goes into $ODDS buybacks${TX.cur==='TORCH'?', $TORCH is counted at the live price':''}. $ODDS has no fee.</p>
    ${ws.length>1?`<div class="vd-row"><label class="k">Network</label>${ws.map(x=>`<button class="vd-chip ${x.chain===w.chain?'on':''}" data-xact="ch" data-c="${x.chain}">${E(((TOPX.chains||{})[x.chain]||{}).name||x.chain)}</button>`).join('')}</div>`:`<p class="note" style="margin:6px 0 0">Network: ${E(ch.name||w.chain)}</p>`}
@@ -2590,6 +2626,7 @@ function topxBox(){const t=TOPX;if(!t||!t.available||!(t.ways||[]).length)return
 async function topxAct(b){const d=b.dataset;
   if(d.xact==='cur'){TX.cur=d.c;TX.msg='';txDraw();return;}
   if(d.xact==='ch'){TX.ch[TX.cur]=d.c;TX.msg='';txDraw();return;}
+  if(d.xact==='cardpay'){b.disabled=true;b.textContent='Opening checkout…';try{const r=await api('/v1/pay/card',{method:'POST',body:JSON.stringify({usd:TX.usd})});location.href=r.url;}catch(er){toast(er.message||'Card payment could not start');b.disabled=false;b.textContent='Pay by card';}return;}
   if(d.xact==='amt'){const v=d.v==='in'?parseFloat((($('#txUsd')||{}).value||'').replace(',','.')):+d.v;if(!(v>=1)){toast('Pick at least $1');return;}TX.usd=Math.round(v*100)/100;TX.msg='';txDraw();return;}
   if(d.xact==='send'){if(!TX.busy)txSend();return;}
   if(d.xact==='claim'){const tx=($('#txIn')||{}).value||'';const msg=$('#txMsg');if(!/^0x[0-9a-fA-F]{64}$/.test(tx.trim())){if(msg)msg.textContent='Paste the full transaction hash (0x and 64 characters).';return;}
@@ -2727,6 +2764,70 @@ function ckView(){const d=CK.d||{},n=d.count||0,T=d.tiers||[{id:'instant',min_od
   return head+`<section class="rv"><div class="card">${tiers}${who}${stat}${list}</div></section>`;}
 function ckBind(){const want=connected()?ME.address:null;if(!CK.d||CK.who!==want){if(!CK.busy)ckLoad().then(()=>{if(TAB==='codes'){$('#view').innerHTML=ckView();document.querySelectorAll('#view .rv').forEach(e=>e.classList.add('in'));ckBind();bind();}});}
   document.querySelectorAll('[data-ckcopy]').forEach(b=>b.onclick=()=>{try{navigator.clipboard.writeText(b.dataset.ckcopy);toast('Copied '+b.dataset.ckcopy);}catch(e){toast(b.dataset.ckcopy);}});}
+
+setTimeout(()=>{try{if(/[?&]paid=1/.test(location.search)){toast('Payment received. Your credit shows up in a few seconds.');history.replaceState(null,'',location.pathname+location.hash);}}catch(e){}},1500);
+/* ---------- 2.82.182: Clips, long video in, short clips out ---------- */
+let CL={on:false,info:null,mode:'upload',url:'',fid:null,min:null,fname:'',up:null,n15:0,n30:3,n60:0,fmt:'vertical_fit',cap:true,lang:'',rights:false,busy:false,jobs:[],err:null,t:null};
+const CL_FMT=[['vertical_fit','Vertical · full frame'],['vertical','Vertical · fill'],['square','Square'],['wide','Wide']];
+const CL_LANG=[['','Auto'],['en','English'],['de','German'],['es','Spanish'],['fr','French'],['pt','Portuguese'],['it','Italian'],['tr','Turkish']];
+function clN(){return CL.n15+CL.n30+CL.n60;}
+function clPrice(){const i=CL.info;if(!i)return null;const n=clN();const r=i.your_discount||0;
+  if(CL.min==null)return {from:(i.base_usd+i.per_clip_usd*n)*(1-r),perMin:i.per_min_usd*(1-r),r};
+  const full=i.base_usd+i.per_min_usd*CL.min+i.per_clip_usd*n;return {full,price:full*(1-r),r};}
+function clStep(k,l){return `<div class="cl-n"><span><b>${l}s</b> clips</span><div class="cl-st"><button class="btn btn-sm" data-cln="${k}:-1" aria-label="Fewer">−</button><b>${CL[k]}</b><button class="btn btn-sm" data-cln="${k}:1" aria-label="More">+</button></div></div>`;}
+function clJob(j){const pr=j.status==='done'?'':` <i class="vd-spin"></i>`;const lab={queued:'Waiting',fetching:'Getting the video',transcribing:'Listening',picking:'Finding the best moments',cutting:'Cutting',done:'Done',failed:'Stopped'}[j.status]||j.status;
+  return `<div class="cl-job"><div class="cl-jh"><b>${E(j.source==='upload'?'Your upload':j.source)}</b><span class="cl-s ${j.status}">${lab}${pr}</span></div>
+  <p class="note">${E(j.step||'')}${j.minutes?' · '+j.minutes+' min video':''}${j.price_usd!=null?' · '+usd(j.price_usd)+(j.status==='done'?' charged':''):''}</p>
+  ${(j.clips||[]).length?`<div class="cl-grid">${j.clips.map(c=>`<div class="cl-c">${c.url?`<video src="${E(c.url)}" controls playsinline preload="metadata"></video>`:'<div class="cl-tg">Sent to your Telegram</div>'}<b>${E(c.title||('Clip '+c.n))}</b><span>${c.len}s${(c.hashtags||[]).length?' · '+c.hashtags.map(h=>'#'+E(h)).join(' '):''}</span>${c.url?`<a class="btn btn-sm" href="${E(c.url)}" download>Download</a>`:''}</div>`).join('')}</div>`:''}</div>`;}
+function clView(){const i=CL.info||{};const p=clPrice();const n=clN();
+  const head=`${hubSeg()}<section class="mhero"><span class="eyebrow rv"><b>●</b> OddsEngine AI · Clips</span>
+    <h1 class="rv d1"><span class="shiny">Long video in.<br>Ready to post clips out.</span></h1>
+    <p class="lead rv d2">Drop a stream, podcast or video. Your Engine listens to all of it, finds the best moments and cuts them into short clips with subtitles for TikTok, Reels and Shorts. You only pay for clips that are done.</p></section>`;
+  if(!connected())return head+`<section class="rv"><div class="card"><div class="vd-row"><button class="btn btn-g" data-act="connect">Connect wallet</button><span class="note">Clips are paid from your balance and saved in your gallery.</span></div></div></section>`;
+  const src=CL.mode==='upload'?`<label class="cl-drop" id="clDrop"><input type="file" accept="video/*" id="clFile" hidden>${CL.up!=null&&CL.up<100?`<b>Uploading ${CL.up}%</b><div class="ck-bar"><i style="width:${CL.up}%"></i></div>`:CL.fid?`<b>${E(CL.fname)}</b><span>${CL.min} min · ready</span>`:`<b>Drop your video here</b><span>or tap to pick a file · up to ${Math.round((i.max_mb||2000)/1000*10)/10} GB, ${i.max_min||120} min</span>`}</label>`
+    :`<input class="inp" id="clUrl" placeholder="Paste a direct video link (Dropbox, Google Drive, .mp4)" value="${E(CL.url)}"><p class="note">${i.links_any_site?'YouTube and Twitch links work too, only for videos you have the rights to.':'YouTube, Twitch and TikTok links are not supported. Download your own video and upload the file.'}</p>`;
+  const prTxt=!p?'':p.price!=null?`${usd(p.price)}${p.r?` <s>${usd(p.full)}</s> <em>-${Math.round(p.r*100)}% $ODDS holder</em>`:''}`:`from ${usd(p.from)} + ${usd(p.perMin)} per minute${p.r?` <em>-${Math.round(p.r*100)}% $ODDS holder</em>`:''}`;
+  const form=`<section class="rv"><div class="card">
+    <div class="gh-tabs"><button class="vd-chip ${CL.mode==='upload'?'on':''}" data-clm="upload">Upload a file</button><button class="vd-chip ${CL.mode==='link'?'on':''}" data-clm="link">Paste a link</button></div>
+    ${src}
+    <h3 class="cl-h">How many clips?</h3><div class="cl-ns">${clStep('n15',15)}${clStep('n30',30)}${clStep('n60',60)}</div>
+    <h3 class="cl-h">Format</h3><div class="gal-f">${CL_FMT.map(([k,l])=>`<button class="vd-chip ${CL.fmt===k?'on':''}" data-clf="${k}">${l}</button>`).join('')}</div>
+    <div class="cl-row"><label class="cl-tog"><input type="checkbox" id="clCap" ${CL.cap?'checked':''}> Subtitles burned in</label>
+    <label class="cl-tog">Language <select id="clLang" class="inp inp-sm">${CL_LANG.map(([k,l])=>`<option value="${k}" ${CL.lang===k?'selected':''}>${l}</option>`).join('')}</select></label></div>
+    <label class="cl-tog cl-r"><input type="checkbox" id="clRights" ${CL.rights?'checked':''}> I own this video or have the rights to clip it</label>
+    <div class="cl-buy"><div><span class="note">${n} clip${n===1?'':'s'}</span><b class="cl-p">${prTxt}</b></div><button class="btn btn-g" data-clgo="1" ${CL.busy?'disabled':''}>${CL.busy?'Starting…':'Make my clips'}</button></div>
+    ${CL.err?`<p class="err">${E(CL.err)}</p>`:''}
+    <p class="note">Only finished clips are charged. If something fails, nothing comes off your balance. Clips also arrive in your Gallery${(i.discount_tiers||[]).length?' · holders save '+i.discount_tiers.map(t=>Math.round(t.discount*100)+'% from '+ckFmt(t.hold)+' $ODDS').join(', '):''}.</p>
+  </div></section>`;
+  const jobs=CL.jobs.length?`<section class="rv"><div class="card"><h3 class="cl-h" style="margin-top:0">Your clips</h3>${CL.jobs.map(clJob).join('')}</div></section>`:'';
+  return head+form+jobs;}
+function clDraw(){if(TAB!=='clips')return;const y=scrollY;$('#view').innerHTML=clView();document.querySelectorAll('#view .rv').forEach(e=>{e.style.transition='none';e.classList.add('in');});bind();clBind(true);scrollTo(0,y);}
+async function clLoad(){try{CL.info=await api('/v1/clips/info');}catch(e){}if(connected()){try{CL.jobs=(await api('/v1/clips/jobs')).jobs||[];}catch(e){}}}
+function clPoll(){clearTimeout(CL.t);if(TAB!=='clips'||!CL.jobs.some(j=>j.status!=='done'&&j.status!=='failed'))return;CL.t=setTimeout(async()=>{try{CL.jobs=(await api('/v1/clips/jobs')).jobs||[];}catch(e){}clDraw();clPoll();},6000);}
+function clUpload(f){if(!f)return;if(!/^video\//.test(f.type||'')&&!/\.(mp4|mov|mkv|webm|m4v)$/i.test(f.name)){toast('Pick a video file');return;}
+  CL.fname=f.name;CL.fid=null;CL.min=null;CL.up=0;CL.err=null;clDraw();
+  const x=new XMLHttpRequest();x.open('POST',API+'/v1/clips/upload');if(TOKEN)x.setRequestHeader('X-OddsEngine-Key',TOKEN);x.setRequestHeader('Content-Type',f.type||'video/mp4');
+  let last=0;x.upload.onprogress=e=>{if(e.lengthComputable){const p=Math.round(e.loaded/e.total*100);if(p!==last){last=p;CL.up=Math.min(99,p);const bar=document.querySelector('#clDrop .ck-bar i'),t=document.querySelector('#clDrop b');if(bar)bar.style.width=CL.up+'%';if(t)t.textContent='Uploading '+CL.up+'%';}}};
+  x.onload=()=>{let j={};try{j=JSON.parse(x.responseText);}catch(e){}if(x.status<300&&j.fid){CL.fid=j.fid;CL.min=j.minutes;CL.up=100;}else{CL.up=null;CL.err=j.detail||'Upload failed';}clDraw();};
+  x.onerror=()=>{CL.up=null;CL.err='Upload failed, check your connection';clDraw();};x.send(f);}
+function clBind(nur){if(!nur){if(!CL.info||CL.who!==(connected()?ME.address:null)){CL.who=connected()?ME.address:null;clLoad().then(()=>{clDraw();clPoll();});}else clPoll();}
+  const fi=$('#clFile'),dr=$('#clDrop');if(fi)fi.onchange=()=>clUpload(fi.files[0]);
+  if(dr){dr.ondragover=e=>{e.preventDefault();dr.classList.add('on');};dr.ondragleave=()=>dr.classList.remove('on');dr.ondrop=e=>{e.preventDefault();dr.classList.remove('on');clUpload(e.dataTransfer.files[0]);};}
+  const u=$('#clUrl');if(u)u.oninput=()=>{CL.url=u.value;};
+  const c=$('#clCap');if(c)c.onchange=()=>{CL.cap=c.checked;};const l=$('#clLang');if(l)l.onchange=()=>{CL.lang=l.value;};const r=$('#clRights');if(r)r.onchange=()=>{CL.rights=r.checked;};
+  document.querySelectorAll('[data-clm]').forEach(b=>b.onclick=()=>{CL.mode=b.dataset.clm;CL.err=null;if(CL.mode==='link'){CL.min=null;}else if(!CL.fid)CL.min=null;clDraw();});
+  document.querySelectorAll('[data-clf]').forEach(b=>b.onclick=()=>{CL.fmt=b.dataset.clf;clDraw();});
+  document.querySelectorAll('[data-cln]').forEach(b=>b.onclick=()=>{const [k,d]=b.dataset.cln.split(':');const mx=(CL.info&&CL.info.max_clips)||20;const v=Math.max(0,Math.min(10,CL[k]+(+d)));if(d>0&&clN()>=mx)return;CL[k]=v;clDraw();});
+  document.querySelectorAll('[data-clgo]').forEach(b=>b.onclick=async()=>{CL.err=null;
+    if(!clN()){CL.err='Pick at least one clip.';clDraw();return;}
+    if(CL.mode==='upload'&&!CL.fid){CL.err='Upload a video first.';clDraw();return;}
+    if(CL.mode==='link'&&!CL.url.trim()){CL.err='Paste a link first.';clDraw();return;}
+    if(!CL.rights){CL.err='Please confirm you own the video or have the rights to clip it.';clDraw();return;}
+    CL.busy=true;clDraw();
+    try{const body={n15:CL.n15,n30:CL.n30,n60:CL.n60,format:CL.fmt,captions:CL.cap,language:CL.lang||null,rights:true};if(CL.mode==='upload')body.fid=CL.fid;else body.url=CL.url.trim();
+      const j=await api('/v1/clips',{method:'POST',body:JSON.stringify(body)});CL.jobs=[j].concat(CL.jobs.filter(x=>x.id!==j.id));CL.fid=null;CL.min=null;CL.fname='';CL.up=null;CL.url='';toast('Started. Your clips show up below.');}
+    catch(er){CL.err=er.message||'Could not start';}
+    CL.busy=false;clDraw();clPoll();});}
 function gpView(){const g=gpG();const est=g?g.price_hour_usd*GP.h:null;
   return `${hubSeg()}<section class="mhero">
     <span class="eyebrow rv"><b>●</b> OddsEngine AI · GPU</span>
@@ -4395,7 +4496,7 @@ function adminBar(){if($('.admin-bar'))return;const b=document.createElement('di
 async function loadModels(){try{const d=await api('/v1/ai/models');MODELS=d.models||[];if(d.markup!=null)MARKUP=d.markup;}catch(e){MODELS=[];}}
 async function load(){
   const pm=MODELS.length?null:loadModels();
-  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);FEAT.options=!!(d.features&&d.features.options);FEAT.autotrade=!!(d.features&&d.features.options_autotrade);CK.on=!!(d.features&&d.features.torchcodes);if(FEAT.options)axLoad();if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const gon=!!(d.features&&d.features.radar)||(PREVIEW&&ADMIN);const gt=document.getElementById('gtaTab');if(gt)gt.style.display=gon?'':'none';const gp=document.getElementById('gtaPill');if(gp)gp.hidden=!gon;}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
+  try{const d=await api('/v1/features');if(d.bot)YE_BOT=d.bot;FEAT.engine=!!(d.features&&d.features.engine);FEAT.ai=!!(d.features&&d.features.ai);FEAT.deals=!!(d.features&&d.features.deals);FEAT.locker=!!(d.features&&d.features.locker);FEAT.options=!!(d.features&&d.features.options);FEAT.autotrade=!!(d.features&&d.features.options_autotrade);CK.on=!!(d.features&&d.features.torchcodes);CL.on=!!(d.features&&d.features.clips);if(FEAT.options)axLoad();if(d.admin)PREVIEW=true;try{const lt=document.getElementById('lockTab');if(lt&&(FEAT.locker||(PREVIEW&&ADMIN)))lt.style.display='';}catch(e){}try{const gon=!!(d.features&&d.features.radar)||(PREVIEW&&ADMIN);const gt=document.getElementById('gtaTab');if(gt)gt.style.display=gon?'':'none';const gp=document.getElementById('gtaPill');if(gp)gp.hidden=!gon;}catch(e){}try{const wt=document.getElementById('worldTab');if(wt&&((d.features&&d.features.world)||(PREVIEW&&ADMIN)))wt.style.display='';}catch(e){}}catch(e){}
   ME=null;
   if(!TOKEN&&TG_INIT){try{const r=await api('/v1/engine/tglogin',{method:'POST',body:JSON.stringify({init_data:TG_INIT})});if(r.token){TOKEN=r.token;try{localStorage.setItem('oe_engine',TOKEN);}catch(e){}}else TG_HINT=r.hint||'';}catch(e){}}
   if(TOKEN){try{ME=await api('/v1/engine/me');}catch(e){if(e.status===401){TOKEN='';try{localStorage.removeItem('oe_engine');}catch(_){}}ME=null;}}
