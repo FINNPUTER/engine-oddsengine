@@ -3194,17 +3194,7 @@ adminCard=function(){
 };
 
 /* Torch referral: every Torch link first passes our referral, then lands where it pointed */
-(function(){var REF='https://app.torchpad.fun/r/REF026455';
-document.addEventListener('click',function(e){
-  if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
-  var a=e.target&&e.target.closest?e.target.closest('a[href*="app.torchpad.fun"]'):null;if(!a)return;
-  var h=a.href;if(/\/r\/|\/api\//.test(h))return;
-  e.preventDefault();
-  var home=/^https:\/\/app\.torchpad\.fun\/?(\?.*)?$/.test(h);
-  var w=null;try{w=window.open(REF,'_blank');}catch(x){}
-  if(!w){location.href=home?REF:h;return;}
-  if(!home)setTimeout(function(){try{w.location.href=h;}catch(x){}},1800);
-},true);})();
+/* seit 28.11.2026: Torch-Links gehen direkt zur Handelsseite, kein Umweg mehr ueber den Referral-Link */
 
 /* ---------- Your Engine: the agent (2.33) ---------- */
 let MO=null, MO_BUSY=false, MO_LOG=[];
